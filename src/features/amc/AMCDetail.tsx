@@ -77,14 +77,13 @@ export function AMCDetail() {
   const navigate = useNavigate();
   const [newRemark, setNewRemark] = useState("");
 
-  // In real app, fetch contract by id
   const contract = mockAMCContracts.find(c => c.id === Number(id)) || mockAMCContracts[0];
 
   return (
     <div className="h-full bg-gray-50/50">
       <ScrollArea className="h-full">
-        <div className="p-4 lg:p-6">
-          <div className="max-w-7xl mx-auto space-y-4">
+        <div className="p-2 lg:p-0">
+          <div className="mx-auto space-y-4">
             <Tabs defaultValue="details" className="space-y-4">
               {/* Unified Header Card */}
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -116,19 +115,19 @@ export function AMCDetail() {
                   <TabsList className="h-12 bg-transparent p-0 gap-8">
                     <TabsTrigger
                       value="details"
-                      className="h-full rounded-none border-b-2 border-transparent data-[state=active]:border-pink-600 data-[state=active]:bg-pink-50/50 data-[state=active]:shadow-none data-[state=active]:text-pink-700 px-4 text-sm font-bold transition-all"
+                      className="h-full rounded-md !border-b-2 border-0 border-transparent data-[state=active]:border-pink-600 data-[state=active]:bg-pink-50/50 data-[state=active]:shadow-none data-[state=active]:text-pink-700 px-4 text-sm font-bold transition-all"
                     >
                       Contract Details
                     </TabsTrigger>
                     <TabsTrigger
                       value="service"
-                      className="h-full rounded-none border-b-2 border-transparent data-[state=active]:border-pink-600 data-[state=active]:bg-pink-50/50 data-[state=active]:shadow-none data-[state=active]:text-pink-700 px-4 text-sm font-bold transition-all"
+                      className="h-full rounded-md !border-b-2 border-0 border-transparent data-[state=active]:border-pink-600 data-[state=active]:bg-pink-50/50 data-[state=active]:shadow-none data-[state=active]:text-pink-700 px-4 text-sm font-bold transition-all"
                     >
                       Service History
                     </TabsTrigger>
                     <TabsTrigger
                       value="remarks"
-                      className="h-full rounded-none border-b-2 border-transparent data-[state=active]:border-pink-600 data-[state=active]:bg-pink-50/50 data-[state=active]:shadow-none data-[state=active]:text-pink-700 px-4 text-sm font-bold transition-all"
+                      className="h-full rounded-md !border-b-2 border-0 border-transparent data-[state=active]:border-pink-600 data-[state=active]:bg-pink-50/50 data-[state=active]:shadow-none data-[state=active]:text-pink-700 px-4 text-sm font-bold transition-all"
                     >
                       Remarks
                     </TabsTrigger>
@@ -298,9 +297,9 @@ export function AMCDetail() {
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-3">
                               <div className="h-8 w-8 rounded-full overflow-hidden shrink-0 border border-pink-100 shadow-sm">
-                                <img 
-                                  src={`https://i.pravatar.cc/150?u=${encodeURIComponent(remark.user)}`} 
-                                  alt={remark.user} 
+                                <img
+                                  src={`https://i.pravatar.cc/150?u=${encodeURIComponent(remark.user)}`}
+                                  alt={remark.user}
                                   className="h-full w-full object-cover"
                                 />
                               </div>

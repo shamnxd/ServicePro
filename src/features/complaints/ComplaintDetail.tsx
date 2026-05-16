@@ -75,8 +75,8 @@ export function ComplaintDetail() {
   return (
     <div className="h-full bg-gray-50/50">
       <ScrollArea className="h-full">
-        <div className="p-4 lg:p-6">
-          <div className="max-w-7xl mx-auto space-y-4">
+        <div className="p-2 lg:p-0">
+          <div className="mx-auto space-y-4">
             <Tabs defaultValue="details" className="space-y-4">
               {/* Unified Header Card */}
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -109,21 +109,21 @@ export function ComplaintDetail() {
                 </div>
                 <div className="px-4 lg:px-5">
                   <TabsList className="h-12 bg-transparent p-0 gap-8">
-                    <TabsTrigger 
-                      value="details" 
-                      className="h-full rounded-none border-b-2 border-transparent data-[state=active]:border-pink-600 data-[state=active]:bg-pink-50/50 data-[state=active]:shadow-none data-[state=active]:text-pink-700 px-4 text-sm font-bold transition-all"
+                    <TabsTrigger
+                      value="details"
+                      className="h-full rounded-md !border-b-2 border-0 border-transparent data-[state=active]:border-pink-600 data-[state=active]:bg-pink-50/50 data-[state=active]:shadow-none data-[state=active]:text-pink-700 px-4 text-sm font-bold transition-all"
                     >
                       Complaint Details
                     </TabsTrigger>
-                    <TabsTrigger 
-                      value="service" 
-                      className="h-full rounded-none border-b-2 border-transparent data-[state=active]:border-pink-600 data-[state=active]:bg-pink-50/50 data-[state=active]:shadow-none data-[state=active]:text-pink-700 px-4 text-sm font-bold transition-all"
+                    <TabsTrigger
+                      value="service"
+                      className="h-full rounded-md !border-b-2 border-0 border-transparent data-[state=active]:border-pink-600 data-[state=active]:bg-pink-50/50 data-[state=active]:shadow-none data-[state=active]:text-pink-700 px-4 text-sm font-bold transition-all"
                     >
                       Service History
                     </TabsTrigger>
-                    <TabsTrigger 
-                      value="remarks" 
-                      className="h-full rounded-none border-b-2 border-transparent data-[state=active]:border-pink-600 data-[state=active]:bg-pink-50/50 data-[state=active]:shadow-none data-[state=active]:text-pink-700 px-4 text-sm font-bold transition-all"
+                    <TabsTrigger
+                      value="remarks"
+                      className="h-full rounded-md !border-b-2 border-0 border-transparent data-[state=active]:border-pink-600 data-[state=active]:bg-pink-50/50 data-[state=active]:shadow-none data-[state=active]:text-pink-700 px-4 text-sm font-bold transition-all"
                     >
                       Remarks
                     </TabsTrigger>
@@ -158,9 +158,9 @@ export function ComplaintDetail() {
                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Assigned To</label>
                         <div className="mt-0.5 flex items-center gap-2">
                           <div className="h-6 w-6 rounded-full overflow-hidden shrink-0 border border-pink-100">
-                            <img 
-                              src={`https://i.pravatar.cc/150?u=${encodeURIComponent(complaint.assignedTo)}`} 
-                              alt={complaint.assignedTo} 
+                            <img
+                              src={`https://i.pravatar.cc/150?u=${encodeURIComponent(complaint.assignedTo)}`}
+                              alt={complaint.assignedTo}
                               className="h-full w-full object-cover"
                             />
                           </div>
@@ -187,9 +187,9 @@ export function ComplaintDetail() {
                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Contact Person</label>
                         <div className="mt-0.5 flex items-center gap-2">
                           <div className="h-6 w-6 rounded-full overflow-hidden shrink-0 border border-blue-100">
-                            <img 
-                              src={`https://i.pravatar.cc/150?u=${encodeURIComponent(complaint.contactPerson)}`} 
-                              alt={complaint.contactPerson} 
+                            <img
+                              src={`https://i.pravatar.cc/150?u=${encodeURIComponent(complaint.contactPerson)}`}
+                              alt={complaint.contactPerson}
                               className="h-full w-full object-cover"
                             />
                           </div>
@@ -266,9 +266,9 @@ export function ComplaintDetail() {
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-3">
                               <div className="h-8 w-8 rounded-full overflow-hidden shrink-0 border border-pink-100 shadow-sm">
-                                <img 
-                                  src={`https://i.pravatar.cc/150?u=${encodeURIComponent(remark.user)}`} 
-                                  alt={remark.user} 
+                                <img
+                                  src={`https://i.pravatar.cc/150?u=${encodeURIComponent(remark.user)}`}
+                                  alt={remark.user}
                                   className="h-full w-full object-cover"
                                 />
                               </div>
