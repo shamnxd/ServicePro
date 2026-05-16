@@ -48,21 +48,21 @@ const mockComplaints = [
 
 const getStatusColor = (status: string) => {
   const colors = {
-    Pending: "bg-amber-100 text-amber-800",
-    "In Progress": "bg-blue-100 text-blue-800",
-    Resolved: "bg-green-100 text-green-800",
+    Pending: "bg-amber-500/10 text-amber-500",
+    "In Progress": "bg-blue-500/10 text-blue-500",
+    Resolved: "bg-green-500/10 text-green-500",
   };
-  return colors[status as keyof typeof colors] || "bg-gray-100 text-gray-800";
+  return colors[status as keyof typeof colors] || "bg-muted text-muted-foreground";
 };
 
 const getPriorityColor = (priority: string) => {
   const colors = {
-    Critical: "bg-red-100 text-red-800",
-    High: "bg-orange-100 text-orange-800",
-    Medium: "bg-amber-100 text-amber-800",
-    Low: "bg-blue-100 text-blue-800",
+    Critical: "bg-red-500/10 text-red-500",
+    High: "bg-orange-500/10 text-orange-500",
+    Medium: "bg-amber-500/10 text-amber-500",
+    Low: "bg-blue-500/10 text-blue-500",
   };
-  return colors[priority as keyof typeof colors] || "bg-gray-100 text-gray-800";
+  return colors[priority as keyof typeof colors] || "bg-muted text-muted-foreground";
 };
 
 export function ComplaintDetail() {
@@ -73,28 +73,28 @@ export function ComplaintDetail() {
   const complaint = mockComplaints.find(c => c.id === Number(id)) || mockComplaints[0];
 
   return (
-    <div className="h-full bg-gray-50/50">
+    <div className="h-full bg-background">
       <ScrollArea className="h-full">
         <div className="p-2 lg:p-0">
           <div className="mx-auto space-y-4">
             <Tabs defaultValue="details" className="space-y-4">
               {/* Unified Header Card */}
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="p-4 lg:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100">
+              <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+                <div className="p-4 lg:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/50">
                   <div className="flex items-center gap-4">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => navigate("/complaints")}
-                      className="gap-2 h-9 px-3 hover:bg-gray-100"
+                      className="gap-2 h-9 px-3 hover:bg-muted"
                     >
                       <ArrowLeft className="h-4 w-4" />
                       <span className="font-medium">Back</span>
                     </Button>
-                    <div className="h-8 w-px bg-gray-200 hidden md:block" />
+                    <div className="h-8 w-px bg-border hidden md:block" />
                     <div>
-                      <h1 className="text-xl font-bold text-gray-900 tracking-tight">{complaint.complaintNo}</h1>
-                      <p className="text-[11px] text-gray-500 uppercase font-bold tracking-wider">{complaint.clientName}</p>
+                      <h1 className="text-xl font-bold text-foreground tracking-tight">{complaint.complaintNo}</h1>
+                      <p className="text-[11px] text-muted-foreground uppercase font-bold tracking-wider">{complaint.clientName}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 self-end md:self-auto">
@@ -134,12 +134,12 @@ export function ComplaintDetail() {
               <TabsContent value="details" className="m-0">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                   {/* Complaint Information Card */}
-                  <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                    <div className="flex items-center gap-2 mb-4 pb-3 border-b">
-                      <div className="h-8 w-8 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
-                        <AlertCircle className="h-4 w-4 text-red-700" />
+                  <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
+                    <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/50">
+                      <div className="h-8 w-8 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0">
+                        <AlertCircle className="h-4 w-4 text-red-500" />
                       </div>
-                      <h3 className="text-base font-semibold text-gray-900">Complaint Information</h3>
+                      <h3 className="text-base font-semibold text-foreground">Complaint Information</h3>
                     </div>
                     <div className="space-y-3">
                       <div>
@@ -171,12 +171,12 @@ export function ComplaintDetail() {
                   </div>
 
                   {/* Client Information Card */}
-                  <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                    <div className="flex items-center gap-2 mb-4 pb-3 border-b">
-                      <div className="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
-                        <Building className="h-4 w-4 text-blue-700" />
+                  <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
+                    <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/50">
+                      <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                        <Building className="h-4 w-4 text-blue-500" />
                       </div>
-                      <h3 className="text-base font-semibold text-gray-900">Client Information</h3>
+                      <h3 className="text-base font-semibold text-foreground">Client Information</h3>
                     </div>
                     <div className="space-y-3">
                       <div>
@@ -214,12 +214,12 @@ export function ComplaintDetail() {
                   </div>
 
                   {/* Timeline Card */}
-                  <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                    <div className="flex items-center gap-2 mb-4 pb-3 border-b">
-                      <div className="h-8 w-8 rounded-lg bg-green-100 flex items-center justify-center shrink-0">
-                        <Calendar className="h-4 w-4 text-green-700" />
+                  <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
+                    <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/50">
+                      <div className="h-8 w-8 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
+                        <Calendar className="h-4 w-4 text-green-500" />
                       </div>
-                      <h3 className="text-base font-semibold text-gray-900">Timeline</h3>
+                      <h3 className="text-base font-semibold text-foreground">Timeline</h3>
                     </div>
                     <div className="space-y-3">
                       <div>
@@ -231,15 +231,15 @@ export function ComplaintDetail() {
                         <p className="mt-1 text-pink-700 font-semibold">{new Date(complaint.expectedResolution).toLocaleDateString()}</p>
                       </div>
                       <div className="pt-4">
-                        <div className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-lg p-4 border border-pink-200">
+                        <div className="bg-pink-500/5 rounded-lg p-4 border border-pink-500/20">
                           <div className="flex items-center gap-2 mb-2">
-                            <Calendar className="h-5 w-5 text-pink-700" />
-                            <span className="font-semibold text-gray-900">Days Remaining</span>
+                            <Calendar className="h-5 w-5 text-pink-600" />
+                            <span className="font-semibold text-foreground">Days Remaining</span>
                           </div>
-                          <p className="text-3xl font-bold text-pink-700">
+                          <p className="text-3xl font-bold text-pink-600">
                             {Math.ceil((new Date(complaint.expectedResolution).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))}
                           </p>
-                          <p className="text-xs text-gray-600 mt-1">Until expected resolution</p>
+                          <p className="text-xs text-muted-foreground mt-1">Until expected resolution</p>
                         </div>
                       </div>
                     </div>
@@ -248,7 +248,7 @@ export function ComplaintDetail() {
               </TabsContent>
 
               <TabsContent value="service" className="m-0">
-                <div className="bg-white rounded-xl border border-gray-200 p-4 lg:p-6 shadow-sm">
+                <div className="bg-card rounded-xl border border-border p-4 lg:p-6 shadow-sm">
                   <ServiceTracking
                     serviceType="Complaint"
                     serviceNo={complaint.complaintNo}
@@ -262,21 +262,21 @@ export function ComplaintDetail() {
                   <div className="space-y-3">
                     {complaint.remarks.length > 0 ? (
                       complaint.remarks.map((remark, idx) => (
-                        <div key={idx} className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <div key={idx} className="bg-card rounded-xl border border-border p-5 shadow-sm">
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-3">
-                              <div className="h-8 w-8 rounded-full overflow-hidden shrink-0 border border-pink-100 shadow-sm">
+                              <div className="h-8 w-8 rounded-full overflow-hidden shrink-0 border border-pink-500/20 shadow-sm">
                                 <img
                                   src={`https://i.pravatar.cc/150?u=${encodeURIComponent(remark.user)}`}
                                   alt={remark.user}
                                   className="h-full w-full object-cover"
                                 />
                               </div>
-                              <span className="font-medium text-gray-900">{remark.user}</span>
+                              <span className="font-medium text-foreground">{remark.user}</span>
                             </div>
-                            <span className="text-sm text-gray-500">{remark.date}</span>
+                            <span className="text-sm text-muted-foreground">{remark.date}</span>
                           </div>
-                          <p className="text-gray-700 pl-11">{remark.text}</p>
+                          <p className="text-muted-foreground pl-11">{remark.text}</p>
                         </div>
                       ))
                     ) : (
@@ -284,8 +284,8 @@ export function ComplaintDetail() {
                     )}
                   </div>
 
-                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                    <h4 className="font-semibold text-gray-900 mb-4">Add New Remark</h4>
+                  <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+                    <h4 className="font-semibold text-foreground mb-4">Add New Remark</h4>
                     <div className="space-y-3">
                       <Textarea
                         placeholder="Add a remark or update..."

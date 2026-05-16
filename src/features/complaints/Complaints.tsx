@@ -168,28 +168,28 @@ export function Complaints() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Resolved":
-        return "bg-green-100 text-green-800";
+        return "bg-green-500/10 text-green-500";
       case "In Progress":
-        return "bg-blue-100 text-blue-800";
+        return "bg-blue-500/10 text-blue-500";
       case "Pending":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-amber-500/10 text-amber-500";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-muted text-muted-foreground";
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "Critical":
-        return "bg-red-600 text-white";
+        return "bg-red-500 text-white";
       case "High":
-        return "bg-red-100 text-red-800";
+        return "bg-red-500/10 text-red-500";
       case "Medium":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-amber-500/10 text-amber-500";
       case "Low":
-        return "bg-green-100 text-green-800";
+        return "bg-blue-500/10 text-blue-500";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-muted text-muted-foreground";
     }
   };
 
@@ -198,8 +198,8 @@ export function Complaints() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Complaint Management</h2>
-          <p className="text-gray-600 mt-1">Track and resolve customer complaints</p>
+          <h2 className="text-2xl font-bold text-foreground">Complaint Management</h2>
+          <p className="text-muted-foreground mt-1">Track and resolve customer complaints</p>
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
@@ -289,10 +289,10 @@ export function Complaints() {
       </div>
 
       {/* Search and Filter */}
-      <div className="bg-white rounded-lg shadow p-4">
+      <div className="bg-card rounded-lg shadow-sm border border-border p-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               placeholder="Search complaints..."
               value={searchQuery}
@@ -316,25 +316,25 @@ export function Complaints() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Total Complaints</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{complaints.length}</p>
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Total Complaints</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{complaints.length}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Pending</p>
-          <p className="text-2xl font-bold text-yellow-600 mt-1">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Pending</p>
+          <p className="text-2xl font-bold text-amber-500 mt-1">
             {complaints.filter((c) => c.status === "Pending").length}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">In Progress</p>
-          <p className="text-2xl font-bold text-blue-600 mt-1">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">In Progress</p>
+          <p className="text-2xl font-bold text-blue-500 mt-1">
             {complaints.filter((c) => c.status === "In Progress").length}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Resolved</p>
-          <p className="text-2xl font-bold text-green-600 mt-1">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Resolved</p>
+          <p className="text-2xl font-bold text-green-500 mt-1">
             {complaints.filter((c) => c.status === "Resolved").length}
           </p>
         </div>
@@ -345,23 +345,23 @@ export function Complaints() {
         {filteredComplaints.map((complaint) => (
           <div
             key={complaint.id}
-            className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow border-l-4"
+            className="bg-card rounded-lg shadow-sm hover:shadow transition-shadow border border-border border-l-4"
             style={{
               borderLeftColor:
                 complaint.priority === "Critical"
-                  ? "#dc2626"
+                  ? "#ef4444"
                   : complaint.priority === "High"
-                    ? "#f59e0b"
+                    ? "#f97316"
                     : complaint.priority === "Medium"
-                      ? "#eab308"
-                      : "#22c55e",
+                      ? "#f59e0b"
+                      : "#10b981",
             }}
           >
             <div className="p-5">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">{complaint.complaintNo}</h3>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <h3 className="font-semibold text-foreground">{complaint.complaintNo}</h3>
+                  <p className="text-xs text-muted-foreground mt-1">
                     {new Date(complaint.date).toLocaleDateString()}
                   </p>
                 </div>
@@ -377,12 +377,12 @@ export function Complaints() {
               </div>
 
               <div className="space-y-2.5 mb-4">
-                <div className="flex items-start gap-2 text-sm font-medium text-gray-900">
+                <div className="flex items-start gap-2 text-sm font-medium text-foreground">
                   <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
                   <span className="line-clamp-2">{complaint.issue}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <div className="h-5 w-5 rounded-full bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="h-5 w-5 rounded-full bg-muted overflow-hidden shrink-0 border border-border">
                     <img
                       src={`https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(complaint.clientName)}&backgroundColor=be185d&fontSize=40&fontWeight=700`}
                       className="h-full w-full object-cover"
@@ -390,12 +390,12 @@ export function Complaints() {
                   </div>
                   <span className="truncate">{complaint.clientName}</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-gray-500">
-                  <MapPin className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <MapPin className="h-3.5 w-3.5 text-muted-foreground/50 flex-shrink-0" />
                   <span className="truncate">{complaint.location}</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-gray-500">
-                  <div className="h-4 w-4 rounded-full bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <div className="h-4 w-4 rounded-full bg-muted overflow-hidden shrink-0 border border-border">
                     <img
                       src={`https://i.pravatar.cc/150?u=${encodeURIComponent(complaint.assignedTo)}`}
                       className="h-full w-full object-cover"
@@ -403,13 +403,13 @@ export function Complaints() {
                   </div>
                   <span className="truncate">{complaint.assignedTo}</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-gray-500">
-                  <Calendar className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Calendar className="h-3.5 w-3.5 text-muted-foreground/50 flex-shrink-0" />
                   <span>{new Date(complaint.expectedResolution).toLocaleDateString()}</span>
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-3 border-t">
+              <div className="flex gap-2 pt-3 border-t border-border/50">
                 <Button
                   size="sm"
                   variant="outline"

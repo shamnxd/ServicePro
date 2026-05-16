@@ -160,28 +160,28 @@ export function Enquiries() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Site Visit Scheduled":
-        return "bg-blue-100 text-blue-800";
+        return "bg-blue-500/10 text-blue-500";
       case "Quotation Prepared":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-amber-500/10 text-amber-500";
       case "Follow-up Required":
-        return "bg-orange-100 text-orange-800";
+        return "bg-orange-500/10 text-orange-500";
       case "Converted to Project":
-        return "bg-green-100 text-green-800";
+        return "bg-green-500/10 text-green-500";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-muted text-muted-foreground";
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "High":
-        return "bg-red-100 text-red-800";
+        return "bg-red-500/10 text-red-500";
       case "Medium":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-amber-500/10 text-amber-500";
       case "Low":
-        return "bg-green-100 text-green-800";
+        return "bg-blue-500/10 text-blue-500";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-muted text-muted-foreground";
     }
   };
 
@@ -190,10 +190,10 @@ export function Enquiries() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-foreground">
             Enquiry Management
           </h2>
-          <p className="text-gray-600 mt-1">
+          <p className="text-muted-foreground mt-1">
             Track and manage customer enquiries
           </p>
         </div>
@@ -324,10 +324,10 @@ export function Enquiries() {
       </div>
 
       {/* Search and Filter */}
-      <div className="bg-white rounded-lg shadow p-4">
+      <div className="bg-card rounded-lg shadow-sm border border-border p-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               placeholder="Search enquiries..."
               value={searchQuery}
@@ -363,17 +363,17 @@ export function Enquiries() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">
             Total Enquiries
           </p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">
+          <p className="text-2xl font-bold text-foreground mt-1">
             {enquiries.length}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Site Visits</p>
-          <p className="text-2xl font-bold text-blue-600 mt-1">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Site Visits</p>
+          <p className="text-2xl font-bold text-blue-500 mt-1">
             {
               enquiries.filter(
                 (e) => e.status === "Site Visit Scheduled",
@@ -381,11 +381,11 @@ export function Enquiries() {
             }
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">
             Quotations Prepared
           </p>
-          <p className="text-2xl font-bold text-yellow-600 mt-1">
+          <p className="text-2xl font-bold text-amber-500 mt-1">
             {
               enquiries.filter(
                 (e) => e.status === "Quotation Prepared",
@@ -393,9 +393,9 @@ export function Enquiries() {
             }
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Converted</p>
-          <p className="text-2xl font-bold text-green-600 mt-1">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Converted</p>
+          <p className="text-2xl font-bold text-green-500 mt-1">
             {
               enquiries.filter(
                 (e) => e.status === "Converted to Project",
@@ -410,15 +410,15 @@ export function Enquiries() {
         {filteredEnquiries.map((enquiry) => (
           <div
             key={enquiry.id}
-            className="bg-white rounded-lg shadow-sm hover:shadow transition-shadow border border-gray-100"
+            className="bg-card rounded-lg shadow-sm hover:shadow transition-shadow border border-border"
           >
             <div className="p-4">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">
+                  <h3 className="font-semibold text-foreground">
                     {enquiry.enquiryNo}
                   </h3>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     {new Date(
                       enquiry.date,
                     ).toLocaleDateString()}
@@ -441,18 +441,18 @@ export function Enquiries() {
 
               <div className="space-y-2.5 mb-4">
                 <div className="flex items-center gap-2 text-sm">
-                  <div className="h-5 w-5 rounded-full bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
+                  <div className="h-5 w-5 rounded-full bg-muted overflow-hidden shrink-0 border border-border">
                     <img
                       src={`https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(enquiry.clientName)}&backgroundColor=be185d&fontSize=40&fontWeight=700`}
                       className="h-full w-full object-cover"
                     />
                   </div>
-                  <span className="font-medium text-gray-900 truncate">
+                  <span className="font-medium text-foreground truncate">
                     {enquiry.clientName}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <div className="h-5 w-5 rounded-full bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="h-5 w-5 rounded-full bg-muted overflow-hidden shrink-0 border border-border">
                     <img
                       src={`https://i.pravatar.cc/150?u=${encodeURIComponent(enquiry.contactPerson)}`}
                       className="h-full w-full object-cover"
@@ -462,14 +462,14 @@ export function Enquiries() {
                     {enquiry.contactPerson}
                   </span>
                 </div>
-                <div className="flex items-start gap-2 text-sm text-gray-600">
-                  <CheckCircle className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                  <CheckCircle className="h-4 w-4 text-muted-foreground/50 flex-shrink-0 mt-0.5" />
                   <span className="line-clamp-2">
                     {enquiry.requirement}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-gray-500">
-                  <div className="h-4 w-4 rounded-full overflow-hidden shrink-0 border border-gray-100">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <div className="h-4 w-4 rounded-full overflow-hidden shrink-0 border border-border/50">
                     <img 
                       src={`https://i.pravatar.cc/150?u=${encodeURIComponent(enquiry.assignedTo)}`} 
                       alt={enquiry.assignedTo} 
@@ -481,8 +481,8 @@ export function Enquiries() {
                   </span>
                 </div>
                 {enquiry.followUpDate && (
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <Calendar className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Calendar className="h-3.5 w-3.5 text-muted-foreground/50 flex-shrink-0" />
                     <span>
                       {new Date(
                         enquiry.followUpDate,
@@ -492,7 +492,7 @@ export function Enquiries() {
                 )}
               </div>
 
-              <div className="flex gap-2 pt-3 border-t">
+              <div className="flex gap-2 pt-3 border-t border-border/50">
                 <Button
                   size="sm"
                   variant="outline"
@@ -530,8 +530,8 @@ export function Enquiries() {
           </DialogHeader>
           {selectedEnquiry && (
             <form className="space-y-4 mt-4">
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <p className="text-sm text-blue-900">
+              <div className="bg-blue-500/10 p-4 rounded-lg border border-blue-500/20">
+                <p className="text-sm text-blue-500 font-medium">
                   <strong>Enquiry:</strong>{" "}
                   {selectedEnquiry.enquiryNo} -{" "}
                   {selectedEnquiry.clientName}
@@ -563,8 +563,8 @@ export function Enquiries() {
                 </div>
               </div>
 
-              <div className="border rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-3">
+              <div className="border border-border rounded-lg p-4">
+                <h4 className="font-medium text-foreground mb-3">
                   Line Items
                 </h4>
                 <div className="space-y-3">
@@ -620,7 +620,7 @@ export function Enquiries() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+              <div className="grid grid-cols-2 gap-4 bg-muted/30 p-4 rounded-lg border border-border">
                 <div>
                   <Label htmlFor="gst">GST (%)</Label>
                   <Input

@@ -114,13 +114,13 @@ export function Staff() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Available":
-        return "bg-green-100 text-green-800";
+        return "bg-green-500/10 text-green-500";
       case "On Site":
-        return "bg-blue-100 text-blue-800";
+        return "bg-blue-500/10 text-blue-500";
       case "On Leave":
-        return "bg-gray-100 text-gray-800";
+        return "bg-muted text-muted-foreground";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-muted text-muted-foreground";
     }
   };
 
@@ -129,8 +129,8 @@ export function Staff() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Staff & Technician Management</h2>
-          <p className="text-gray-600 mt-1">Manage your team and track their tasks</p>
+          <h2 className="text-2xl font-bold text-foreground">Staff & Technician Management</h2>
+          <p className="text-muted-foreground mt-1">Manage your team and track their tasks</p>
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
@@ -191,9 +191,9 @@ export function Staff() {
       </div>
 
       {/* Search */}
-      <div className="bg-white rounded-lg shadow p-4">
+      <div className="bg-card rounded-lg shadow-sm border border-border p-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             placeholder="Search staff by name, role, or specialization..."
             value={searchQuery}
@@ -205,25 +205,25 @@ export function Staff() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Total Staff</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{staff.length}</p>
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Total Staff</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{staff.length}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Available</p>
-          <p className="text-2xl font-bold text-green-600 mt-1">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Available</p>
+          <p className="text-2xl font-bold text-green-500 mt-1">
             {staff.filter((s) => s.status === "Available").length}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">On Site</p>
-          <p className="text-2xl font-bold text-blue-600 mt-1">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">On Site</p>
+          <p className="text-2xl font-bold text-blue-500 mt-1">
             {staff.filter((s) => s.status === "On Site").length}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Active Tasks</p>
-          <p className="text-2xl font-bold text-orange-600 mt-1">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Active Tasks</p>
+          <p className="text-2xl font-bold text-orange-500 mt-1">
             {staff.reduce((sum, s) => sum + s.tasksAssigned, 0)}
           </p>
         </div>
@@ -232,11 +232,11 @@ export function Staff() {
       {/* Staff Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
         {filteredStaff.map((member) => (
-          <div key={member.id} className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+          <div key={member.id} className="bg-card rounded-lg shadow-sm hover:shadow transition-shadow border border-border">
             <div className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-full overflow-hidden shrink-0 ring-2 ring-blue-50 shadow-sm">
+                  <div className="h-12 w-12 rounded-full overflow-hidden shrink-0 ring-2 ring-muted shadow-sm">
                     <img 
                       src={`https://i.pravatar.cc/150?u=${encodeURIComponent(member.name)}`} 
                       alt={member.name} 
@@ -244,8 +244,8 @@ export function Staff() {
                     />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">{member.name}</h3>
-                    <p className="text-sm text-gray-500">{member.role}</p>
+                    <h3 className="font-semibold text-foreground">{member.name}</h3>
+                    <p className="text-sm text-muted-foreground">{member.role}</p>
                   </div>
                 </div>
                 <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(member.status)}`}>
@@ -254,32 +254,32 @@ export function Staff() {
               </div>
 
               <div className="space-y-2 mb-4">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Briefcase className="h-4 w-4 text-gray-400" />
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Briefcase className="h-4 w-4 text-muted-foreground/50" />
                   {member.specialization}
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Phone className="h-4 w-4 text-gray-400" />
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Phone className="h-4 w-4 text-muted-foreground/50" />
                   {member.phone}
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Mail className="h-4 w-4 text-gray-400" />
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Mail className="h-4 w-4 text-muted-foreground/50" />
                   {member.email}
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <MapPin className="h-4 w-4 text-gray-400" />
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <MapPin className="h-4 w-4 text-muted-foreground/50" />
                   {member.location}
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border/50">
                 <div>
-                  <p className="text-xs text-gray-500">Active Tasks</p>
-                  <p className="text-lg font-bold text-blue-600">{member.tasksAssigned}</p>
+                  <p className="text-xs text-muted-foreground">Active Tasks</p>
+                  <p className="text-lg font-bold text-blue-500">{member.tasksAssigned}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Completed</p>
-                  <p className="text-lg font-bold text-green-600">{member.tasksCompleted}</p>
+                  <p className="text-xs text-muted-foreground">Completed</p>
+                  <p className="text-lg font-bold text-green-500">{member.tasksCompleted}</p>
                 </div>
               </div>
 
@@ -297,52 +297,52 @@ export function Staff() {
       </div>
 
       {/* Recent Tasks */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-6 border-b">
-          <h3 className="text-lg font-semibold text-gray-900">Recent Task Assignments</h3>
+      <div className="bg-card rounded-lg shadow-sm border border-border">
+        <div className="p-6 border-b border-border">
+          <h3 className="text-lg font-semibold text-foreground">Recent Task Assignments</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b">
+            <thead className="bg-muted/50 border-b border-border">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Task No
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Staff Member
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Client
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Task Type
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Date
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Status
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-border">
               {tasks.map((task) => (
-                <tr key={task.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 font-medium text-gray-900">{task.taskNo}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{task.staffName}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{task.clientName}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{task.taskType}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
+                <tr key={task.id} className="hover:bg-muted/30 transition-colors">
+                  <td className="px-6 py-4 font-medium text-foreground">{task.taskNo}</td>
+                  <td className="px-6 py-4 text-sm text-foreground">{task.staffName}</td>
+                  <td className="px-6 py-4 text-sm text-muted-foreground">{task.clientName}</td>
+                  <td className="px-6 py-4 text-sm text-muted-foreground">{task.taskType}</td>
+                  <td className="px-6 py-4 text-sm text-foreground">
                     {new Date(task.date).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4">
                     <span
                       className={`px-2 py-1 text-xs font-medium rounded-full ${
                         task.status === "Completed"
-                          ? "bg-green-100 text-green-800"
+                          ? "bg-green-500/10 text-green-500"
                           : task.status === "In Progress"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-yellow-100 text-yellow-800"
+                          ? "bg-blue-500/10 text-blue-500"
+                          : "bg-amber-500/10 text-amber-500"
                       }`}
                     >
                       {task.status}

@@ -77,8 +77,8 @@ export function Clients() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Client Management</h2>
-          <p className="text-gray-600 mt-1">Manage your client database</p>
+          <h2 className="text-2xl font-bold text-foreground">Client Management</h2>
+          <p className="text-muted-foreground mt-1">Manage your client database</p>
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
@@ -134,9 +134,9 @@ export function Clients() {
       </div>
 
       {/* Search */}
-      <div className="bg-white rounded-lg shadow p-4">
+      <div className="bg-card rounded-lg shadow-sm border border-border p-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             placeholder="Search clients by name, contact, or city..."
             value={searchQuery}
@@ -148,65 +148,65 @@ export function Clients() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Total Clients</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{clients.length}</p>
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Total Clients</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{clients.length}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Active AMC</p>
-          <p className="text-2xl font-bold text-green-600 mt-1">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Active AMC</p>
+          <p className="text-2xl font-bold text-green-500 mt-1">
             {clients.filter((c) => c.amcStatus === "Active").length}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Expired AMC</p>
-          <p className="text-2xl font-bold text-red-600 mt-1">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Expired AMC</p>
+          <p className="text-2xl font-bold text-red-500 mt-1">
             {clients.filter((c) => c.amcStatus === "Expired").length}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Total Projects</p>
-          <p className="text-2xl font-bold text-blue-600 mt-1">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Total Projects</p>
+          <p className="text-2xl font-bold text-blue-500 mt-1">
             {clients.reduce((sum, c) => sum + c.projectsCount, 0)}
           </p>
         </div>
       </div>
 
       {/* Clients Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b">
+            <thead className="bg-muted/50 border-b border-border">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Company
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Contact Person
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Contact Info
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Location
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Projects
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   AMC Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-border">
               {filteredClients.map((client) => (
-                <tr key={client.id} className="hover:bg-gray-50">
+                <tr key={client.id} className="hover:bg-muted/30 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-full overflow-hidden shrink-0 border border-gray-100 shadow-sm">
+                      <div className="h-9 w-9 rounded-full overflow-hidden shrink-0 border border-border shadow-sm">
                         <img
                           src={`https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(client.companyName)}&backgroundColor=be185d&fontSize=40&fontWeight=700`}
                           alt={client.companyName}
@@ -214,42 +214,42 @@ export function Clients() {
                         />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900 leading-tight">{client.companyName}</p>
-                        <p className="text-[10px] text-gray-500 font-mono mt-0.5 uppercase">{client.gst}</p>
+                        <p className="font-medium text-foreground leading-tight">{client.companyName}</p>
+                        <p className="text-[10px] text-muted-foreground font-mono mt-0.5 uppercase">{client.gst}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
+                  <td className="px-6 py-4 text-sm text-foreground">
                     {client.contactPerson}
                   </td>
                   <td className="px-6 py-4">
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Phone className="h-3 w-3" />
                         {client.phone}
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Mail className="h-3 w-3" />
                         {client.email}
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <MapPin className="h-3 w-3" />
                       {client.city}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
+                  <td className="px-6 py-4 text-sm text-foreground">
                     {client.projectsCount}
                   </td>
                   <td className="px-6 py-4">
                     <span
                       className={`px-2 py-1 text-xs font-medium rounded-full ${client.amcStatus === "Active"
-                          ? "bg-green-100 text-green-800"
+                          ? "bg-green-500/10 text-green-500"
                           : client.amcStatus === "Inactive"
-                            ? "bg-gray-100 text-gray-800"
-                            : "bg-red-100 text-red-800"
+                            ? "bg-muted text-muted-foreground"
+                            : "bg-red-500/10 text-red-500"
                         }`}
                     >
                       {client.amcStatus}
@@ -262,14 +262,14 @@ export function Clients() {
                           setSelectedClient(client);
                           setIsViewDialogOpen(true);
                         }}
-                        className="text-blue-600 hover:text-blue-800"
+                        className="text-blue-500 hover:text-blue-600 transition-colors"
                       >
                         <Eye className="h-4 w-4" />
                       </button>
-                      <button className="text-green-600 hover:text-green-800">
+                      <button className="text-green-500 hover:text-green-600 transition-colors">
                         <Edit className="h-4 w-4" />
                       </button>
-                      <button className="text-red-600 hover:text-red-800">
+                      <button className="text-red-500 hover:text-red-600 transition-colors">
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
@@ -291,42 +291,42 @@ export function Clients() {
             <div className="space-y-6 mt-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Company Name</label>
-                  <p className="mt-1 text-gray-900">{selectedClient.companyName}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Company Name</label>
+                  <p className="mt-1 text-foreground font-medium">{selectedClient.companyName}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Contact Person</label>
-                  <p className="mt-1 text-gray-900">{selectedClient.contactPerson}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Contact Person</label>
+                  <p className="mt-1 text-foreground">{selectedClient.contactPerson}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Phone</label>
-                  <p className="mt-1 text-gray-900">{selectedClient.phone}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Phone</label>
+                  <p className="mt-1 text-foreground">{selectedClient.phone}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Email</label>
-                  <p className="mt-1 text-gray-900">{selectedClient.email}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Email</label>
+                  <p className="mt-1 text-foreground">{selectedClient.email}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">GST Number</label>
-                  <p className="mt-1 text-gray-900">{selectedClient.gst}</p>
+                  <label className="text-sm font-medium text-muted-foreground">GST Number</label>
+                  <p className="mt-1 text-foreground font-mono">{selectedClient.gst}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">City</label>
-                  <p className="mt-1 text-gray-900">{selectedClient.city}</p>
+                  <label className="text-sm font-medium text-muted-foreground">City</label>
+                  <p className="mt-1 text-foreground">{selectedClient.city}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Total Projects</label>
-                  <p className="mt-1 text-gray-900">{selectedClient.projectsCount}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Total Projects</label>
+                  <p className="mt-1 text-foreground">{selectedClient.projectsCount}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">AMC Status</label>
+                  <label className="text-sm font-medium text-muted-foreground">AMC Status</label>
                   <p className="mt-1">
                     <span
                       className={`px-2 py-1 text-xs font-medium rounded-full ${selectedClient.amcStatus === "Active"
-                          ? "bg-green-100 text-green-800"
+                          ? "bg-green-500/10 text-green-500"
                           : selectedClient.amcStatus === "Inactive"
-                            ? "bg-gray-100 text-gray-800"
-                            : "bg-red-100 text-red-800"
+                            ? "bg-muted text-muted-foreground"
+                            : "bg-red-500/10 text-red-500"
                         }`}
                     >
                       {selectedClient.amcStatus}
@@ -334,7 +334,7 @@ export function Clients() {
                   </p>
                 </div>
               </div>
-              <div className="flex justify-end gap-2 pt-4">
+              <div className="flex justify-end gap-2 pt-4 border-t border-border/50">
                 <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
                   Close
                 </Button>

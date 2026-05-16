@@ -30,21 +30,21 @@ const mockEnquiries = [
 
 const getStatusColor = (status: string) => {
   const colors = {
-    "Site Visit Scheduled": "bg-blue-100 text-blue-800",
-    "Quotation Prepared": "bg-green-100 text-green-800",
-    "Follow-up Required": "bg-amber-100 text-amber-800",
-    "Converted to Quotation": "bg-purple-100 text-purple-800",
+    "Site Visit Scheduled": "bg-blue-500/10 text-blue-500",
+    "Quotation Prepared": "bg-green-500/10 text-green-500",
+    "Follow-up Required": "bg-amber-500/10 text-amber-500",
+    "Converted to Quotation": "bg-purple-500/10 text-purple-500",
   };
-  return colors[status as keyof typeof colors] || "bg-gray-100 text-gray-800";
+  return colors[status as keyof typeof colors] || "bg-muted text-muted-foreground";
 };
 
 const getPriorityColor = (priority: string) => {
   const colors = {
-    High: "bg-red-100 text-red-800",
-    Medium: "bg-amber-100 text-amber-800",
-    Low: "bg-blue-100 text-blue-800",
+    High: "bg-red-500/10 text-red-500",
+    Medium: "bg-amber-500/10 text-amber-500",
+    Low: "bg-blue-500/10 text-blue-500",
   };
-  return colors[priority as keyof typeof colors] || "bg-gray-100 text-gray-800";
+  return colors[priority as keyof typeof colors] || "bg-muted text-muted-foreground";
 };
 
 export function EnquiryDetail() {
@@ -54,28 +54,28 @@ export function EnquiryDetail() {
   const enquiry = mockEnquiries.find(e => e.id === Number(id)) || mockEnquiries[0];
 
   return (
-    <div className="h-full bg-gray-50/50">
+    <div className="h-full bg-background">
       <ScrollArea className="h-full">
         <div className="p-2 lg:p-0">
           <div className="mx-auto space-y-4">
             <Tabs defaultValue="details" className="space-y-4">
               {/* Unified Header Card */}
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="p-4 lg:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100">
+              <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+                <div className="p-4 lg:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/50">
                   <div className="flex items-center gap-4">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => navigate("/enquiries")}
-                      className="gap-2 h-9 px-3 hover:bg-gray-100"
+                      className="gap-2 h-9 px-3 hover:bg-muted"
                     >
                       <ArrowLeft className="h-4 w-4" />
                       <span className="font-medium">Back</span>
                     </Button>
-                    <div className="h-8 w-px bg-gray-200 hidden md:block" />
+                    <div className="h-8 w-px bg-border hidden md:block" />
                     <div>
-                      <h1 className="text-xl font-bold text-gray-900 tracking-tight">{enquiry.enquiryNo}</h1>
-                      <p className="text-[11px] text-gray-500 uppercase font-bold tracking-wider">{enquiry.clientName}</p>
+                      <h1 className="text-xl font-bold text-foreground tracking-tight">{enquiry.enquiryNo}</h1>
+                      <p className="text-[11px] text-muted-foreground uppercase font-bold tracking-wider">{enquiry.clientName}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 self-end md:self-auto">
@@ -105,12 +105,12 @@ export function EnquiryDetail() {
                   {/* Overview Cards */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                     {/* Enquiry Information */}
-                    <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                      <div className="flex items-center gap-2 mb-4 pb-3 border-b">
-                        <div className="h-8 w-8 rounded-lg bg-pink-100 flex items-center justify-center shrink-0">
-                          <FileText className="h-4 w-4 text-pink-700" />
+                    <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
+                      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/50">
+                        <div className="h-8 w-8 rounded-lg bg-pink-500/10 flex items-center justify-center shrink-0">
+                          <FileText className="h-4 w-4 text-pink-600" />
                         </div>
-                        <h3 className="text-base font-semibold text-gray-900">Enquiry Information</h3>
+                        <h3 className="text-base font-semibold text-foreground">Enquiry Information</h3>
                       </div>
                       <div className="grid grid-cols-2 lg:grid-cols-1 gap-y-3 gap-x-4">
                         <div>
@@ -138,22 +138,22 @@ export function EnquiryDetail() {
                           </div>
                         </div>
                         <div>
-                          <label className="text-xs font-medium text-gray-500 uppercase">Follow-up Date</label>
+                          <label className="text-xs font-medium text-muted-foreground uppercase">Follow-up Date</label>
                           <div className="mt-1 flex items-center gap-2">
                             <AlertCircle className="h-4 w-4 text-amber-500" />
-                            <p className="text-gray-900 font-medium">{new Date(enquiry.followUpDate).toLocaleDateString()}</p>
+                            <p className="text-foreground font-medium">{new Date(enquiry.followUpDate).toLocaleDateString()}</p>
                           </div>
                         </div>
                       </div>
                     </div>
 
                     {/* Client Information */}
-                    <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                      <div className="flex items-center gap-2 mb-4 pb-3 border-b">
-                        <div className="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
-                          <Building className="h-4 w-4 text-blue-700" />
+                    <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
+                      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/50">
+                        <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                          <Building className="h-4 w-4 text-blue-500" />
                         </div>
-                        <h3 className="text-base font-semibold text-gray-900">Client Information</h3>
+                        <h3 className="text-base font-semibold text-foreground">Client Information</h3>
                       </div>
                       <div className="grid grid-cols-2 lg:grid-cols-1 gap-y-3 gap-x-4">
                         <div>
@@ -191,12 +191,12 @@ export function EnquiryDetail() {
                     </div>
 
                     {/* Requirement Summary */}
-                    <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                      <div className="flex items-center gap-2 mb-4 pb-3 border-b">
-                        <div className="h-8 w-8 rounded-lg bg-green-100 flex items-center justify-center shrink-0">
-                          <FileText className="h-4 w-4 text-green-700" />
+                    <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
+                      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/50">
+                        <div className="h-8 w-8 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
+                          <FileText className="h-4 w-4 text-green-500" />
                         </div>
-                        <h3 className="text-base font-semibold text-gray-900">Requirement</h3>
+                        <h3 className="text-base font-semibold text-foreground">Requirement</h3>
                       </div>
                       <div className="space-y-3">
                         <div>
@@ -212,13 +212,13 @@ export function EnquiryDetail() {
                   </div>
 
                   {/* Drawings & Documents */}
-                  <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                  <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 rounded-lg bg-purple-100 flex items-center justify-center shrink-0">
-                          <FileText className="h-4 w-4 text-purple-700" />
+                        <div className="h-8 w-8 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
+                          <FileText className="h-4 w-4 text-purple-500" />
                         </div>
-                        <h3 className="text-base font-semibold text-gray-900">Drawings & Documents</h3>
+                        <h3 className="text-base font-semibold text-foreground">Drawings & Documents</h3>
                       </div>
                       <Button size="sm" className="gap-2 h-8">
                         <Upload className="h-3.5 w-3.5" />
@@ -251,17 +251,17 @@ export function EnquiryDetail() {
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
-                        <FileText className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                        <p className="text-gray-600 font-medium mb-1">No drawings uploaded yet</p>
-                        <p className="text-sm text-gray-500">Upload site drawings, floor plans, or technical documents</p>
+                      <div className="text-center py-12 bg-muted/30 rounded-lg border-2 border-dashed border-border">
+                        <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                        <p className="text-muted-foreground font-medium mb-1">No drawings uploaded yet</p>
+                        <p className="text-sm text-muted-foreground">Upload site drawings, floor plans, or technical documents</p>
                       </div>
                     )}
                   </div>
 
                   {/* Activity Timeline Placeholder */}
-                  <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                    <h3 className="text-base font-semibold text-gray-900 mb-4">Activity Timeline</h3>
+                  <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
+                    <h3 className="text-base font-semibold text-foreground mb-4">Activity Timeline</h3>
                     <div className="space-y-3">
                       <div className="flex gap-3">
                         <div className="flex flex-col items-center">

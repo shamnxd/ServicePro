@@ -39,7 +39,7 @@ export function ServiceTracking({ serviceType, serviceNo, logs = [] }: ServiceTr
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h4 className="font-semibold text-gray-900">Service Tracking</h4>
+        <h4 className="font-semibold text-foreground">Service Tracking</h4>
         <Button
           size="sm"
           onClick={() => setShowAddForm(!showAddForm)}
@@ -52,47 +52,47 @@ export function ServiceTracking({ serviceType, serviceNo, logs = [] }: ServiceTr
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <div className="bg-blue-50 rounded-lg p-3">
-          <div className="flex items-center gap-2 text-blue-600 mb-1">
+        <div className="bg-blue-500/10 rounded-lg p-3 border border-blue-500/20">
+          <div className="flex items-center gap-2 text-blue-500 mb-1">
             <Clock className="h-4 w-4" />
             <span className="text-xs font-medium">Travel Time</span>
           </div>
-          <p className="text-lg font-bold text-blue-900">{totalTravelTime} min</p>
+          <p className="text-lg font-bold text-foreground">{totalTravelTime} min</p>
         </div>
-        <div className="bg-green-50 rounded-lg p-3">
-          <div className="flex items-center gap-2 text-green-600 mb-1">
+        <div className="bg-green-500/10 rounded-lg p-3 border border-green-500/20">
+          <div className="flex items-center gap-2 text-green-500 mb-1">
             <Clock className="h-4 w-4" />
             <span className="text-xs font-medium">Work Time</span>
           </div>
-          <p className="text-lg font-bold text-green-900">{totalWorkTime} min</p>
+          <p className="text-lg font-bold text-foreground">{totalWorkTime} min</p>
         </div>
-        <div className="bg-orange-50 rounded-lg p-3">
-          <div className="flex items-center gap-2 text-orange-600 mb-1">
+        <div className="bg-orange-500/10 rounded-lg p-3 border border-orange-500/20">
+          <div className="flex items-center gap-2 text-orange-500 mb-1">
             <Car className="h-4 w-4" />
             <span className="text-xs font-medium">Petrol</span>
           </div>
-          <p className="text-lg font-bold text-orange-900">₹{totalPetrol}</p>
+          <p className="text-lg font-bold text-foreground">₹{totalPetrol}</p>
         </div>
-        <div className="bg-purple-50 rounded-lg p-3">
-          <div className="flex items-center gap-2 text-purple-600 mb-1">
+        <div className="bg-purple-500/10 rounded-lg p-3 border border-purple-500/20">
+          <div className="flex items-center gap-2 text-purple-500 mb-1">
             <Package className="h-4 w-4" />
             <span className="text-xs font-medium">Materials</span>
           </div>
-          <p className="text-lg font-bold text-purple-900">₹{totalMaterialCost}</p>
+          <p className="text-lg font-bold text-foreground">₹{totalMaterialCost}</p>
         </div>
-        <div className="bg-red-50 rounded-lg p-3">
-          <div className="flex items-center gap-2 text-red-600 mb-1">
+        <div className="bg-red-500/10 rounded-lg p-3 border border-red-500/20">
+          <div className="flex items-center gap-2 text-red-500 mb-1">
             <DollarSign className="h-4 w-4" />
             <span className="text-xs font-medium">Other Exp.</span>
           </div>
-          <p className="text-lg font-bold text-red-900">₹{totalExpenses}</p>
+          <p className="text-lg font-bold text-foreground">₹{totalExpenses}</p>
         </div>
       </div>
 
       {/* Add Entry Form */}
       {showAddForm && (
-        <div className="border rounded-lg p-4 bg-gray-50">
-          <h5 className="font-medium text-gray-900 mb-3">Add Service Entry</h5>
+        <div className="border border-border rounded-lg p-4 bg-muted/30">
+          <h5 className="font-medium text-foreground mb-3">Add Service Entry</h5>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="entryDate">Date *</Label>
@@ -175,42 +175,42 @@ export function ServiceTracking({ serviceType, serviceNo, logs = [] }: ServiceTr
 
       {/* Service Logs */}
       {logs.length > 0 && (
-        <div className="border rounded-lg overflow-hidden">
+        <div className="border border-border rounded-lg overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50">
+            <thead className="bg-muted/50">
               <tr>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Technician</th>
-                <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">Travel (min)</th>
-                <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">Work (min)</th>
-                <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Petrol (₹)</th>
-                <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Materials (₹)</th>
-                <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Other (₹)</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground uppercase">Date</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground uppercase">Technician</th>
+                <th className="px-3 py-2 text-center text-xs font-medium text-muted-foreground uppercase">Travel (min)</th>
+                <th className="px-3 py-2 text-center text-xs font-medium text-muted-foreground uppercase">Work (min)</th>
+                <th className="px-3 py-2 text-right text-xs font-medium text-muted-foreground uppercase">Petrol (₹)</th>
+                <th className="px-3 py-2 text-right text-xs font-medium text-muted-foreground uppercase">Materials (₹)</th>
+                <th className="px-3 py-2 text-right text-xs font-medium text-muted-foreground uppercase">Other (₹)</th>
               </tr>
             </thead>
-            <tbody className="divide-y">
+            <tbody className="divide-y divide-border">
               {logs.map((log) => (
-                <tr key={log.id} className="hover:bg-gray-50">
-                  <td className="px-3 py-2 text-gray-900">{new Date(log.date).toLocaleDateString()}</td>
-                  <td className="px-3 py-2 text-gray-900">{log.technician}</td>
-                  <td className="px-3 py-2 text-center text-gray-600">{log.travelTime}</td>
-                  <td className="px-3 py-2 text-center text-gray-600">{log.workTime}</td>
-                  <td className="px-3 py-2 text-right text-gray-600">₹{log.petrolExpense}</td>
-                  <td className="px-3 py-2 text-right text-gray-600">
+                <tr key={log.id} className="hover:bg-muted/30 transition-colors">
+                  <td className="px-3 py-2 text-foreground">{new Date(log.date).toLocaleDateString()}</td>
+                  <td className="px-3 py-2 text-foreground">{log.technician}</td>
+                  <td className="px-3 py-2 text-center text-muted-foreground">{log.travelTime}</td>
+                  <td className="px-3 py-2 text-center text-muted-foreground">{log.workTime}</td>
+                  <td className="px-3 py-2 text-right text-muted-foreground">₹{log.petrolExpense}</td>
+                  <td className="px-3 py-2 text-right text-muted-foreground">
                     ₹{log.materials.reduce((s, m) => s + m.cost, 0)}
                   </td>
-                  <td className="px-3 py-2 text-right text-gray-600">₹{log.otherExpenses}</td>
+                  <td className="px-3 py-2 text-right text-muted-foreground">₹{log.otherExpenses}</td>
                 </tr>
               ))}
             </tbody>
-            <tfoot className="bg-gray-100">
+            <tfoot className="bg-muted">
               <tr className="font-bold">
-                <td colSpan={2} className="px-3 py-2 text-gray-900">Total</td>
-                <td className="px-3 py-2 text-center text-gray-900">{totalTravelTime}</td>
-                <td className="px-3 py-2 text-center text-gray-900">{totalWorkTime}</td>
-                <td className="px-3 py-2 text-right text-gray-900">₹{totalPetrol}</td>
-                <td className="px-3 py-2 text-right text-gray-900">₹{totalMaterialCost}</td>
-                <td className="px-3 py-2 text-right text-gray-900">₹{totalExpenses}</td>
+                <td colSpan={2} className="px-3 py-2 text-foreground">Total</td>
+                <td className="px-3 py-2 text-center text-foreground">{totalTravelTime}</td>
+                <td className="px-3 py-2 text-center text-foreground">{totalWorkTime}</td>
+                <td className="px-3 py-2 text-right text-foreground">₹{totalPetrol}</td>
+                <td className="px-3 py-2 text-right text-foreground">₹{totalMaterialCost}</td>
+                <td className="px-3 py-2 text-right text-foreground">₹{totalExpenses}</td>
               </tr>
             </tfoot>
           </table>
@@ -218,7 +218,7 @@ export function ServiceTracking({ serviceType, serviceNo, logs = [] }: ServiceTr
       )}
 
       {logs.length === 0 && !showAddForm && (
-        <p className="text-sm text-gray-500 italic text-center py-4">No service entries yet</p>
+        <p className="text-sm text-muted-foreground italic text-center py-4">No service entries yet</p>
       )}
     </div>
   );

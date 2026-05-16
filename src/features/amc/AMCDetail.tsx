@@ -65,11 +65,11 @@ const mockAMCContracts = [
 
 const getStatusColor = (status: string) => {
   const colors = {
-    Active: "bg-green-100 text-green-800",
-    Expired: "bg-red-100 text-red-800",
-    "Due for Renewal": "bg-amber-100 text-amber-800",
+    Active: "bg-green-500/10 text-green-500",
+    Expired: "bg-red-500/10 text-red-500",
+    "Due for Renewal": "bg-amber-500/10 text-amber-500",
   };
-  return colors[status as keyof typeof colors] || "bg-gray-100 text-gray-800";
+  return colors[status as keyof typeof colors] || "bg-muted text-muted-foreground";
 };
 
 export function AMCDetail() {
@@ -80,28 +80,28 @@ export function AMCDetail() {
   const contract = mockAMCContracts.find(c => c.id === Number(id)) || mockAMCContracts[0];
 
   return (
-    <div className="h-full bg-gray-50/50">
+    <div className="h-full bg-background">
       <ScrollArea className="h-full">
         <div className="p-2 lg:p-0">
           <div className="mx-auto space-y-4">
             <Tabs defaultValue="details" className="space-y-4">
               {/* Unified Header Card */}
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="p-4 lg:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100">
+              <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+                <div className="p-4 lg:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/50">
                   <div className="flex items-center gap-4">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => navigate("/amc")}
-                      className="gap-2 h-9 px-3 hover:bg-gray-100"
+                      className="gap-2 h-9 px-3 hover:bg-muted"
                     >
                       <ArrowLeft className="h-4 w-4" />
                       <span className="font-medium">Back</span>
                     </Button>
-                    <div className="h-8 w-px bg-gray-200 hidden md:block" />
+                    <div className="h-8 w-px bg-border hidden md:block" />
                     <div>
-                      <h1 className="text-xl font-bold text-gray-900 tracking-tight">{contract.amcNo}</h1>
-                      <p className="text-[11px] text-gray-500 uppercase font-bold tracking-wider">{contract.clientName}</p>
+                      <h1 className="text-xl font-bold text-foreground tracking-tight">{contract.amcNo}</h1>
+                      <p className="text-[11px] text-muted-foreground uppercase font-bold tracking-wider">{contract.clientName}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 self-end md:self-auto">
@@ -139,12 +139,12 @@ export function AMCDetail() {
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                     {/* Contract Information Card */}
-                    <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                      <div className="flex items-center gap-2 mb-4 pb-3 border-b">
-                        <div className="h-8 w-8 rounded-lg bg-pink-100 flex items-center justify-center shrink-0">
-                          <Calendar className="h-4 w-4 text-pink-700" />
+                    <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
+                      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/50">
+                        <div className="h-8 w-8 rounded-lg bg-pink-500/10 flex items-center justify-center shrink-0">
+                          <Calendar className="h-4 w-4 text-pink-600" />
                         </div>
-                        <h3 className="text-base font-semibold text-gray-900">Contract Information</h3>
+                        <h3 className="text-base font-semibold text-foreground">Contract Information</h3>
                       </div>
                       <div className="space-y-3">
                         <div>
@@ -171,12 +171,12 @@ export function AMCDetail() {
                     </div>
 
                     {/* Client Information Card */}
-                    <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                      <div className="flex items-center gap-2 mb-4 pb-3 border-b">
-                        <div className="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
-                          <Building className="h-4 w-4 text-blue-700" />
+                    <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
+                      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/50">
+                        <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                          <Building className="h-4 w-4 text-blue-500" />
                         </div>
-                        <h3 className="text-base font-semibold text-gray-900">Client Information</h3>
+                        <h3 className="text-base font-semibold text-foreground">Client Information</h3>
                       </div>
                       <div className="space-y-3">
                         <div>
@@ -221,12 +221,12 @@ export function AMCDetail() {
                     </div>
 
                     {/* Contract Period & Progress Card */}
-                    <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                      <div className="flex items-center gap-2 mb-4 pb-3 border-b">
-                        <div className="h-8 w-8 rounded-lg bg-green-100 flex items-center justify-center shrink-0">
-                          <DollarSign className="h-4 w-4 text-green-700" />
+                    <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
+                      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/50">
+                        <div className="h-8 w-8 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
+                          <DollarSign className="h-4 w-4 text-green-500" />
                         </div>
-                        <h3 className="text-base font-semibold text-gray-900">Period & Progress</h3>
+                        <h3 className="text-base font-semibold text-foreground">Period & Progress</h3>
                       </div>
                       <div className="space-y-4">
                         <div className="space-y-3">
@@ -253,22 +253,22 @@ export function AMCDetail() {
                               {contract.visitsCompleted}/{contract.totalVisits}
                             </span>
                           </div>
-                          <div className="w-full bg-gray-200 rounded-full h-3">
+                          <div className="w-full bg-muted rounded-full h-3">
                             <div
-                              className="bg-pink-700 h-3 rounded-full transition-all"
+                              className="bg-pink-600 h-3 rounded-full transition-all shadow-[0_0_8px_rgba(219,39,119,0.4)]"
                               style={{
                                 width: `${(contract.visitsCompleted / contract.totalVisits) * 100}%`,
                               }}
                             />
                           </div>
                           <div className="grid grid-cols-2 gap-3 mt-4">
-                            <div className="bg-green-50 rounded-lg p-3 text-center">
-                              <p className="text-xs text-gray-600 mb-1">Completed</p>
-                              <p className="text-2xl font-bold text-green-700">{contract.visitsCompleted}</p>
+                            <div className="bg-green-500/10 rounded-lg p-3 text-center">
+                              <p className="text-xs text-muted-foreground mb-1">Completed</p>
+                              <p className="text-2xl font-bold text-green-500">{contract.visitsCompleted}</p>
                             </div>
-                            <div className="bg-gray-50 rounded-lg p-3 text-center">
-                              <p className="text-xs text-gray-600 mb-1">Remaining</p>
-                              <p className="text-2xl font-bold text-gray-900">{contract.totalVisits - contract.visitsCompleted}</p>
+                            <div className="bg-muted/50 rounded-lg p-3 text-center">
+                              <p className="text-xs text-muted-foreground mb-1">Remaining</p>
+                              <p className="text-2xl font-bold text-foreground">{contract.totalVisits - contract.visitsCompleted}</p>
                             </div>
                           </div>
                         </div>
@@ -279,7 +279,7 @@ export function AMCDetail() {
               </TabsContent>
 
               <TabsContent value="service" className="m-0">
-                <div className="bg-white rounded-xl border border-gray-200 p-4 lg:p-6 shadow-sm">
+                <div className="bg-card rounded-xl border border-border p-4 lg:p-6 shadow-sm">
                   <ServiceTracking
                     serviceType="AMC"
                     serviceNo={contract.amcNo}
@@ -293,21 +293,21 @@ export function AMCDetail() {
                   <div className="space-y-3">
                     {contract.remarks.length > 0 ? (
                       contract.remarks.map((remark, idx) => (
-                        <div key={idx} className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <div key={idx} className="bg-card rounded-xl border border-border p-5 shadow-sm">
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-3">
-                              <div className="h-8 w-8 rounded-full overflow-hidden shrink-0 border border-pink-100 shadow-sm">
+                              <div className="h-8 w-8 rounded-full overflow-hidden shrink-0 border border-pink-500/20 shadow-sm">
                                 <img
                                   src={`https://i.pravatar.cc/150?u=${encodeURIComponent(remark.user)}`}
                                   alt={remark.user}
                                   className="h-full w-full object-cover"
                                 />
                               </div>
-                              <span className="font-medium text-gray-900">{remark.user}</span>
+                              <span className="font-medium text-foreground">{remark.user}</span>
                             </div>
-                            <span className="text-sm text-gray-500">{remark.date}</span>
+                            <span className="text-sm text-muted-foreground">{remark.date}</span>
                           </div>
-                          <p className="text-gray-700 pl-11">{remark.text}</p>
+                          <p className="text-muted-foreground pl-11">{remark.text}</p>
                         </div>
                       ))
                     ) : (
@@ -315,8 +315,8 @@ export function AMCDetail() {
                     )}
                   </div>
 
-                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                    <h4 className="font-semibold text-gray-900 mb-4">Add New Remark</h4>
+                  <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+                    <h4 className="font-semibold text-foreground mb-4">Add New Remark</h4>
                     <div className="space-y-3">
                       <Textarea
                         placeholder="Add a remark or update..."

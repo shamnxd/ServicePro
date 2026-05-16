@@ -33,12 +33,12 @@ const mockQuotations = [
 
 const getStatusColor = (status: string) => {
   const colors = {
-    "Pending Approval": "bg-amber-100 text-amber-800",
-    Approved: "bg-green-100 text-green-800",
-    Rejected: "bg-red-100 text-red-800",
-    Expired: "bg-gray-100 text-gray-800",
+    "Pending Approval": "bg-amber-500/10 text-amber-500",
+    Approved: "bg-green-500/10 text-green-500",
+    Rejected: "bg-red-500/10 text-red-500",
+    Expired: "bg-muted text-muted-foreground",
   };
-  return colors[status as keyof typeof colors] || "bg-gray-100 text-gray-800";
+  return colors[status as keyof typeof colors] || "bg-muted text-muted-foreground";
 };
 
 export function QuotationDetail() {
@@ -49,28 +49,28 @@ export function QuotationDetail() {
   const quotation = mockQuotations.find(q => q.id === Number(id)) || mockQuotations[0];
 
   return (
-    <div className="h-full bg-gray-50/50">
+    <div className="h-full bg-background">
       <ScrollArea className="h-full">
         <div className="p-2 lg:p-0">
           <div className="mx-auto space-y-4">
             <Tabs defaultValue="details" className="space-y-4">
               {/* Unified Header Card */}
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="p-4 lg:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100">
+              <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+                <div className="p-4 lg:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/50">
                   <div className="flex items-center gap-4">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => navigate("/quotations")}
-                      className="gap-2 h-9 px-3 hover:bg-gray-100"
+                      className="gap-2 h-9 px-3 hover:bg-muted"
                     >
                       <ArrowLeft className="h-4 w-4" />
                       <span className="font-medium">Back</span>
                     </Button>
-                    <div className="h-8 w-px bg-gray-200 hidden md:block" />
+                    <div className="h-8 w-px bg-border hidden md:block" />
                     <div>
-                      <h1 className="text-xl font-bold text-gray-900 tracking-tight">{quotation.quotationNo}</h1>
-                      <p className="text-[11px] text-gray-500 uppercase font-bold tracking-wider">{quotation.clientName}</p>
+                      <h1 className="text-xl font-bold text-foreground tracking-tight">{quotation.quotationNo}</h1>
+                      <p className="text-[11px] text-muted-foreground uppercase font-bold tracking-wider">{quotation.clientName}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 self-end md:self-auto">
@@ -106,73 +106,73 @@ export function QuotationDetail() {
                 <div className="space-y-4">
                   {/* Overview Cards */}
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                    <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                    <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <Calendar className="h-3.5 w-3.5 text-gray-400" />
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Quotation Date</label>
+                        <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Quotation Date</label>
                       </div>
-                      <p className="text-base font-semibold text-gray-900">{new Date(quotation.date).toLocaleDateString()}</p>
+                      <p className="text-base font-semibold text-foreground">{new Date(quotation.date).toLocaleDateString()}</p>
                     </div>
-                    <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                    <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <Calendar className="h-3.5 w-3.5 text-gray-400" />
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Valid Until</label>
+                        <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Valid Until</label>
                       </div>
-                      <p className="text-base font-semibold text-pink-700">{new Date(quotation.validUntil).toLocaleDateString()}</p>
+                      <p className="text-base font-semibold text-pink-600">{new Date(quotation.validUntil).toLocaleDateString()}</p>
                     </div>
-                    <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                    <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <FileText className="h-3.5 w-3.5 text-gray-400" />
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Enquiry Ref</label>
+                        <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Enquiry Ref</label>
                       </div>
-                      <p className="text-base font-semibold text-blue-700">{quotation.enquiryNo}</p>
+                      <p className="text-base font-semibold text-blue-500">{quotation.enquiryNo}</p>
                     </div>
-                    <div className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-xl border border-pink-100 p-4 shadow-sm">
+                    <div className="bg-pink-500/10 rounded-xl border border-pink-500/20 p-4 shadow-sm">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <DollarSign className="h-3.5 w-3.5 text-pink-700" />
-                        <label className="text-[10px] font-bold text-pink-700 uppercase tracking-wider">Total Amount</label>
+                        <DollarSign className="h-3.5 w-3.5 text-pink-600" />
+                        <label className="text-[10px] font-bold text-pink-600 uppercase tracking-wider">Total Amount</label>
                       </div>
-                      <p className="text-xl font-bold text-pink-700">₹{quotation.total.toLocaleString()}</p>
+                      <p className="text-xl font-bold text-pink-600">₹{quotation.total.toLocaleString()}</p>
                     </div>
                   </div>
 
                   {/* Line Items */}
-                  <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                    <div className="px-4 py-3 bg-gray-50 border-b">
-                      <h3 className="text-base font-semibold text-gray-900">Line Items</h3>
+                  <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+                    <div className="px-4 py-3 bg-muted/50 border-b border-border/50">
+                      <h3 className="text-base font-semibold text-foreground">Line Items</h3>
                     </div>
                     <div className="overflow-x-auto">
                       <table className="w-full">
-                        <thead className="bg-gray-50 border-b">
+                        <thead className="bg-muted/30 border-b border-border/50">
                           <tr>
-                            <th className="px-4 py-2 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Description</th>
-                            <th className="px-4 py-2 text-center text-[10px] font-bold text-gray-400 uppercase tracking-wider">Quantity</th>
-                            <th className="px-4 py-2 text-right text-[10px] font-bold text-gray-400 uppercase tracking-wider">Rate (₹)</th>
-                            <th className="px-4 py-2 text-right text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total (₹)</th>
+                            <th className="px-4 py-2 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Description</th>
+                            <th className="px-4 py-2 text-center text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Quantity</th>
+                            <th className="px-4 py-2 text-right text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Rate (₹)</th>
+                            <th className="px-4 py-2 text-right text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Total (₹)</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y divide-border/50">
                           {quotation.items.map((item, idx) => (
-                            <tr key={idx} className="hover:bg-gray-50 transition-colors">
-                              <td className="px-4 py-3 text-sm text-gray-900">{item.description}</td>
-                              <td className="px-4 py-3 text-center text-sm text-gray-600">{item.qty}</td>
-                              <td className="px-4 py-3 text-right text-sm text-gray-600">₹{item.rate.toLocaleString()}</td>
-                              <td className="px-4 py-3 text-right text-sm text-gray-900 font-semibold">₹{item.total.toLocaleString()}</td>
+                            <tr key={idx} className="hover:bg-muted/30 transition-colors">
+                              <td className="px-4 py-3 text-sm text-foreground">{item.description}</td>
+                              <td className="px-4 py-3 text-center text-sm text-muted-foreground">{item.qty}</td>
+                              <td className="px-4 py-3 text-right text-sm text-muted-foreground">₹{item.rate.toLocaleString()}</td>
+                              <td className="px-4 py-3 text-right text-sm text-foreground font-semibold">₹{item.total.toLocaleString()}</td>
                             </tr>
                           ))}
                         </tbody>
-                        <tfoot className="bg-gray-50/50 border-t">
+                        <tfoot className="bg-muted/50 border-t border-border/50">
                           <tr>
-                            <td colSpan={3} className="px-4 py-2 text-right text-xs font-medium text-gray-500">Subtotal</td>
-                            <td className="px-4 py-2 text-right text-sm font-semibold text-gray-900">₹{quotation.amount.toLocaleString()}</td>
+                            <td colSpan={3} className="px-4 py-2 text-right text-xs font-medium text-muted-foreground">Subtotal</td>
+                            <td className="px-4 py-2 text-right text-sm font-semibold text-foreground">₹{quotation.amount.toLocaleString()}</td>
                           </tr>
                           <tr>
-                            <td colSpan={3} className="px-4 py-2 text-right text-xs font-medium text-gray-500">GST (18%)</td>
-                            <td className="px-4 py-2 text-right text-sm font-semibold text-gray-900">₹{quotation.gst.toLocaleString()}</td>
+                            <td colSpan={3} className="px-4 py-2 text-right text-xs font-medium text-muted-foreground">GST (18%)</td>
+                            <td className="px-4 py-2 text-right text-sm font-semibold text-foreground">₹{quotation.gst.toLocaleString()}</td>
                           </tr>
-                          <tr className="bg-pink-50/50">
-                            <td colSpan={3} className="px-4 py-3 text-right text-sm font-bold text-gray-900">Total Amount</td>
-                            <td className="px-4 py-3 text-right font-bold text-pink-700 text-lg">₹{quotation.total.toLocaleString()}</td>
+                          <tr className="bg-pink-500/5">
+                            <td colSpan={3} className="px-4 py-3 text-right text-sm font-bold text-foreground">Total Amount</td>
+                            <td className="px-4 py-3 text-right font-bold text-pink-600 text-lg">₹{quotation.total.toLocaleString()}</td>
                           </tr>
                         </tfoot>
                       </table>
@@ -180,9 +180,9 @@ export function QuotationDetail() {
                   </div>
 
                   {/* Terms & Conditions Placeholder */}
-                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Terms & Conditions</h3>
-                    <div className="space-y-2 text-sm text-gray-700">
+                  <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+                    <h3 className="text-lg font-semibold text-foreground mb-4">Terms & Conditions</h3>
+                    <div className="space-y-2 text-sm text-muted-foreground">
                       <p>1. Payment terms: 50% advance, 50% on completion</p>
                       <p>2. GST @ 18% applicable on all items</p>
                       <p>3. Delivery timeline: 4-6 weeks from date of order confirmation</p>
@@ -198,21 +198,21 @@ export function QuotationDetail() {
                   <div className="space-y-3">
                     {quotation.remarks.length > 0 ? (
                       quotation.remarks.map((remark, idx) => (
-                        <div key={idx} className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <div key={idx} className="bg-card rounded-xl border border-border p-5 shadow-sm">
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-3">
-                              <div className="h-8 w-8 rounded-full overflow-hidden shrink-0 border border-pink-100 shadow-sm">
+                              <div className="h-8 w-8 rounded-full overflow-hidden shrink-0 border border-pink-500/20 shadow-sm">
                                 <img
                                   src={`https://i.pravatar.cc/150?u=${encodeURIComponent(remark.user)}`}
                                   alt={remark.user}
                                   className="h-full w-full object-cover"
                                 />
                               </div>
-                              <span className="font-medium text-gray-900">{remark.user}</span>
+                              <span className="font-medium text-foreground">{remark.user}</span>
                             </div>
-                            <span className="text-sm text-gray-500">{remark.date}</span>
+                            <span className="text-sm text-muted-foreground">{remark.date}</span>
                           </div>
-                          <p className="text-gray-700 pl-11">{remark.text}</p>
+                          <p className="text-muted-foreground pl-11">{remark.text}</p>
                         </div>
                       ))
                     ) : (
@@ -220,8 +220,8 @@ export function QuotationDetail() {
                     )}
                   </div>
 
-                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                    <h4 className="font-semibold text-gray-900 mb-4">Add New Remark</h4>
+                  <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+                    <h4 className="font-semibold text-foreground mb-4">Add New Remark</h4>
                     <div className="space-y-3">
                       <Textarea
                         placeholder="Add a remark or note..."

@@ -83,8 +83,8 @@ export function AMCPlans() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">AMC Plans</h2>
-          <p className="text-gray-600 mt-1">Create and manage AMC packages</p>
+          <h2 className="text-2xl font-bold text-foreground">AMC Plans</h2>
+          <p className="text-muted-foreground mt-1">Create and manage AMC packages</p>
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
@@ -164,7 +164,7 @@ export function AMCPlans() {
                   />
                 </div>
               </div>
-              <div className="flex justify-end gap-2 pt-4">
+              <div className="flex justify-end gap-2 pt-4 border-t border-border/50">
                 <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
                   Cancel
                 </Button>
@@ -176,9 +176,9 @@ export function AMCPlans() {
       </div>
 
       {/* Search */}
-      <div className="bg-white rounded-lg shadow p-4">
+      <div className="bg-card rounded-lg shadow-sm border border-border p-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             placeholder="Search plans by name or category..."
             value={searchQuery}
@@ -190,25 +190,25 @@ export function AMCPlans() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Total Plans</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{plans.length}</p>
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Total Plans</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{plans.length}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Active Plans</p>
-          <p className="text-2xl font-bold text-green-600 mt-1">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Active Plans</p>
+          <p className="text-2xl font-bold text-green-500 mt-1">
             {plans.filter((p) => p.active).length}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Total Value</p>
-          <p className="text-2xl font-bold text-blue-600 mt-1">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Total Value</p>
+          <p className="text-2xl font-bold text-blue-500 mt-1">
             ₹{(plans.reduce((sum, p) => sum + p.amount, 0) / 100000).toFixed(1)}L
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Categories</p>
-          <p className="text-2xl font-bold text-purple-600 mt-1">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Categories</p>
+          <p className="text-2xl font-bold text-purple-500 mt-1">
             {new Set(plans.map((p) => p.category)).size}
           </p>
         </div>
@@ -217,18 +217,18 @@ export function AMCPlans() {
       {/* Plans Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {filteredPlans.map((plan) => (
-          <div key={plan.id} className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
-            <div className="p-6">
+          <div key={plan.id} className="bg-card rounded-lg shadow-sm hover:shadow transition-shadow border border-border flex flex-col">
+            <div className="p-6 flex-1">
               <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-1">{plan.planName}</h3>
-                  <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-foreground mb-1 truncate">{plan.planName}</h3>
+                  <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded bg-blue-500/10 text-blue-500 border border-blue-500/20">
                     {plan.category}
                   </span>
                 </div>
                 <span
-                  className={`px-2 py-1 text-xs font-medium rounded-full ${
-                    plan.active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                  className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                    plan.active ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"
                   }`}
                 >
                   {plan.active ? "Active" : "Inactive"}
@@ -237,67 +237,65 @@ export function AMCPlans() {
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600 flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    <Calendar className="h-4 w-4 opacity-50" />
                     Frequency
                   </span>
-                  <span className="font-medium text-gray-900">{plan.frequency}</span>
+                  <span className="font-medium text-foreground">{plan.frequency}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Visits per Year</span>
-                  <span className="font-medium text-gray-900">{plan.visits}</span>
+                  <span className="text-muted-foreground">Visits per Year</span>
+                  <span className="font-medium text-foreground">{plan.visits}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Duration</span>
-                  <span className="font-medium text-gray-900">{plan.duration}</span>
+                  <span className="text-muted-foreground">Duration</span>
+                  <span className="font-medium text-foreground">{plan.duration}</span>
                 </div>
-                <div className="pt-3 border-t">
+                <div className="pt-3 border-t border-border/50">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600 flex items-center gap-2">
-                      <DollarSign className="h-4 w-4" />
+                    <span className="text-muted-foreground flex items-center gap-2">
+                      <DollarSign className="h-4 w-4 opacity-50" />
                       Plan Amount
                     </span>
-                    <span className="text-lg font-bold text-blue-600">₹{plan.amount.toLocaleString()}</span>
+                    <span className="text-lg font-bold text-blue-500">₹{plan.amount.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-4 pt-4 border-t">
-                <p className="text-xs text-gray-500 mb-2">Inclusions:</p>
-                <ul className="space-y-1">
+              <div className="mt-4 pt-4 border-t border-border/50">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Inclusions</p>
+                <ul className="space-y-1.5">
                   {plan.inclusions.slice(0, 3).map((inclusion, idx) => (
-                    <li key={idx} className="text-xs text-gray-600 flex items-start gap-2">
-                      <span className="text-green-500 mt-0.5">✓</span>
-                      {inclusion}
+                    <li key={idx} className="text-xs text-muted-foreground flex items-start gap-2">
+                      <span className="text-green-500 mt-0.5 font-bold">✓</span>
+                      <span className="line-clamp-1">{inclusion}</span>
                     </li>
                   ))}
                   {plan.inclusions.length > 3 && (
-                    <li className="text-xs text-blue-600">+ {plan.inclusions.length - 3} more</li>
+                    <li className="text-xs text-blue-500 font-medium">+ {plan.inclusions.length - 3} more</li>
                   )}
                 </ul>
               </div>
-
-              <div className="flex gap-2 mt-4">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => {
-                    setSelectedPlan(plan);
-                    setIsViewDialogOpen(true);
-                  }}
-                >
-                  <Eye className="h-3 w-3 mr-1" />
-                  View
-                </Button>
-                <Button size="sm" variant="outline">
-                  <Edit className="h-3 w-3 mr-1" />
-                  Edit
-                </Button>
-                <Button size="sm" variant="outline">
-                  <Trash2 className="h-3 w-3" />
-                </Button>
-              </div>
+            </div>
+            
+            <div className="p-4 pt-0 flex gap-2 border-t border-border/10">
+              <Button
+                size="sm"
+                variant="outline"
+                className="flex-1 h-8 text-xs"
+                onClick={() => {
+                  setSelectedPlan(plan);
+                  setIsViewDialogOpen(true);
+                }}
+              >
+                View
+              </Button>
+              <Button size="sm" variant="outline" className="flex-1 h-8 text-xs">
+                Edit
+              </Button>
+              <Button size="sm" variant="outline" className="w-8 h-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-500/10 border-red-500/20">
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
             </div>
           </div>
         ))}
@@ -313,52 +311,52 @@ export function AMCPlans() {
             <div className="space-y-4 mt-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Plan Name</label>
-                  <p className="mt-1 text-gray-900 font-semibold">{selectedPlan.planName}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Plan Name</label>
+                  <p className="mt-1 text-foreground font-semibold text-lg">{selectedPlan.planName}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Category</label>
+                  <label className="text-sm font-medium text-muted-foreground">Category</label>
                   <p className="mt-1">
-                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                    <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded bg-blue-500/10 text-blue-500 border border-blue-500/20">
                       {selectedPlan.category}
                     </span>
                   </p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Frequency</label>
-                  <p className="mt-1 text-gray-900">{selectedPlan.frequency}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Frequency</label>
+                  <p className="mt-1 text-foreground">{selectedPlan.frequency}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Total Visits</label>
-                  <p className="mt-1 text-gray-900">{selectedPlan.visits}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Total Visits</label>
+                  <p className="mt-1 text-foreground">{selectedPlan.visits}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Duration</label>
-                  <p className="mt-1 text-gray-900">{selectedPlan.duration}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Duration</label>
+                  <p className="mt-1 text-foreground">{selectedPlan.duration}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Plan Amount</label>
-                  <p className="mt-1 text-blue-600 font-bold text-lg">₹{selectedPlan.amount.toLocaleString()}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Plan Amount</label>
+                  <p className="mt-1 text-blue-500 font-bold text-xl">₹{selectedPlan.amount.toLocaleString()}</p>
                 </div>
               </div>
 
-              <div className="border-t pt-4">
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Plan Inclusions</label>
-                <ul className="space-y-2">
+              <div className="border-t border-border/50 pt-4">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3 block">Plan Inclusions</label>
+                <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {selectedPlan.inclusions.map((inclusion, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-sm text-gray-600">
-                      <span className="text-green-500 mt-0.5">✓</span>
+                    <li key={idx} className="flex items-start gap-3 text-sm text-foreground bg-muted/30 p-2 rounded-lg border border-border/50">
+                      <span className="text-green-500 font-bold">✓</span>
                       {inclusion}
                     </li>
                   ))}
                 </ul>
               </div>
 
-              <div className="flex justify-end gap-2 pt-4 border-t">
+              <div className="flex justify-end gap-2 pt-4 border-t border-border/50">
                 <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
                   Close
                 </Button>
-                <Button>Use This Plan</Button>
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white">Use This Plan</Button>
               </div>
             </div>
           )}

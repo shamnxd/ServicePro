@@ -18,7 +18,10 @@ import {
   Search,
   ChevronDown,
   ChevronRight,
+  Sun,
+  Moon,
 } from "lucide-react";
+import { useEffect } from "react";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -43,14 +46,31 @@ const navigation = [
 export function RootLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [amcExpanded, setAmcExpanded] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("theme");
+      return saved === "dark" || (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    }
+    return false;
+  });
   const location = useLocation();
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  }, [darkMode]);
 
   return (
     <div className="flex h-screen bg-background">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-gray-900 bg-opacity-50 lg:hidden"
+          className="fixed inset-0 z-40 bg-pink-900/40 backdrop-blur-sm lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -199,6 +219,17 @@ export function RootLayout() {
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="p-2.5 hover:bg-muted rounded-xl transition-colors relative group"
+              title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {darkMode ? (
+                <Sun className="h-5 w-5 text-muted-foreground group-hover:text-foreground" />
+              ) : (
+                <Moon className="h-5 w-5 text-muted-foreground group-hover:text-foreground" />
+              )}
+            </button>
             <button className="p-2.5 hover:bg-muted rounded-xl transition-colors relative group">
               <Search className="h-5 w-5 text-muted-foreground group-hover:text-foreground" />
             </button>

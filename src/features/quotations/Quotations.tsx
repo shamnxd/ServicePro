@@ -120,13 +120,13 @@ export function Quotations() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Approved":
-        return "bg-green-100 text-green-800";
+        return "bg-green-500/10 text-green-500";
       case "Pending Approval":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-amber-500/10 text-amber-500";
       case "Rejected":
-        return "bg-red-100 text-red-800";
+        return "bg-red-500/10 text-red-500";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-muted text-muted-foreground";
     }
   };
 
@@ -146,8 +146,8 @@ export function Quotations() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Quotation Management</h2>
-          <p className="text-gray-600 mt-1">Create and track quotations</p>
+          <h2 className="text-2xl font-bold text-foreground">Quotation Management</h2>
+          <p className="text-muted-foreground mt-1">Create and track quotations</p>
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
@@ -188,8 +188,8 @@ export function Quotations() {
                 </div>
               </div>
 
-              <div className="border rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-3">Line Items</h4>
+              <div className="border border-border rounded-lg p-4">
+                <h4 className="font-medium text-foreground mb-3">Line Items</h4>
                 <div className="space-y-3">
                   <div className="grid grid-cols-12 gap-2 items-end">
                     <div className="col-span-5">
@@ -238,10 +238,10 @@ export function Quotations() {
       </div>
 
       {/* Search and Filter */}
-      <div className="bg-white rounded-lg shadow p-4">
+      <div className="bg-card rounded-lg shadow-sm border border-border p-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               placeholder="Search quotations..."
               value={searchQuery}
@@ -265,65 +265,65 @@ export function Quotations() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Total Quotations</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{quotations.length}</p>
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Total Quotations</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{quotations.length}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Approved</p>
-          <p className="text-2xl font-bold text-green-600 mt-1">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Approved</p>
+          <p className="text-2xl font-bold text-green-500 mt-1">
             {quotations.filter((q) => q.status === "Approved").length}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Pending</p>
-          <p className="text-2xl font-bold text-yellow-600 mt-1">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Pending</p>
+          <p className="text-2xl font-bold text-amber-500 mt-1">
             {quotations.filter((q) => q.status === "Pending Approval").length}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Total Value</p>
-          <p className="text-2xl font-bold text-blue-600 mt-1">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Total Value</p>
+          <p className="text-2xl font-bold text-blue-500 mt-1">
             ₹{(quotations.reduce((sum, q) => sum + q.amount, 0) / 100000).toFixed(1)}L
           </p>
         </div>
       </div>
 
       {/* Quotations Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b">
+            <thead className="bg-muted/50 border-b border-border">
               <tr>
-                <th className="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Quotation No</th>
-                <th className="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Date</th>
-                <th className="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Client</th>
-                <th className="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Enquiry No</th>
-                <th className="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Amount</th>
-                <th className="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Valid Until</th>
-                <th className="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Status</th>
-                <th className="px-4 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Actions</th>
+                <th className="px-4 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Quotation No</th>
+                <th className="px-4 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Date</th>
+                <th className="px-4 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Client</th>
+                <th className="px-4 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Enquiry No</th>
+                <th className="px-4 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Amount</th>
+                <th className="px-4 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Valid Until</th>
+                <th className="px-4 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Status</th>
+                <th className="px-4 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-border">
               {filteredQuotations.map((quotation) => (
-                <tr key={quotation.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-2.5 font-medium text-gray-900 text-sm">
+                <tr key={quotation.id} className="hover:bg-muted/30 transition-colors">
+                  <td className="px-4 py-2.5 font-medium text-foreground text-sm">
                     {quotation.quotationNo}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
+                  <td className="px-4 py-2.5 text-sm text-muted-foreground">
                     {new Date(quotation.date).toLocaleDateString()}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
+                  <td className="px-4 py-2.5 text-sm text-foreground">
                     {quotation.clientName}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
+                  <td className="px-4 py-2.5 text-sm text-muted-foreground">
                     {quotation.enquiryNo}
                   </td>
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                  <td className="px-4 py-2.5 text-sm font-medium text-foreground">
                     ₹{quotation.amount.toLocaleString()}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
+                  <td className="px-4 py-2.5 text-sm text-muted-foreground">
                     {new Date(quotation.validUntil).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-2.5">
@@ -336,11 +336,11 @@ export function Quotations() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => navigate(`/quotations/${quotation.id}`)}
-                        className="text-blue-600 hover:text-blue-800"
+                        className="text-blue-500 hover:text-blue-600 transition-colors"
                       >
                         <Eye className="h-4 w-4" />
                       </button>
-                      <button className="text-green-600 hover:text-green-800">
+                      <button className="text-green-500 hover:text-green-600 transition-colors">
                         <Download className="h-4 w-4" />
                       </button>
                     </div>
@@ -351,8 +351,6 @@ export function Quotations() {
           </table>
         </div>
       </div>
-
-
     </div>
   );
 }

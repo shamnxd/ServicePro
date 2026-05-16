@@ -23,7 +23,7 @@ const initialColumns: Column[] = [
   {
     id: "todo",
     title: "To Do",
-    color: "bg-gray-100",
+    color: "bg-muted",
     tasks: [
       {
         id: "1",
@@ -48,7 +48,7 @@ const initialColumns: Column[] = [
   {
     id: "in-progress",
     title: "In Progress",
-    color: "bg-blue-100",
+    color: "bg-blue-500/10",
     tasks: [
       {
         id: "3",
@@ -73,7 +73,7 @@ const initialColumns: Column[] = [
   {
     id: "review",
     title: "Review",
-    color: "bg-yellow-100",
+    color: "bg-amber-500/10",
     tasks: [
       {
         id: "5",
@@ -89,7 +89,7 @@ const initialColumns: Column[] = [
   {
     id: "completed",
     title: "Completed",
-    color: "bg-green-100",
+    color: "bg-green-500/10",
     tasks: [
       {
         id: "6",
@@ -121,32 +121,32 @@ export function Kanban() {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "Critical":
-        return "bg-red-100 text-red-800 border-red-300";
+        return "bg-red-500/10 text-red-500 border-red-500/20";
       case "High":
-        return "bg-orange-100 text-orange-800 border-orange-300";
+        return "bg-orange-500/10 text-orange-500 border-orange-500/20";
       case "Medium":
-        return "bg-yellow-100 text-yellow-800 border-yellow-300";
+        return "bg-amber-500/10 text-amber-500 border-amber-500/20";
       case "Low":
-        return "bg-green-100 text-green-800 border-green-300";
+        return "bg-green-500/10 text-green-500 border-green-500/20";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-300";
+        return "bg-muted text-muted-foreground border-border";
     }
   };
 
   const getTypeColor = (type: string) => {
     switch (type) {
       case "Enquiry":
-        return "bg-blue-100 text-blue-800";
+        return "bg-blue-500/10 text-blue-500 border-blue-500/20";
       case "Quotation":
-        return "bg-purple-100 text-purple-800";
+        return "bg-purple-500/10 text-purple-500 border-purple-500/20";
       case "Complaint":
-        return "bg-red-100 text-red-800";
+        return "bg-red-500/10 text-red-500 border-red-500/20";
       case "AMC":
-        return "bg-teal-100 text-teal-800";
+        return "bg-teal-500/10 text-teal-500 border-teal-500/20";
       case "Project":
-        return "bg-indigo-100 text-indigo-800";
+        return "bg-indigo-500/10 text-indigo-500 border-indigo-500/20";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-muted text-muted-foreground border-border";
     }
   };
 
@@ -179,13 +179,13 @@ export function Kanban() {
       <div className="bg-card rounded-2xl shadow-sm border border-border p-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
-            <label className="text-sm font-medium text-foreground mb-2 block">Filter by Type</label>
+            <label className="text-sm font-medium text-foreground mb-3 block">Filter by Type</label>
             <div className="flex gap-2 flex-wrap">
               <button
                 onClick={() => setTypeFilter("all")}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   typeFilter === "all"
-                    ? "bg-pink-700 text-white shadow-md shadow-pink-200"
+                    ? "bg-primary text-primary-foreground shadow-md"
                     : "bg-muted text-muted-foreground hover:bg-muted/80"
                 }`}
               >
@@ -193,50 +193,50 @@ export function Kanban() {
               </button>
               <button
                 onClick={() => setTypeFilter("Enquiry")}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   typeFilter === "Enquiry"
-                    ? "bg-blue-500 text-white"
-                    : "bg-blue-100 text-blue-800 hover:bg-blue-200"
+                    ? "bg-blue-500 text-white shadow-md shadow-blue-500/20"
+                    : "bg-blue-500/10 text-blue-500 hover:bg-blue-500/20"
                 }`}
               >
                 Enquiry
               </button>
               <button
                 onClick={() => setTypeFilter("Quotation")}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   typeFilter === "Quotation"
-                    ? "bg-purple-500 text-white"
-                    : "bg-purple-100 text-purple-800 hover:bg-purple-200"
+                    ? "bg-purple-500 text-white shadow-md shadow-purple-500/20"
+                    : "bg-purple-500/10 text-purple-500 hover:bg-purple-500/20"
                 }`}
               >
                 Quotation
               </button>
               <button
                 onClick={() => setTypeFilter("Complaint")}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   typeFilter === "Complaint"
-                    ? "bg-red-500 text-white"
-                    : "bg-red-100 text-red-800 hover:bg-red-200"
+                    ? "bg-red-500 text-white shadow-md shadow-red-500/20"
+                    : "bg-red-500/10 text-red-500 hover:bg-red-500/20"
                 }`}
               >
                 Complaint
               </button>
               <button
                 onClick={() => setTypeFilter("AMC")}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   typeFilter === "AMC"
-                    ? "bg-teal-500 text-white"
-                    : "bg-teal-100 text-teal-800 hover:bg-teal-200"
+                    ? "bg-teal-500 text-white shadow-md shadow-teal-500/20"
+                    : "bg-teal-500/10 text-teal-500 hover:bg-teal-500/20"
                 }`}
               >
                 AMC
               </button>
               <button
                 onClick={() => setTypeFilter("Project")}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   typeFilter === "Project"
-                    ? "bg-indigo-500 text-white"
-                    : "bg-indigo-100 text-indigo-800 hover:bg-indigo-200"
+                    ? "bg-indigo-500 text-white shadow-md shadow-indigo-500/20"
+                    : "bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500/20"
                 }`}
               >
                 Project
@@ -247,15 +247,15 @@ export function Kanban() {
       </div>
 
       {/* Kanban Columns */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {filteredColumns.map((column) => (
-          <div key={column.id} className="flex flex-col">
+          <div key={column.id} className="flex flex-col min-h-[500px]">
             {/* Column Header */}
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 px-1">
               <div className="flex items-center gap-2">
-                <div className={`w-3 h-3 rounded-full ${column.color.replace("bg-", "bg-opacity-50 bg-")}`}></div>
-                <h3 className="font-semibold text-foreground">{column.title}</h3>
-                <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                <div className={`w-2.5 h-2.5 rounded-full ${column.color.replace("/10", "").replace("bg-", "bg-")}`}></div>
+                <h3 className="font-semibold text-foreground text-sm uppercase tracking-wider">{column.title}</h3>
+                <span className="text-[10px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full border border-border">
                   {column.tasks.length}
                 </span>
               </div>
@@ -264,54 +264,54 @@ export function Kanban() {
               </button>
             </div>
 
-            {/* Tasks */}
-            <div className="space-y-3 flex-1">
+            {/* Tasks Container */}
+            <div className="space-y-3 flex-1 bg-muted/20 rounded-2xl p-2 border border-border/50">
               {column.tasks.map((task) => (
                 <div
                   key={task.id}
-                  className="bg-card rounded-xl border border-border p-3.5 hover:shadow transition-all cursor-pointer"
+                  className="bg-card rounded-xl border border-border p-3.5 hover:shadow-md transition-all cursor-pointer group active:scale-[0.98]"
                 >
                   {/* Task Header */}
-                  <div className="flex items-start justify-between mb-3">
-                    <h4 className="font-medium text-foreground text-sm flex-1">
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="font-semibold text-foreground text-sm flex-1 leading-snug group-hover:text-primary transition-colors">
                       {task.title}
                     </h4>
-                    <button className="text-muted-foreground hover:text-foreground">
+                    <button className="text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
                       <MoreVertical className="h-4 w-4" />
                     </button>
                   </div>
 
                   {/* Description */}
-                  <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
+                  <p className="text-[11px] text-muted-foreground mb-4 line-clamp-2 leading-relaxed">
                     {task.description}
                   </p>
 
                   {/* Tags */}
-                  <div className="flex gap-2 mb-3 flex-wrap">
-                    <span className={`px-2 py-1 text-xs font-medium rounded-lg ${getTypeColor(task.type)}`}>
+                  <div className="flex gap-1.5 mb-4 flex-wrap">
+                    <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md border uppercase tracking-wider ${getTypeColor(task.type)}`}>
                       {task.type}
                     </span>
-                    <span className={`px-2 py-1 text-xs font-medium rounded-lg border ${getPriorityColor(task.priority)}`}>
+                    <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md border uppercase tracking-wider ${getPriorityColor(task.priority)}`}>
                       {task.priority}
                     </span>
                   </div>
 
                   {/* Footer */}
-                  <div className="flex items-center justify-between pt-3 border-t border-border">
+                  <div className="flex items-center justify-between pt-3 border-t border-border/50">
                     <div className="flex items-center gap-2">
-                      <div className="h-6 w-6 rounded-full overflow-hidden shrink-0 border border-primary/20 shadow-sm">
+                      <div className="h-6 w-6 rounded-full overflow-hidden shrink-0 border border-border shadow-sm">
                         <img 
                           src={`https://i.pravatar.cc/150?u=${encodeURIComponent(task.assignee)}`} 
                           alt={task.assignee} 
                           className="h-full w-full object-cover"
                         />
                       </div>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-[11px] font-medium text-muted-foreground">
                         {task.assignee.split(" ")[0]}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Calendar className="h-3 w-3" />
+                    <div className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
+                      <Calendar className="h-3 w-3 opacity-50" />
                       {new Date(task.dueDate).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
@@ -322,7 +322,7 @@ export function Kanban() {
               ))}
 
               {/* Add Task Button */}
-              <button className="w-full py-3 border-2 border-dashed border-border rounded-xl text-muted-foreground hover:text-foreground hover:border-primary/50 hover:bg-primary/5 transition-all text-sm font-medium">
+              <button className="w-full py-3 border-2 border-dashed border-border/50 rounded-xl text-muted-foreground hover:text-foreground hover:border-primary/30 hover:bg-card/50 transition-all text-xs font-bold uppercase tracking-widest">
                 + Add Task
               </button>
             </div>

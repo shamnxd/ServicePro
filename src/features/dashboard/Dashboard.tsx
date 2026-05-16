@@ -98,43 +98,48 @@ const complaintStatusData = [
 ];
 
 const amcVisitsData = [
-  { month: "Jan", scheduled: 45, completed: 42 },
-  { month: "Feb", scheduled: 48, completed: 46 },
-  { month: "Mar", scheduled: 52, completed: 50 },
-  { month: "Apr", scheduled: 55, completed: 53 },
-  { month: "May", scheduled: 58, completed: 55 },
+  { month: "Jan", scheduled: 15, completed: 14 },
+  { month: "Feb", scheduled: 18, completed: 16 },
+  { month: "Mar", scheduled: 22, completed: 20 },
+  { month: "Apr", scheduled: 25, completed: 22 },
+  { month: "May", scheduled: 20, completed: 5 },
 ];
 
 const recentActivities = [
   {
     id: 1,
-    title: "New Enquiry from ABC Corp",
-    time: "2 hours ago",
     type: "enquiry",
+    title: "New Enquiry from ABC Corp",
+    time: "2 mins ago",
+    status: "New",
   },
   {
     id: 2,
-    title: "AMC Visit Scheduled - XYZ Ltd",
-    time: "3 hours ago",
-    type: "amc",
+    type: "quotation",
+    title: "Quotation Sent - DEF Solutions",
+    time: "45 mins ago",
+    status: "Sent",
   },
   {
     id: 3,
-    title: "Complaint Resolved - DEF Industries",
-    time: "5 hours ago",
     type: "complaint",
+    title: "New Complaint - GHI Industries",
+    time: "2 hours ago",
+    status: "Urgent",
   },
   {
     id: 4,
-    title: "Invoice Generated - GHI Enterprises",
-    time: "6 hours ago",
-    type: "invoice",
+    type: "amc",
+    title: "AMC Visit Scheduled - JKL Ltd",
+    time: "4 hours ago",
+    status: "Scheduled",
   },
   {
     id: 5,
-    title: "Quotation Approved - JKL Solutions",
-    time: "1 day ago",
-    type: "quotation",
+    type: "invoice",
+    title: "Invoice Generated - MNO Systems",
+    time: "6 hours ago",
+    status: "Paid",
   },
 ];
 
@@ -142,10 +147,10 @@ const criticalAlerts = [
   {
     id: 1,
     type: "critical",
-    title: "Fire Alarm System Malfunction",
-    client: "XYZ Industries",
+    title: "Generator Failure - High Priority",
+    client: "Global Tech Hub",
     assignee: "Amit Sharma",
-    time: "2 hours ago",
+    time: "10 mins ago",
     priority: "Critical",
   },
   {
@@ -256,7 +261,7 @@ export function Dashboard() {
         <div className="bg-card rounded-2xl shadow-sm border border-border p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-semibold text-foreground">Critical Alerts</h3>
-            <span className="text-[10px] bg-red-100 text-red-800 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+            <span className="text-[10px] bg-red-500/10 text-red-500 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
               {criticalAlerts.length} Active
             </span>
           </div>
@@ -266,8 +271,8 @@ export function Dashboard() {
                 key={alert.id}
                 className={`p-3 rounded-xl border-l-4 ${
                   alert.priority === "Critical"
-                    ? "bg-red-50/50 border-red-500"
-                    : "bg-orange-50/50 border-orange-500"
+                    ? "bg-red-500/10 border-red-500"
+                    : "bg-orange-500/10 border-orange-500"
                 }`}
               >
                 <div className="flex items-start justify-between mb-1">
@@ -275,8 +280,8 @@ export function Dashboard() {
                   <span
                     className={`px-1.5 py-0.5 text-[10px] font-bold rounded uppercase ${
                       alert.priority === "Critical"
-                        ? "bg-red-100 text-red-800"
-                        : "bg-orange-100 text-orange-800"
+                        ? "bg-red-500/20 text-red-500"
+                        : "bg-orange-500/20 text-orange-500"
                     }`}
                   >
                     {alert.priority}
@@ -304,7 +309,7 @@ export function Dashboard() {
           </div>
           <div className="space-y-2">
             {upcomingTasks.map((task) => (
-              <div key={task.id} className="p-3 bg-muted/20 rounded-xl hover:bg-muted/40 transition-colors">
+              <div key={task.id} className="p-3 bg-muted/30 rounded-xl hover:bg-muted/50 transition-colors border border-transparent hover:border-border">
                 <div className="flex items-start justify-between mb-1">
                   <h4 className="font-bold text-foreground text-[13px]">{task.task}</h4>
                   <CheckCircle className="h-3.5 w-3.5 text-muted-foreground" />
@@ -342,17 +347,19 @@ export function Dashboard() {
           </div>
           <ResponsiveContainer width="100%" height={140}>
             <LineChart data={revenueData}>
-              <CartesianGrid key="revenue-grid" strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-              <XAxis key="revenue-xaxis" dataKey="month" stroke="#9ca3af" tick={{ fontSize: 10 }} />
-              <YAxis key="revenue-yaxis" stroke="#9ca3af" tick={{ fontSize: 10 }} hide />
+              <CartesianGrid key="revenue-grid" strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+              <XAxis key="revenue-xaxis" dataKey="month" stroke="var(--muted-foreground)" tick={{ fontSize: 10 }} />
+              <YAxis key="revenue-yaxis" stroke="var(--muted-foreground)" tick={{ fontSize: 10 }} hide />
               <Tooltip
                 key="revenue-tooltip"
                 contentStyle={{
-                  backgroundColor: "#fff",
-                  border: "1px solid #e5e7eb",
+                  backgroundColor: "var(--card)",
+                  border: "1px solid var(--border)",
                   borderRadius: "6px",
                   fontSize: "11px",
+                  color: "var(--foreground)"
                 }}
+                itemStyle={{ color: "var(--foreground)" }}
               />
               <Line key="revenue-line" type="monotone" dataKey="revenue" stroke="#be185d" strokeWidth={2} dot={{ fill: "#be185d", r: 3 }} />
             </LineChart>
@@ -389,8 +396,8 @@ export function Dashboard() {
               <Tooltip
                 key="complaint-tooltip"
                 contentStyle={{
-                  backgroundColor: "#fff",
-                  border: "1px solid #e5e7eb",
+                  backgroundColor: "var(--card)",
+                  border: "1px solid var(--border)",
                   borderRadius: "6px",
                   fontSize: "11px",
                 }}
@@ -402,9 +409,9 @@ export function Dashboard() {
               <div key={idx} className="text-center">
                 <div className="flex items-center justify-center gap-1 mb-1">
                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-xs text-gray-600">{item.name.split(' ')[0]}</span>
+                  <span className="text-xs text-muted-foreground">{item.name.split(' ')[0]}</span>
                 </div>
-                <p className="text-sm font-semibold text-gray-900">{item.value}</p>
+                <p className="text-sm font-semibold text-foreground">{item.value}</p>
               </div>
             ))}
           </div>
@@ -418,14 +425,14 @@ export function Dashboard() {
           </div>
           <ResponsiveContainer width="100%" height={140}>
             <BarChart data={amcVisitsData}>
-              <CartesianGrid key="amc-grid" strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-              <XAxis key="amc-xaxis" dataKey="month" stroke="#9ca3af" tick={{ fontSize: 10 }} />
-              <YAxis key="amc-yaxis" stroke="#9ca3af" tick={{ fontSize: 10 }} hide />
+              <CartesianGrid key="amc-grid" strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+              <XAxis key="amc-xaxis" dataKey="month" stroke="var(--muted-foreground)" tick={{ fontSize: 10 }} />
+              <YAxis key="amc-yaxis" stroke="var(--muted-foreground)" tick={{ fontSize: 10 }} hide />
               <Tooltip
                 key="amc-tooltip"
                 contentStyle={{
-                  backgroundColor: "#fff",
-                  border: "1px solid #e5e7eb",
+                  backgroundColor: "var(--card)",
+                  border: "1px solid var(--border)",
                   borderRadius: "6px",
                   fontSize: "11px",
                 }}
@@ -438,22 +445,22 @@ export function Dashboard() {
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 rounded-full bg-[#db2777]" />
-                <span className="text-xs text-gray-600">Scheduled</span>
+                <span className="text-xs text-muted-foreground">Scheduled</span>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 rounded-full bg-[#9f1239]" />
-                <span className="text-xs text-gray-600">Completed</span>
+                <span className="text-xs text-muted-foreground">Completed</span>
               </div>
             </div>
-            <span className="text-sm font-semibold text-gray-900">{amcVisitsData[amcVisitsData.length - 1].completed}/{amcVisitsData[amcVisitsData.length - 1].scheduled}</span>
+            <span className="text-sm font-semibold text-foreground">{amcVisitsData[amcVisitsData.length - 1].completed}/{amcVisitsData[amcVisitsData.length - 1].scheduled}</span>
           </div>
         </div>
       </div>
 
       {/* Recent Activities */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border">
-        <div className="p-6 border-b border-border">
-          <h3 className="text-lg font-semibold text-foreground">
+      <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
+        <div className="p-4 border-b border-border">
+          <h3 className="text-base font-semibold text-foreground">
             Recent Activities
           </h3>
         </div>

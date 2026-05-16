@@ -107,7 +107,7 @@ const mockAMCContracts = [
     endDate: "2026-05-31",
     frequency: "Quarterly",
     nextVisit: null,
-    status: "Expiring Soon",
+    status: "Due for Renewal",
     amount: 150000,
     visitsCompleted: 4,
     totalVisits: 4,
@@ -196,13 +196,13 @@ export function AMC() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Active":
-        return "bg-green-100 text-green-800";
-      case "Expiring Soon":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-green-500/10 text-green-500";
+      case "Due for Renewal":
+        return "bg-amber-500/10 text-amber-500";
       case "Expired":
-        return "bg-red-100 text-red-800";
+        return "bg-red-500/10 text-red-500";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-muted text-muted-foreground";
     }
   };
 
@@ -210,7 +210,7 @@ export function AMC() {
     switch (status) {
       case "Active":
         return <CheckCircle className="h-4 w-4" />;
-      case "Expiring Soon":
+      case "Due for Renewal":
         return <AlertTriangle className="h-4 w-4" />;
       case "Expired":
         return <Clock className="h-4 w-4" />;
@@ -224,8 +224,8 @@ export function AMC() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">AMC Management</h2>
-          <p className="text-gray-600 mt-1">Manage annual maintenance contracts</p>
+          <h2 className="text-2xl font-bold text-foreground">AMC Management</h2>
+          <p className="text-muted-foreground mt-1">Manage annual maintenance contracts</p>
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
@@ -296,10 +296,10 @@ export function AMC() {
       </div>
 
       {/* Search and Filter */}
-      <div className="bg-white rounded-lg shadow p-4">
+      <div className="bg-card rounded-lg shadow-sm border border-border p-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               placeholder="Search AMC contracts..."
               value={searchQuery}
@@ -314,7 +314,7 @@ export function AMC() {
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="Active">Active</SelectItem>
-              <SelectItem value="Expiring Soon">Expiring Soon</SelectItem>
+              <SelectItem value="Due for Renewal">Due for Renewal</SelectItem>
               <SelectItem value="Expired">Expired</SelectItem>
             </SelectContent>
           </Select>
@@ -323,25 +323,25 @@ export function AMC() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Total AMC Contracts</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{contracts.length}</p>
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Total AMC Contracts</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{contracts.length}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Active Contracts</p>
-          <p className="text-2xl font-bold text-green-600 mt-1">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Active Contracts</p>
+          <p className="text-2xl font-bold text-green-500 mt-1">
             {contracts.filter((c) => c.status === "Active").length}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Expiring Soon</p>
-          <p className="text-2xl font-bold text-yellow-600 mt-1">
-            {contracts.filter((c) => c.status === "Expiring Soon").length}
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Due for Renewal</p>
+          <p className="text-2xl font-bold text-amber-500 mt-1">
+            {contracts.filter((c) => c.status === "Due for Renewal").length}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Total AMC Revenue</p>
-          <p className="text-2xl font-bold text-blue-600 mt-1">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Total AMC Revenue</p>
+          <p className="text-2xl font-bold text-blue-500 mt-1">
             ₹{(contracts.reduce((sum, c) => sum + c.amount, 0) / 100000).toFixed(1)}L
           </p>
         </div>
@@ -357,12 +357,12 @@ export function AMC() {
         <TabsContent value="contracts" className="mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {filteredContracts.map((contract) => (
-              <div key={contract.id} className="bg-white rounded-lg shadow-sm hover:shadow transition-shadow border border-gray-100">
+              <div key={contract.id} className="bg-card rounded-lg shadow-sm hover:shadow transition-shadow border border-border">
                 <div className="p-4">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900">{contract.amcNo}</h3>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <h3 className="font-semibold text-foreground">{contract.amcNo}</h3>
+                      <p className="text-xs text-muted-foreground mt-1">
                         {new Date(contract.startDate).toLocaleDateString()}
                       </p>
                     </div>
@@ -377,49 +377,49 @@ export function AMC() {
 
                   <div className="space-y-2.5 mb-4">
                     <div className="flex items-center gap-2 text-sm">
-                      <div className="h-5 w-5 rounded-full bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
+                      <div className="h-5 w-5 rounded-full bg-muted overflow-hidden shrink-0 border border-border">
                         <img
                           src={`https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(contract.clientName)}&backgroundColor=be185d&fontSize=40&fontWeight=700`}
                           className="h-full w-full object-cover"
                         />
                       </div>
-                      <span className="font-medium text-gray-900 truncate">{contract.clientName}</span>
+                      <span className="font-medium text-foreground truncate">{contract.clientName}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <CheckCircle className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <CheckCircle className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
                       <span className="truncate">{contract.serviceType}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                      <Calendar className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Calendar className="h-3.5 w-3.5 text-muted-foreground/50 flex-shrink-0" />
                       <span>{contract.frequency}</span>
                     </div>
                     {contract.nextVisit && (
-                      <div className="flex items-center gap-2 text-xs text-blue-600 font-medium">
+                      <div className="flex items-center gap-2 text-xs text-blue-500 font-medium">
                         <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
                         <span>Next: {new Date(contract.nextVisit).toLocaleDateString()}</span>
                       </div>
                     )}
                     <div className="pt-2">
-                      <div className="flex justify-between text-xs text-gray-600 mb-1">
+                      <div className="flex justify-between text-xs text-muted-foreground mb-1">
                         <span>Progress</span>
-                        <span className="font-medium">{contract.visitsCompleted}/{contract.totalVisits}</span>
+                        <span className="font-medium text-foreground">{contract.visitsCompleted}/{contract.totalVisits}</span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-1.5">
+                      <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
                         <div
-                          className="bg-blue-600 h-1.5 rounded-full"
+                          className="bg-blue-500 h-1.5 rounded-full transition-all"
                           style={{
                             width: `${(contract.visitsCompleted / contract.totalVisits) * 100}%`,
                           }}
                         />
                       </div>
                     </div>
-                    <div className="flex items-center justify-between text-xs pt-2 border-t">
-                      <span className="text-gray-600">Value</span>
-                      <span className="font-bold text-gray-900">₹{contract.amount.toLocaleString()}</span>
+                    <div className="flex items-center justify-between text-xs pt-2 border-t border-border/50">
+                      <span className="text-muted-foreground">Value</span>
+                      <span className="font-bold text-foreground">₹{contract.amount.toLocaleString()}</span>
                     </div>
                   </div>
 
-                  <div className="flex gap-2 pt-3 border-t">
+                  <div className="flex gap-2 pt-3 border-t border-border/50">
                     <Button
                       size="sm"
                       variant="outline"
@@ -446,49 +446,49 @@ export function AMC() {
         </TabsContent>
 
         <TabsContent value="visits" className="mt-6">
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50 border-b">
+                <thead className="bg-muted/50 border-b border-border">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       AMC No
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Client
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Visit Type
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Scheduled Date
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Assigned To
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-border">
                   {visits.map((visit) => (
-                    <tr key={visit.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 font-medium text-gray-900">{visit.amcNo}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">{visit.clientName}</td>
-                      <td className="px-6 py-4 text-sm text-gray-600">{visit.visitType}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
+                    <tr key={visit.id} className="hover:bg-muted/30 transition-colors">
+                      <td className="px-6 py-4 font-medium text-foreground">{visit.amcNo}</td>
+                      <td className="px-6 py-4 text-sm text-foreground">{visit.clientName}</td>
+                      <td className="px-6 py-4 text-sm text-muted-foreground">{visit.visitType}</td>
+                      <td className="px-6 py-4 text-sm text-foreground">
                         {new Date(visit.scheduledDate).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">{visit.assignedTo}</td>
+                      <td className="px-6 py-4 text-sm text-muted-foreground">{visit.assignedTo}</td>
                       <td className="px-6 py-4">
                         <span
                           className={`px-2 py-1 text-xs font-medium rounded-full ${visit.status === "Completed"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-blue-100 text-blue-800"
+                              ? "bg-green-500/10 text-green-500"
+                              : "bg-blue-500/10 text-blue-500"
                             }`}
                         >
                           {visit.status}
@@ -517,11 +517,11 @@ export function AMC() {
           </DialogHeader>
           {selectedContract && (
             <form className="space-y-4 mt-4">
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <p className="text-sm text-blue-900">
+              <div className="bg-blue-500/10 p-4 rounded-lg border border-blue-500/20">
+                <p className="text-sm text-blue-500 font-medium">
                   <strong>AMC Contract:</strong> {selectedContract.amcNo} - {selectedContract.clientName}
                 </p>
-                <p className="text-xs text-blue-700 mt-1">
+                <p className="text-xs text-blue-500/70 mt-1 font-medium">
                   Service Type: {selectedContract.serviceType} | Frequency: {selectedContract.frequency}
                 </p>
               </div>

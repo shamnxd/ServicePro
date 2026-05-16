@@ -92,15 +92,15 @@ export function Invoices() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Paid":
-        return "bg-green-100 text-green-800";
+        return "bg-green-500/10 text-green-500";
       case "Sent":
-        return "bg-blue-100 text-blue-800";
+        return "bg-blue-500/10 text-blue-500";
       case "Pending":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-amber-500/10 text-amber-500";
       case "Overdue":
-        return "bg-red-100 text-red-800";
+        return "bg-red-500/10 text-red-500";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-muted text-muted-foreground";
     }
   };
 
@@ -132,8 +132,8 @@ export function Invoices() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Invoice Management</h2>
-          <p className="text-gray-600 mt-1">Generate and track invoices</p>
+          <h2 className="text-2xl font-bold text-foreground">Invoice Management</h2>
+          <p className="text-muted-foreground mt-1">Generate and track invoices</p>
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
@@ -185,8 +185,8 @@ export function Invoices() {
                 </div>
               </div>
 
-              <div className="border rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-3">Invoice Items</h4>
+              <div className="border border-border rounded-lg p-4">
+                <h4 className="font-medium text-foreground mb-3">Invoice Items</h4>
                 <div className="space-y-3">
                   <div className="grid grid-cols-12 gap-2 items-end">
                     <div className="col-span-5">
@@ -212,7 +212,7 @@ export function Invoices() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4 bg-gray-50 p-4 rounded-lg">
+              <div className="grid grid-cols-3 gap-4 bg-muted/30 p-4 rounded-lg border border-border">
                 <div>
                   <Label htmlFor="subtotal">Subtotal (₹)</Label>
                   <Input id="subtotal" type="number" placeholder="0.00" className="mt-1" disabled />
@@ -242,10 +242,10 @@ export function Invoices() {
       </div>
 
       {/* Search and Filter */}
-      <div className="bg-white rounded-lg shadow p-4">
+      <div className="bg-card rounded-lg shadow-sm border border-border p-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               placeholder="Search invoices..."
               value={searchQuery}
@@ -270,89 +270,89 @@ export function Invoices() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Total Invoices</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{invoices.length}</p>
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Total Invoices</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{invoices.length}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Total Revenue</p>
-          <p className="text-2xl font-bold text-blue-600 mt-1">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Total Revenue</p>
+          <p className="text-2xl font-bold text-blue-500 mt-1">
             ₹{(totalRevenue / 100000).toFixed(2)}L
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Paid Amount</p>
-          <p className="text-2xl font-bold text-green-600 mt-1">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Paid Amount</p>
+          <p className="text-2xl font-bold text-green-500 mt-1">
             ₹{(paidAmount / 100000).toFixed(2)}L
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Pending Amount</p>
-          <p className="text-2xl font-bold text-red-600 mt-1">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+          <p className="text-sm text-muted-foreground">Pending Amount</p>
+          <p className="text-2xl font-bold text-red-500 mt-1">
             ₹{(pendingAmount / 100000).toFixed(2)}L
           </p>
         </div>
       </div>
 
       {/* Invoices Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b">
+            <thead className="bg-muted/50 border-b border-border">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Invoice No
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Date
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Client
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Type
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Amount
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Total (incl. GST)
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Due Date
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-border">
               {filteredInvoices.map((invoice) => (
-                <tr key={invoice.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 font-medium text-gray-900">
+                <tr key={invoice.id} className="hover:bg-muted/30 transition-colors">
+                  <td className="px-6 py-4 font-medium text-foreground">
                     {invoice.invoiceNo}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
+                  <td className="px-6 py-4 text-sm text-muted-foreground">
                     {new Date(invoice.date).toLocaleDateString()}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
+                  <td className="px-6 py-4 text-sm text-foreground">
                     {invoice.clientName}
                   </td>
                   <td className="px-6 py-4">
-                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-500/10 text-blue-500">
                       {invoice.type}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
+                  <td className="px-6 py-4 text-sm text-foreground">
                     ₹{invoice.amount.toLocaleString()}
                   </td>
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                  <td className="px-6 py-4 text-sm font-medium text-foreground">
                     ₹{invoice.totalAmount.toLocaleString()}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
+                  <td className="px-6 py-4 text-sm text-muted-foreground">
                     {new Date(invoice.dueDate).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4">
@@ -363,14 +363,14 @@ export function Invoices() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <button className="text-blue-600 hover:text-blue-800">
+                      <button className="text-blue-500 hover:text-blue-600 transition-colors">
                         <Eye className="h-4 w-4" />
                       </button>
-                      <button className="text-green-600 hover:text-green-800">
+                      <button className="text-green-500 hover:text-green-600 transition-colors">
                         <Download className="h-4 w-4" />
                       </button>
                       {invoice.status !== "Paid" && (
-                        <button className="text-purple-600 hover:text-purple-800">
+                        <button className="text-purple-500 hover:text-purple-600 transition-colors">
                           <Send className="h-4 w-4" />
                         </button>
                       )}
