@@ -17,14 +17,15 @@ import { Reports } from "./features/reports/Reports";
 import { Kanban } from "./features/kanban/Kanban";
 import { Login } from "./features/auth/Login";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { AppRoute } from "./constants/routes.enum";
 
 export const router = createBrowserRouter([
   {
-    path: "/login",
+    path: AppRoute.LOGIN,
     element: <Login />,
   },
   {
-    path: "/",
+    path: AppRoute.DASHBOARD,
     element: (
       <ProtectedRoute>
         <RootLayout />
@@ -32,21 +33,20 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Dashboard /> },
-      { path: "kanban", element: <Kanban /> },
-      { path: "clients", element: <Clients /> },
-      { path: "enquiries", element: <Enquiries /> },
-      { path: "enquiries/:id", element: <EnquiryDetail /> },
-      { path: "quotations", element: <Quotations /> },
-      { path: "quotations/:id", element: <QuotationDetail /> },
-      { path: "complaints", element: <Complaints /> },
-      { path: "complaints/:id", element: <ComplaintDetail /> },
-      { path: "amc", element: <AMC /> },
-      { path: "amc/:id", element: <AMCDetail /> },
-      { path: "amc-plans", element: <AMCPlans /> },
-      { path: "staff", element: <Staff /> },
-      { path: "invoices", element: <Invoices /> },
-      { path: "reports", element: <Reports /> },
+      { path: AppRoute.KANBAN, element: <Kanban /> },
+      { path: AppRoute.CLIENTS, element: <Clients /> },
+      { path: AppRoute.ENQUIRIES, element: <Enquiries /> },
+      { path: AppRoute.ENQUIRY_DETAIL, element: <EnquiryDetail /> },
+      { path: AppRoute.QUOTATIONS, element: <Quotations /> },
+      { path: AppRoute.QUOTATION_DETAIL, element: <QuotationDetail /> },
+      { path: AppRoute.COMPLAINTS, element: <Complaints /> },
+      { path: AppRoute.COMPLAINT_DETAIL, element: <ComplaintDetail /> },
+      { path: AppRoute.AMC, element: <AMC /> },
+      { path: AppRoute.AMC_DETAIL, element: <AMCDetail /> },
+      { path: AppRoute.AMC_PLANS, element: <AMCPlans /> },
+      { path: AppRoute.STAFF, element: <Staff /> },
+      { path: AppRoute.INVOICES, element: <Invoices /> },
+      { path: AppRoute.REPORTS, element: <Reports /> },
     ],
   },
 ]);
-

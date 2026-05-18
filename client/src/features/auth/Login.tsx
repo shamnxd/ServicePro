@@ -6,6 +6,7 @@ import { Label } from "../../components/ui/label";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { loginUser, setError } from "../../store/slices/authSlice";
 import { Loader2, AlertCircle, ShieldAlert } from "lucide-react";
+import { AppRoute } from "../../constants/routes.enum";
 
 export function Login() {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ export function Login() {
   // Auto-redirect if already signed in statefully
   useEffect(() => {
     if (user) {
-      navigate("/", { replace: true });
+      navigate(AppRoute.DASHBOARD, { replace: true });
     }
   }, [user, navigate]);
 
@@ -36,7 +37,7 @@ export function Login() {
     try {
       const result = await dispatch(loginUser({ email, password }));
       if (loginUser.fulfilled.match(result)) {
-        navigate("/", { replace: true });
+        navigate(AppRoute.DASHBOARD, { replace: true });
       }
     } catch (err) {
       console.warn("Sign-in handling failure:", err);

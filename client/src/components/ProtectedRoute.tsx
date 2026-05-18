@@ -1,6 +1,7 @@
 import { Navigate } from "react-router";
 import { useAppSelector } from "../store/hooks";
 import { Loader2 } from "lucide-react";
+import { AppRoute } from "../constants/routes.enum";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -47,7 +48,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to={AppRoute.LOGIN} replace />;
   }
 
   return <>{children}</>;

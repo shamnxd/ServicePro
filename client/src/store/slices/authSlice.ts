@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { loginApi, logoutApi, refreshApi } from "../../api/auth.api";
 import { User } from "../../interfaces/user.interface";
+import { LoginRequest } from "../../interfaces/auth.interface";
 
 interface AuthState {
   user: User | null;
@@ -38,7 +39,7 @@ function decodeJwt(token: string): User | null {
 // Thunk: Authenticate Dispatcher Credentials
 export const loginUser = createAsyncThunk(
   "auth/login",
-  async (credentials: { email: string; password: string }, { dispatch, rejectWithValue }) => {
+  async (credentials: LoginRequest, { dispatch, rejectWithValue }) => {
     try {
       const response = await loginApi(credentials.email, credentials.password);
       dispatch(setCredentials({ user: response.user, accessToken: response.accessToken }));
