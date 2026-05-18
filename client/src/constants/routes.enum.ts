@@ -16,3 +16,10 @@ export enum AppRoute {
   INVOICES = "/invoices",
   REPORTS = "/reports",
 }
+
+export enum ApiRoute {
+  // Auth Routes
+  AUTH_LOGIN = "/auth/login",
+  AUTH_LOGOUT = "/auth/logout",
+  AUTH_REFRESH = "/auth/refresh",
+}
