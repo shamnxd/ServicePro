@@ -1,0 +1,37 @@
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
+import { AppError } from "../errors/AppError";
+import { StatusCode } from "../constants/statusCodes";
+import { env } from "../config/env";
+
+export interface TokenPayload {
+  id: string;
+  username: string;
+  email: string;
+}
+
+export interface AuthenticatedRequest extends Request {
+  user?: TokenPayload;
+}
+
+export const requireAuth = (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): void => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    throw new AppError("Access token required", StatusCode.UNAUTHORIZED);
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const decoded = jwt.verify(token, env.JWT_ACCESS_SECRET) as TokenPayload;
+    req.user = decoded; // Bind decoded user details
+    next();
+  } catch (error) {
+    throw new AppError("Invalid or expired access token", StatusCode.UNAUTHORIZED);
+  }
+};
