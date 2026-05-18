@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, Link, useLocation } from "react-router";
 import {
   LayoutDashboard,
@@ -21,7 +21,8 @@ import {
   Sun,
   Moon,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { logoutUser } from "../store/slices/authSlice";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -44,6 +45,8 @@ const navigation = [
 ];
 
 export function RootLayout() {
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [amcExpanded, setAmcExpanded] = useState(false);
   const [darkMode, setDarkMode] = useState(() => {
@@ -193,17 +196,20 @@ export function RootLayout() {
             <div className="flex items-center gap-3 mb-3 px-2 py-2 bg-muted/30 rounded-xl">
               <div className="h-10 w-10 rounded-full overflow-hidden ring-2 ring-primary/20 shadow-lg shrink-0">
                 <img
-                  src={`https://i.pravatar.cc/150?u=dd`}
-                  alt="Admin"
+                  src={`https://i.pravatar.cc/150?u=${user?.email ?? "default"}`}
+                  alt={user?.username ?? "User"}
                   className="h-full w-full object-cover"
                 />
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-foreground">Admin User</p>
-                <p className="text-xs text-muted-foreground">admin@continental.com</p>
+              <div className="flex-1 overflow-hidden">
+                <p className="text-sm font-semibold text-foreground truncate">{user?.username ?? "—"}</p>
+                <p className="text-xs text-muted-foreground truncate">{user?.email ?? "—"}</p>
               </div>
             </div>
-            <button className="flex items-center gap-2 w-full px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-red-50 hover:text-red-600 rounded-xl transition-colors">
+            <button
+              onClick={() => dispatch(logoutUser())}
+              className="flex items-center gap-2 w-full px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-red-50 hover:text-red-600 rounded-xl transition-colors dark:hover:bg-red-950/40 dark:hover:text-red-400"
+            >
               <LogOut className="h-4 w-4" />
               Logout
             </button>

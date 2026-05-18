@@ -103,8 +103,8 @@ export function Login() {
               />
             </div>
 
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={submitting}
               className="w-full py-6 bg-gradient-to-r from-pink-700 to-pink-600 hover:from-pink-600 hover:to-pink-500 text-white font-bold rounded-xl shadow-lg shadow-pink-700/10 hover:shadow-pink-700/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer border-none"
             >
@@ -118,11 +118,6 @@ export function Login() {
               )}
             </Button>
           </form>
-
-          <div className="mt-8 pt-6 border-t border-slate-850 flex items-center justify-center gap-2 text-xs text-slate-500">
-            <ShieldAlert className="h-4 w-4 text-pink-600/60" />
-            <span>Secure Dispatch Gateway Session</span>
-          </div>
         </div>
       </div>
     </div>
