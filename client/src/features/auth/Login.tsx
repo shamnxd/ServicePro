@@ -1,67 +1,122 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
+import { useAuth } from "./AuthContext";
+import { Loader2, AlertCircle, ShieldAlert } from "lucide-react";
 
 export function Login() {
   const navigate = useNavigate();
+  const { login, error, clearError, user } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (user) {
+      navigate("/", { replace: true });
+    }
+  }, [user, navigate]);
+
+  // Clear errors when the user types
+  useEffect(() => {
+    if (error) {
+      clearError();
+    }
+  }, [email, password]);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock login - in real app, this would validate credentials
-    navigate("/");
+    setSubmitting(true);
+    try {
+      await login(email, password);
+      navigate("/", { replace: true });
+    } catch (err) {
+      console.warn("Authentication failed:", err);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 via-cyan-50 to-teal-100 p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-card rounded-3xl shadow-2xl p-8 border border-border">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 p-4">
+      {/* Background radial glowing effects */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-teal-500/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="w-full max-w-md relative z-10">
+        <div className="bg-slate-950/80 backdrop-blur-2xl rounded-3xl shadow-2xl p-8 border border-slate-800/80">
           <div className="text-center mb-8">
-            <div className="inline-flex h-16 w-16 mb-4 items-center justify-center shrink-0">
-              <img src="/clogo.png" alt="Continental Logo" className="h-full w-full object-contain" />
+            <div className="inline-flex h-16 w-16 mb-4 items-center justify-center shrink-0 rounded-2xl bg-slate-900 border border-slate-800 shadow-inner relative">
+              <div className="absolute inset-0 bg-teal-500/10 rounded-2xl blur-sm" />
+              <img src="/clogo.png" alt="Continental Logo" className="h-10 w-10 object-contain relative z-10" />
             </div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Continental</h1>
-            <p className="text-muted-foreground">Service Management System</p>
+            <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Continental</h1>
+            <p className="text-sm text-slate-400">Service Management Dispatch System</p>
           </div>
 
+          {/* Premium animated error alert */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-950/40 border border-red-900/50 rounded-2xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+              <AlertCircle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h5 className="text-sm font-semibold text-red-200">Sign-in Failed</h5>
+                <p className="text-xs text-red-300/90 mt-1">{error}</p>
+              </div>
+            </div>
+          )}
+
           <form onSubmit={handleLogin} className="space-y-6">
-            <div>
-              <Label htmlFor="email">Email</Label>
+            <div className="space-y-1">
+              <Label htmlFor="email" className="text-slate-300 text-xs font-semibold uppercase tracking-wider">Email Address</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@continental.com"
+                placeholder="dispatcher@continental.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="mt-1"
+                disabled={submitting}
+                className="mt-1 bg-slate-900/50 border-slate-800 text-white placeholder-slate-600 focus:border-teal-500 focus:ring-teal-500/20 rounded-xl"
               />
             </div>
 
-            <div>
-              <Label htmlFor="password">Password</Label>
+            <div className="space-y-1">
+              <Label htmlFor="password" className="text-slate-300 text-xs font-semibold uppercase tracking-wider">Secret Password</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="Enter your password"
+                placeholder="••••••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="mt-1"
+                disabled={submitting}
+                className="mt-1 bg-slate-900/50 border-slate-800 text-white placeholder-slate-600 focus:border-teal-500 focus:ring-teal-500/20 rounded-xl"
               />
             </div>
 
-            <Button type="submit" className="w-full">
-              Sign In
+            <Button 
+              type="submit" 
+              disabled={submitting}
+              className="w-full py-6 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-teal-500/10 hover:shadow-teal-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span>Signing in...</span>
+                </>
+              ) : (
+                <span>Authorize & Sign In</span>
+              )}
             </Button>
           </form>
 
-          <p className="text-center text-sm text-muted-foreground mt-6">
-            Demo Mode - No authentication required
-          </p>
+          <div className="mt-8 pt-6 border-t border-slate-850 flex items-center justify-center gap-2 text-xs text-slate-500">
+            <ShieldAlert className="h-4 w-4 text-teal-500/60" />
+            <span>Secure Dispatch Gateway Session</span>
+          </div>
         </div>
       </div>
     </div>

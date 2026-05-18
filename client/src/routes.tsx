@@ -16,6 +16,7 @@ import { Invoices } from "./features/invoices/Invoices";
 import { Reports } from "./features/reports/Reports";
 import { Kanban } from "./features/kanban/Kanban";
 import { Login } from "./features/auth/Login";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 export const router = createBrowserRouter([
   {
@@ -24,7 +25,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "/",
-    element: <RootLayout />,
+    element: (
+      <ProtectedRoute>
+        <RootLayout />
+      </ProtectedRoute>
+    ),
     children: [
       { index: true, element: <Dashboard /> },
       { path: "kanban", element: <Kanban /> },
@@ -44,3 +49,4 @@ export const router = createBrowserRouter([
     ],
   },
 ]);
+
