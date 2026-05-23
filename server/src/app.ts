@@ -5,6 +5,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { env } from "./config/env";
 import { authRouter } from "./routes/auth.routes";
+import { clientRouter } from "./routes/client.routes";
 import { errorHandler } from "./middleware/error.middleware";
 
 const app = express();
@@ -24,6 +25,7 @@ app.get("/health", (req, res) => {
 
 // Modular Routes
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/clients", clientRouter);
 
 // Centralized error handler (must be registered last)
 app.use(errorHandler);

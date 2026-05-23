@@ -30,7 +30,7 @@ import {
 } from "../../components/ui/select";
 import { Textarea } from "../../components/ui/textarea";
 
-const mockEnquiries = [
+export const mockEnquiries = [
   {
     id: 1,
     enquiryNo: "ENQ-2026-001",

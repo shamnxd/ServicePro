@@ -1,0 +1,14 @@
+export interface Client {
+  id?: string;
+  companyName: string;
+  contactPerson: string;
+  phone: string;
+  email: string;
+  gst?: string;
+  city: string;
+  address?: string;
+  projectsCount: number;
+  amcStatus: "Active" | "Inactive" | "Expired";
+  createdAt?: string;
+  updatedAt?: string;
+}

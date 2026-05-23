@@ -1,5 +1,8 @@
-import { useState } from "react";
-import { Plus, Search, Edit, Trash2, Eye, MapPin, Phone, Mail } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import {
+  Plus, Search, Edit, Trash2, Eye, MapPin, Phone, Mail,
+  Loader2, Filter, MoreVertical, ChevronLeft, ChevronRight,
+} from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import {
@@ -7,134 +10,383 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "../../components/ui/dialog";
-import { Label } from "../../components/ui/label";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../../components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "../../components/ui/alert-dialog";
+import { Client } from "../../interfaces/client.interface";
+import { getClientsApi, deleteClientApi } from "../../api/client.api";
+import { ClientFormModal } from "./ClientFormModal";
+import { mockComplaints } from "../complaints/Complaints";
+import { mockEnquiries } from "../enquiries/Enquiries";
+import { useDebounce } from "../../hooks/useDebounce";
+import { ReusableTable } from "../../components/ReusableTable";
 
-const mockClients = [
-  {
-    id: 1,
-    companyName: "ABC Corporation",
-    contactPerson: "John Doe",
-    phone: "+91 98765 43210",
-    email: "john@abccorp.com",
-    gst: "29ABCDE1234F1Z5",
-    city: "Mumbai",
-    projectsCount: 5,
-    amcStatus: "Active",
-  },
-  {
-    id: 2,
-    companyName: "XYZ Industries",
-    contactPerson: "Jane Smith",
-    phone: "+91 98765 43211",
-    email: "jane@xyzind.com",
-    gst: "27XYZAB5678G2Z3",
-    city: "Delhi",
-    projectsCount: 3,
-    amcStatus: "Inactive",
-  },
-  {
-    id: 3,
-    companyName: "DEF Solutions",
-    contactPerson: "Mike Johnson",
-    phone: "+91 98765 43212",
-    email: "mike@defsol.com",
-    gst: "29DEFGH9012H3Z1",
-    city: "Bangalore",
-    projectsCount: 8,
-    amcStatus: "Active",
-  },
-  {
-    id: 4,
-    companyName: "GHI Enterprises",
-    contactPerson: "Sarah Williams",
-    phone: "+91 98765 43213",
-    email: "sarah@ghient.com",
-    gst: "19GHIJK3456I4Z9",
-    city: "Pune",
-    projectsCount: 2,
-    amcStatus: "Expired",
-  },
+type FilterType = "all" | "active-amc" | "expired-amc" | "active-complaints" | "active-enquiries";
+
+const filterLabels: Record<FilterType, string> = {
+  "all": "All Clients",
+  "active-amc": "Active AMC",
+  "expired-amc": "Expired AMC",
+  "active-complaints": "Active Complaints",
+  "active-enquiries": "Active Enquiries",
+};
+
+const PAGE_SIZE = 10;
+
+// Derive company names from mocked data
+const activeComplaintCompanies = [
+  ...new Set(
+    mockComplaints
+      .filter((c) => c.status !== "Resolved")
+      .map((c) => c.clientName)
+  ),
+];
+
+const activeEnquiryCompanies = [
+  ...new Set(
+    mockEnquiries
+      .filter((e) => e.status !== "Converted to Project")
+      .map((e) => e.clientName)
+  ),
 ];
 
 export function Clients() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [clients] = useState(mockClients);
+  const debouncedSearch = useDebounce(searchQuery, 400);
+
+  const [clients, setClients] = useState<Client[]>([]);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const [isLoading, setIsLoading] = useState(true);
+
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-  const [selectedClient, setSelectedClient] = useState<typeof mockClients[0] | null>(null);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [activeFilter, setActiveFilter] = useState<FilterType>("all");
 
-  const filteredClients = clients.filter(
-    (client) =>
-      client.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      client.contactPerson.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      client.city.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [clientToDelete, setClientToDelete] = useState<string | null>(null);
+
+  // Stat counts (fetched separately without pagination)
+  const [statCounts, setStatCounts] = useState({
+    total: 0,
+    activeAmc: 0,
+    expiredAmc: 0,
+    activeComplaints: activeComplaintCompanies.length,
+    activeEnquiries: activeEnquiryCompanies.length,
+  });
+
+  const fetchStatCounts = useCallback(async () => {
+    try {
+      const [allRes, activeAmcRes, expiredAmcRes] = await Promise.all([
+        getClientsApi({ page: 1, limit: 1 }),
+        getClientsApi({ page: 1, limit: 1, filter: "active-amc" }),
+        getClientsApi({ page: 1, limit: 1, filter: "expired-amc" }),
+      ]);
+      setStatCounts({
+        total: allRes.total ?? 0,
+        activeAmc: activeAmcRes.total ?? 0,
+        expiredAmc: expiredAmcRes.total ?? 0,
+        activeComplaints: activeComplaintCompanies.length,
+        activeEnquiries: activeEnquiryCompanies.length,
+      });
+    } catch (err) {
+      console.error("Failed to fetch stat counts:", err);
+    }
+  }, []);
+
+  const fetchClients = useCallback(async (page: number, search: string, filter: FilterType) => {
+    setIsLoading(true);
+    try {
+      const companyNames =
+        filter === "active-complaints"
+          ? activeComplaintCompanies
+          : filter === "active-enquiries"
+          ? activeEnquiryCompanies
+          : undefined;
+
+      const response = await getClientsApi({
+        search: search || undefined,
+        page,
+        limit: PAGE_SIZE,
+        filter: filter === "all" ? undefined : filter,
+        companyNames,
+      });
+
+      if (response.success) {
+        setClients(response.data);
+        setTotal(response.total ?? 0);
+        setTotalPages(response.totalPages ?? 0);
+      }
+    } catch (error) {
+      console.error("Failed to fetch clients:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Re-fetch whenever debounced search, filter, or page changes
+  useEffect(() => {
+    fetchClients(currentPage, debouncedSearch, activeFilter);
+  }, [currentPage, debouncedSearch, activeFilter, fetchClients]);
+
+  // Reset to page 1 on search or filter change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, activeFilter]);
+
+  useEffect(() => {
+    fetchStatCounts();
+  }, [fetchStatCounts]);
+
+  const handleOpenAddDialog = () => {
+    setSelectedClient(null);
+    setIsAddDialogOpen(true);
+  };
+
+  const handleOpenEditDialog = (client: Client) => {
+    setSelectedClient(client);
+    setIsAddDialogOpen(true);
+  };
+
+  const handleFormSuccess = () => {
+    fetchClients(currentPage, debouncedSearch, activeFilter);
+    fetchStatCounts();
+  };
+
+  const triggerDeleteClient = (id: string) => {
+    setClientToDelete(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const executeDeleteClient = async () => {
+    if (!clientToDelete) return;
+    try {
+      const response = await deleteClientApi(clientToDelete);
+      if (response.success) {
+        fetchClients(currentPage, debouncedSearch, activeFilter);
+        fetchStatCounts();
+      }
+    } catch (error) {
+      console.error("Failed to delete client:", error);
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setClientToDelete(null);
+    }
+  };
+
+  const getActiveComplaintsCount = (companyName: string) =>
+    mockComplaints.filter(
+      (c) => c.clientName.toLowerCase() === companyName.toLowerCase() && c.status !== "Resolved"
+    ).length;
+
+  const statCards = [
+    {
+      label: "Total Clients",
+      value: statCounts.total,
+      color: "text-foreground",
+      filter: "all" as FilterType,
+      bg: activeFilter === "all" ? "bg-primary/5 ring-1 ring-primary/20" : "bg-card",
+    },
+    {
+      label: "Active AMC",
+      value: statCounts.activeAmc,
+      color: "text-green-500",
+      filter: "active-amc" as FilterType,
+      bg: activeFilter === "active-amc" ? "bg-green-500/10 ring-1 ring-green-500/30" : "bg-card",
+    },
+    {
+      label: "Expired AMC",
+      value: statCounts.expiredAmc,
+      color: "text-red-500",
+      filter: "expired-amc" as FilterType,
+      bg: activeFilter === "expired-amc" ? "bg-red-500/10 ring-1 ring-red-500/30" : "bg-card",
+    },
+    {
+      label: "Active Complaints",
+      value: statCounts.activeComplaints,
+      color: "text-orange-500",
+      filter: "active-complaints" as FilterType,
+      bg: activeFilter === "active-complaints" ? "bg-orange-500/10 ring-1 ring-orange-500/30" : "bg-card",
+    },
+    {
+      label: "Active Enquiries",
+      value: statCounts.activeEnquiries,
+      color: "text-blue-500",
+      filter: "active-enquiries" as FilterType,
+      bg: activeFilter === "active-enquiries" ? "bg-blue-500/10 ring-1 ring-blue-500/30" : "bg-card",
+    },
+  ];
+
+  const columns = [
+    {
+      header: "Company",
+      accessor: (client: Client) => (
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-full overflow-hidden shrink-0 border border-border shadow-sm">
+            <img
+              src={`https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(client.companyName)}&backgroundColor=be185d&fontSize=40&fontWeight=700`}
+              alt={client.companyName}
+              className="h-full w-full object-cover"
+            />
+          </div>
+          <div>
+            <p className="font-medium text-foreground leading-tight">{client.companyName}</p>
+            {client.gst && <p className="text-[10px] text-muted-foreground font-mono mt-0.5 uppercase">{client.gst}</p>}
+          </div>
+        </div>
+      ),
+      className: "px-6 py-4",
+    },
+    {
+      header: "Contact Person",
+      accessor: "contactPerson" as keyof Client,
+      className: "px-6 py-4 text-sm text-foreground",
+    },
+    {
+      header: "Contact Info",
+      accessor: (client: Client) => (
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Phone className="h-3 w-3" />
+            {client.phone}
+          </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Mail className="h-3 w-3" />
+            {client.email}
+          </div>
+        </div>
+      ),
+      className: "px-6 py-4",
+    },
+    {
+      header: "Location",
+      accessor: (client: Client) => (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <MapPin className="h-3 w-3" />
+          {client.city}
+        </div>
+      ),
+      className: "px-6 py-4",
+    },
+    {
+      header: "Active Complaints",
+      accessor: (client: Client) => {
+        const count = getActiveComplaintsCount(client.companyName);
+        return count > 0 ? (
+          <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold rounded-full bg-orange-500/10 text-orange-500">
+            {count}
+          </span>
+        ) : (
+          <span className="text-muted-foreground">0</span>
+        );
+      },
+      className: "px-6 py-4 text-sm",
+    },
+    {
+      header: <span className="sr-only">Actions</span>,
+      className: "px-6 py-4 text-right w-[60px]",
+      accessor: (client: Client) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8 p-0 hover:bg-muted rounded-full">
+              <MoreVertical className="h-4 w-4 text-muted-foreground" />
+              <span className="sr-only">Open menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[160px]">
+            <DropdownMenuItem
+              onClick={() => {
+                setSelectedClient(client);
+                setIsViewDialogOpen(true);
+              }}
+              className="cursor-pointer"
+            >
+              <Eye className="mr-2 h-4 w-4 text-blue-500" />
+              View Details
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => handleOpenEditDialog(client)}
+              className="cursor-pointer"
+            >
+              <Edit className="mr-2 h-4 w-4 text-green-500" />
+              Edit Client
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => triggerDeleteClient(client.id!)}
+              className="cursor-pointer"
+            >
+              <Trash2 className="mr-2 h-4 w-4 text-destructive" />
+              Delete Client
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ];
+
+  const startItem = total === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+  const endItem = Math.min(currentPage * PAGE_SIZE, total);
 
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-foreground">Client Management</h2>
-          <p className="text-muted-foreground mt-1">Manage your client database</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground">Client Management</h2>
+          <p className="text-sm text-muted-foreground mt-0.5">Manage your client database</p>
         </div>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              Add Client
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Add New Client</DialogTitle>
-            </DialogHeader>
-            <form className="space-y-4 mt-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="companyName">Company Name *</Label>
-                  <Input id="companyName" placeholder="Enter company name" className="mt-1" />
-                </div>
-                <div>
-                  <Label htmlFor="contactPerson">Contact Person *</Label>
-                  <Input id="contactPerson" placeholder="Enter contact person" className="mt-1" />
-                </div>
-                <div>
-                  <Label htmlFor="phone">Phone Number *</Label>
-                  <Input id="phone" placeholder="+91 XXXXX XXXXX" className="mt-1" />
-                </div>
-                <div>
-                  <Label htmlFor="email">Email *</Label>
-                  <Input id="email" type="email" placeholder="email@company.com" className="mt-1" />
-                </div>
-                <div>
-                  <Label htmlFor="gst">GST Number</Label>
-                  <Input id="gst" placeholder="GST Number" className="mt-1" />
-                </div>
-                <div>
-                  <Label htmlFor="city">City *</Label>
-                  <Input id="city" placeholder="Enter city" className="mt-1" />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="address">Address</Label>
-                <Input id="address" placeholder="Full address" className="mt-1" />
-              </div>
-              <div className="flex justify-end gap-2 pt-4">
-                <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">Save Client</Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+
+        <Button onClick={handleOpenAddDialog} className="flex items-center gap-2 shrink-0">
+          <Plus className="h-4 w-4" />
+          Add Client
+        </Button>
+
+        <ClientFormModal
+          isOpen={isAddDialogOpen}
+          onClose={() => setIsAddDialogOpen(false)}
+          onSuccess={handleFormSuccess}
+          client={selectedClient}
+        />
       </div>
 
-      {/* Search */}
-      <div className="bg-card rounded-lg shadow-sm border border-border p-4">
+      {/* Stats Cards */}
+      <div className="hidden sm:grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
+        {statCards.map((card) => (
+          <button
+            key={card.label}
+            onClick={() => setActiveFilter(card.filter)}
+            className={`rounded-lg shadow-sm border border-border p-3 sm:p-4 text-left transition-all cursor-pointer hover:shadow-md ${card.bg} ${
+              activeFilter === card.filter ? "shadow-md" : ""
+            }`}
+          >
+            <p className="text-[11px] sm:text-xs text-muted-foreground font-medium leading-tight">{card.label}</p>
+            <div className={`text-xl sm:text-2xl font-bold mt-1 ${card.color}`}>
+              {card.value}
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Search + Filter Tabs */}
+      <div className="bg-card rounded-lg shadow-sm border border-border p-4 space-y-3">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
@@ -144,146 +396,259 @@ export function Clients() {
             className="pl-10"
           />
         </div>
+
+        {/* Filter Tabs */}
+        <div className="flex flex-wrap gap-2">
+          {(Object.keys(filterLabels) as FilterType[]).map((key) => (
+            <button
+              key={key}
+              onClick={() => setActiveFilter(key)}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all border ${
+                activeFilter === key
+                  ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                  : "bg-muted/50 text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
+              }`}
+            >
+              {key !== "all" && <Filter className="h-3 w-3" />}
+              {filterLabels[key]}
+              {key !== "all" && (
+                <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                  activeFilter === key ? "bg-white/20" : "bg-border"
+                }`}>
+                  {key === "active-amc" && statCounts.activeAmc}
+                  {key === "expired-amc" && statCounts.expiredAmc}
+                  {key === "active-complaints" && statCounts.activeComplaints}
+                  {key === "active-enquiries" && statCounts.activeEnquiries}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
-          <p className="text-sm text-muted-foreground">Total Clients</p>
-          <p className="text-2xl font-bold text-foreground mt-1">{clients.length}</p>
-        </div>
-        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
-          <p className="text-sm text-muted-foreground">Active AMC</p>
-          <p className="text-2xl font-bold text-green-500 mt-1">
-            {clients.filter((c) => c.amcStatus === "Active").length}
-          </p>
-        </div>
-        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
-          <p className="text-sm text-muted-foreground">Expired AMC</p>
-          <p className="text-2xl font-bold text-red-500 mt-1">
-            {clients.filter((c) => c.amcStatus === "Expired").length}
-          </p>
-        </div>
-        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
-          <p className="text-sm text-muted-foreground">Total Projects</p>
-          <p className="text-2xl font-bold text-blue-500 mt-1">
-            {clients.reduce((sum, c) => sum + c.projectsCount, 0)}
-          </p>
-        </div>
-      </div>
-
-      {/* Clients Table */}
+      {/* Clients Table / Card List */}
       <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-muted/50 border-b border-border">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Company
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Contact Person
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Contact Info
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Location
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Projects
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  AMC Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {filteredClients.map((client) => (
-                <tr key={client.id} className="hover:bg-muted/30 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-full overflow-hidden shrink-0 border border-border shadow-sm">
-                        <img
-                          src={`https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(client.companyName)}&backgroundColor=be185d&fontSize=40&fontWeight=700`}
-                          alt={client.companyName}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                      <div>
-                        <p className="font-medium text-foreground leading-tight">{client.companyName}</p>
-                        <p className="text-[10px] text-muted-foreground font-mono mt-0.5 uppercase">{client.gst}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-foreground">
-                    {client.contactPerson}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Phone className="h-3 w-3" />
-                        {client.phone}
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Mail className="h-3 w-3" />
-                        {client.email}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <MapPin className="h-3 w-3" />
-                      {client.city}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-foreground">
-                    {client.projectsCount}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`px-2 py-1 text-xs font-medium rounded-full ${client.amcStatus === "Active"
-                          ? "bg-green-500/10 text-green-500"
-                          : client.amcStatus === "Inactive"
-                            ? "bg-muted text-muted-foreground"
-                            : "bg-red-500/10 text-red-500"
-                        }`}
-                    >
-                      {client.amcStatus}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => {
-                          setSelectedClient(client);
-                          setIsViewDialogOpen(true);
-                        }}
-                        className="text-blue-500 hover:text-blue-600 transition-colors"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </button>
-                      <button className="text-green-500 hover:text-green-600 transition-colors">
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button className="text-red-500 hover:text-red-600 transition-colors">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        {/* Table header with result count */}
+        <div className="px-4 sm:px-6 py-3 border-b border-border flex items-center justify-between gap-2">
+          <p className="text-xs sm:text-sm text-muted-foreground min-w-0 truncate">
+            {isLoading ? (
+              "Loading..."
+            ) : total === 0 ? (
+              "No clients found"
+            ) : (
+              <>
+                Showing <span className="font-medium text-foreground">{startItem}–{endItem}</span> of{" "}
+                <span className="font-medium text-foreground">{total}</span> clients
+                {activeFilter !== "all" && (
+                  <span className="hidden sm:inline ml-1">
+                    — filtered by <span className="text-primary font-medium">{filterLabels[activeFilter]}</span>
+                  </span>
+                )}
+              </>
+            )}
+          </p>
+          {activeFilter !== "all" && (
+            <button
+              onClick={() => setActiveFilter("all")}
+              className="text-xs text-muted-foreground hover:text-primary transition-colors underline shrink-0"
+            >
+              Clear filter
+            </button>
+          )}
         </div>
+
+        {/* Desktop Table — hidden on mobile */}
+        <div className="hidden md:block">
+          <ReusableTable
+            data={clients}
+            columns={columns}
+            isLoading={isLoading}
+            rowKey={(client) => client.id || client.companyName}
+            emptyMessage={
+              <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
+                <p className="text-sm">No clients found</p>
+                {activeFilter !== "all" && (
+                  <button onClick={() => setActiveFilter("all")} className="mt-2 text-xs text-primary hover:underline">
+                    Clear filter
+                  </button>
+                )}
+              </div>
+            }
+          />
+        </div>
+
+        {/* Mobile Card List — shown only on small screens */}
+        <div className="md:hidden">
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-12 gap-3 text-muted-foreground">
+              <Loader2 className="h-7 w-7 animate-spin text-primary" />
+              <span className="text-sm">Loading clients...</span>
+            </div>
+          ) : clients.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+              <p className="text-sm">No clients found</p>
+              {activeFilter !== "all" && (
+                <button onClick={() => setActiveFilter("all")} className="mt-2 text-xs text-primary hover:underline">
+                  Clear filter
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="divide-y divide-border">
+              {clients.map((client) => {
+                const complaintsCount = getActiveComplaintsCount(client.companyName);
+                return (
+                  <div key={client.id || client.companyName} className="px-4 py-3 hover:bg-muted/30 transition-colors">
+                    <div className="flex items-start justify-between gap-3">
+                      {/* Left: avatar + info */}
+                      <div className="flex items-start gap-3 min-w-0">
+                        <div className="h-10 w-10 rounded-full overflow-hidden shrink-0 border border-border shadow-sm">
+                          <img
+                            src={`https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(client.companyName)}&backgroundColor=be185d&fontSize=40&fontWeight=700`}
+                            alt={client.companyName}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-foreground text-sm leading-tight truncate">{client.companyName}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{client.contactPerson}</p>
+                          {client.gst && (
+                            <p className="text-[10px] text-muted-foreground font-mono mt-0.5 uppercase tracking-wide">{client.gst}</p>
+                          )}
+                        </div>
+                      </div>
+                      {/* Right: actions */}
+                      <div className="shrink-0">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 p-0 hover:bg-muted rounded-full">
+                              <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                              <span className="sr-only">Open menu</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-[160px]">
+                            <DropdownMenuItem
+                              onClick={() => { setSelectedClient(client); setIsViewDialogOpen(true); }}
+                              className="cursor-pointer"
+                            >
+                              <Eye className="mr-2 h-4 w-4 text-blue-500" /> View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleOpenEditDialog(client)} className="cursor-pointer">
+                              <Edit className="mr-2 h-4 w-4 text-green-500" /> Edit Client
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              variant="destructive"
+                              onClick={() => triggerDeleteClient(client.id!)}
+                              className="cursor-pointer"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4 text-destructive" /> Delete Client
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                    {/* Contact info row */}
+                    <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1">
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Phone className="h-3 w-3" />{client.phone}
+                      </span>
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Mail className="h-3 w-3" />{client.email}
+                      </span>
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <MapPin className="h-3 w-3" />{client.city}
+                      </span>
+                      {complaintsCount > 0 && (
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-orange-500">
+                          <span className="inline-flex items-center justify-center h-4 w-4 rounded-full bg-orange-500/10 text-[10px] font-bold">{complaintsCount}</span>
+                          complaint{complaintsCount > 1 ? "s" : ""}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Pagination Controls */}
+        {!isLoading && totalPages > 1 && (
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
+              Page <span className="font-medium text-foreground">{currentPage}</span> of{" "}
+              <span className="font-medium text-foreground">{totalPages}</span>
+            </p>
+            <div className="flex items-center gap-1 order-1 sm:order-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="h-8 w-8 p-0"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+
+              {/* Page number buttons — hidden on very small screens */}
+              <div className="hidden xs:flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter((page) => {
+                    if (totalPages <= 5) return true;
+                    if (page === 1 || page === totalPages) return true;
+                    if (Math.abs(page - currentPage) <= 1) return true;
+                    return false;
+                  })
+                  .reduce<(number | "...")[]>((acc, page, idx, arr) => {
+                    if (idx > 0 && typeof arr[idx - 1] === "number" && (page as number) - (arr[idx - 1] as number) > 1) {
+                      acc.push("...");
+                    }
+                    acc.push(page);
+                    return acc;
+                  }, [])
+                  .map((item, idx) =>
+                    item === "..." ? (
+                      <span key={`ellipsis-${idx}`} className="px-1 text-muted-foreground text-sm">…</span>
+                    ) : (
+                      <Button
+                        key={item}
+                        variant={currentPage === item ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setCurrentPage(item as number)}
+                        className="h-8 w-8 p-0 text-xs"
+                      >
+                        {item}
+                      </Button>
+                    )
+                  )}
+              </div>
+
+              {/* Compact current/total on mobile */}
+              <span className="xs:hidden text-sm text-muted-foreground px-2">
+                {currentPage} / {totalPages}
+              </span>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="h-8 w-8 p-0"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* View Client Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent
+          className="w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-2 sm:mx-auto"
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle>Client Details</DialogTitle>
           </DialogHeader>
@@ -308,11 +673,15 @@ export function Clients() {
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">GST Number</label>
-                  <p className="mt-1 text-foreground font-mono">{selectedClient.gst}</p>
+                  <p className="mt-1 text-foreground font-mono">{selectedClient.gst || "N/A"}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">City</label>
                   <p className="mt-1 text-foreground">{selectedClient.city}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Address</label>
+                  <p className="mt-1 text-foreground">{selectedClient.address || "N/A"}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Total Projects</label>
@@ -320,30 +689,66 @@ export function Clients() {
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">AMC Status</label>
-                  <p className="mt-1">
+                  <div className="mt-1">
                     <span
-                      className={`px-2 py-1 text-xs font-medium rounded-full ${selectedClient.amcStatus === "Active"
+                      className={`px-2 py-1 text-xs font-medium rounded-full ${
+                        selectedClient.amcStatus === "Active"
                           ? "bg-green-500/10 text-green-500"
                           : selectedClient.amcStatus === "Inactive"
-                            ? "bg-muted text-muted-foreground"
-                            : "bg-red-500/10 text-red-500"
-                        }`}
+                          ? "bg-muted text-muted-foreground"
+                          : "bg-red-500/10 text-red-500"
+                      }`}
                     >
                       {selectedClient.amcStatus}
                     </span>
-                  </p>
+                  </div>
                 </div>
               </div>
               <div className="flex justify-end gap-2 pt-4 border-t border-border/50">
                 <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
                   Close
                 </Button>
-                <Button>Edit Client</Button>
+                <Button
+                  onClick={() => {
+                    setIsViewDialogOpen(false);
+                    handleOpenEditDialog(selectedClient);
+                  }}
+                >
+                  Edit Client
+                </Button>
               </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Alert Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the client record from the database.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                setClientToDelete(null);
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={executeDeleteClient}
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

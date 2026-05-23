@@ -22,7 +22,7 @@ import { Textarea } from "../../components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { ServiceTracking } from "../../components/ServiceTracking";
 
-const mockComplaints = [
+export const mockComplaints = [
   {
     id: 1,
     complaintNo: "CMP-2026-001",
