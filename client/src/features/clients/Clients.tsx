@@ -1,16 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router";
 import {
   Plus, Search, Edit, Trash2, Eye, MapPin, Phone, Mail,
   Loader2, Filter, MoreVertical, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "../../components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -65,6 +60,7 @@ const activeEnquiryCompanies = [
 ];
 
 export function Clients() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearch = useDebounce(searchQuery, 400);
 
@@ -76,7 +72,6 @@ export function Clients() {
   const [isLoading, setIsLoading] = useState(true);
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
 
@@ -312,10 +307,7 @@ export function Clients() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-[160px]">
             <DropdownMenuItem
-              onClick={() => {
-                setSelectedClient(client);
-                setIsViewDialogOpen(true);
-              }}
+              onClick={() => navigate(`/clients/${client.id}`)}
               className="cursor-pointer"
             >
               <Eye className="mr-2 h-4 w-4 text-blue-500" />
@@ -528,7 +520,7 @@ export function Clients() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-[160px]">
                             <DropdownMenuItem
-                              onClick={() => { setSelectedClient(client); setIsViewDialogOpen(true); }}
+                              onClick={() => navigate(`/clients/${client.id}`)}
                               className="cursor-pointer"
                             >
                               <Eye className="mr-2 h-4 w-4 text-blue-500" /> View Details
@@ -642,85 +634,6 @@ export function Clients() {
         )}
       </div>
 
-      {/* View Client Dialog */}
-      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent
-          className="w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-2 sm:mx-auto"
-          onPointerDownOutside={(e) => e.preventDefault()}
-          onInteractOutside={(e) => e.preventDefault()}
-        >
-          <DialogHeader>
-            <DialogTitle>Client Details</DialogTitle>
-          </DialogHeader>
-          {selectedClient && (
-            <div className="space-y-6 mt-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Company Name</label>
-                  <p className="mt-1 text-foreground font-medium">{selectedClient.companyName}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Contact Person</label>
-                  <p className="mt-1 text-foreground">{selectedClient.contactPerson}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Phone</label>
-                  <p className="mt-1 text-foreground">{selectedClient.phone}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Email</label>
-                  <p className="mt-1 text-foreground">{selectedClient.email}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">GST Number</label>
-                  <p className="mt-1 text-foreground font-mono">{selectedClient.gst || "N/A"}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">City</label>
-                  <p className="mt-1 text-foreground">{selectedClient.city}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Address</label>
-                  <p className="mt-1 text-foreground">{selectedClient.address || "N/A"}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Total Projects</label>
-                  <p className="mt-1 text-foreground">{selectedClient.projectsCount}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">AMC Status</label>
-                  <div className="mt-1">
-                    <span
-                      className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        selectedClient.amcStatus === "Active"
-                          ? "bg-green-500/10 text-green-500"
-                          : selectedClient.amcStatus === "Inactive"
-                          ? "bg-muted text-muted-foreground"
-                          : "bg-red-500/10 text-red-500"
-                      }`}
-                    >
-                      {selectedClient.amcStatus}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-end gap-2 pt-4 border-t border-border/50">
-                <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
-                  Close
-                </Button>
-                <Button
-                  onClick={() => {
-                    setIsViewDialogOpen(false);
-                    handleOpenEditDialog(selectedClient);
-                  }}
-                >
-                  Edit Client
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
 
       {/* Delete Confirmation Alert Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>

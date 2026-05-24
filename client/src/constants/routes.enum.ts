@@ -3,6 +3,7 @@ export enum AppRoute {
   DASHBOARD = "/",
   KANBAN = "/kanban",
   CLIENTS = "/clients",
+  CLIENT_DETAIL = "/clients/:id",
   ENQUIRIES = "/enquiries",
   ENQUIRY_DETAIL = "/enquiries/:id",
   QUOTATIONS = "/quotations",
@@ -24,4 +25,5 @@ export enum ApiRoute {
   AUTH_REFRESH = "/auth/refresh",
   // Client Routes
   CLIENTS = "/clients",
+  CLIENT_BY_ID = "/clients/:id",
 }

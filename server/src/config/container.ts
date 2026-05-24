@@ -14,6 +14,7 @@ import { CreateClientDto, UpdateClientDto } from "../dtos/client.dto";
 import { IClient } from "../interfaces/models/IClient";
 import { CreateClientUseCase } from "../usecases/clients/CreateClientUseCase";
 import { GetClientsUseCase } from "../usecases/clients/GetClientsUseCase";
+import { GetClientByIdUseCase } from "../usecases/clients/GetClientByIdUseCase";
 import { UpdateClientUseCase } from "../usecases/clients/UpdateClientUseCase";
 import { DeleteClientUseCase } from "../usecases/clients/DeleteClientUseCase";
 
@@ -27,5 +28,6 @@ container.registerSingleton<IUseCase<string, string>>("RefreshTokenUseCase", Ref
 
 container.registerSingleton<IUseCase<CreateClientDto, IClient>>("CreateClientUseCase", CreateClientUseCase);
 container.registerSingleton<IUseCase<GetClientsQuery, PaginatedClients>>("GetClientsUseCase", GetClientsUseCase);
+container.registerSingleton<IUseCase<string, IClient | null>>("GetClientByIdUseCase", GetClientByIdUseCase);
 container.registerSingleton<IUseCase<{ id: string; data: UpdateClientDto }, IClient>>("UpdateClientUseCase", UpdateClientUseCase);
 container.registerSingleton<IUseCase<string, boolean>>("DeleteClientUseCase", DeleteClientUseCase);

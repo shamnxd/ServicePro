@@ -13,6 +13,8 @@ export class ClientController {
     private _createClientUseCase?: IUseCase<CreateClientDto, IClient>,
     @inject("GetClientsUseCase")
     private _getClientsUseCase?: IUseCase<GetClientsQuery, PaginatedClients>,
+    @inject("GetClientByIdUseCase")
+    private _getClientByIdUseCase?: IUseCase<string, IClient | null>,
     @inject("UpdateClientUseCase")
     private _updateClientUseCase?: IUseCase<{ id: string; data: UpdateClientDto }, IClient>,
     @inject("DeleteClientUseCase")
@@ -48,6 +50,19 @@ export class ClientController {
         success: true,
         ...result
       });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const client = await this._getClientByIdUseCase!.execute(req.params.id);
+      if (!client) {
+        res.status(StatusCode.NOT_FOUND).json({ success: false, message: "Client not found" });
+        return;
+      }
+      res.status(StatusCode.OK).json({ success: true, data: client });
     } catch (error) {
       next(error);
     }

@@ -51,3 +51,8 @@ export async function deleteClientApi(id: string): Promise<{ success: boolean; m
   return await api.delete(`${ApiRoute.CLIENTS}/${id}`);
 }
 
+export async function getClientByIdApi(id: string): Promise<ClientResponse> {
+  return await api.get(`${ApiRoute.CLIENTS}/${id}`);
+}
+
+

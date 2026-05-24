@@ -5,7 +5,8 @@ export interface GetClientsQuery {
   search?: string;
   page?: number;
   limit?: number;
-  filter?: "all" | "active-amc" | "expired-amc";
+  filter?: "all" | "active-amc" | "expired-amc" | "active-complaints" | "active-enquiries";
+  companyNames?: string[];
 }
 
 export interface PaginatedClients {

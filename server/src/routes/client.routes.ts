@@ -12,6 +12,7 @@ router.use(requireAuth);
 
 router.post("/", validateDto(CreateClientSchema), controller.create);
 router.get("/", controller.getAll);
+router.get("/:id", controller.getById);
 router.put("/:id", validateDto(UpdateClientSchema), controller.update);
 router.delete("/:id", controller.delete);
 

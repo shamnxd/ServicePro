@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router";
 import { RootLayout } from "./layouts/RootLayout";
 import { Dashboard } from "./features/dashboard/Dashboard";
 import { Clients } from "./features/clients/Clients";
+import { ClientDetail } from "./features/clients/ClientDetail";
 import { Enquiries } from "./features/enquiries/Enquiries";
 import { EnquiryDetail } from "./features/enquiries/EnquiryDetail";
 import { Quotations } from "./features/quotations/Quotations";
@@ -35,6 +36,7 @@ export const router = createBrowserRouter([
       { index: true, element: <Dashboard /> },
       { path: AppRoute.KANBAN, element: <Kanban /> },
       { path: AppRoute.CLIENTS, element: <Clients /> },
+      { path: AppRoute.CLIENT_DETAIL, element: <ClientDetail /> },
       { path: AppRoute.ENQUIRIES, element: <Enquiries /> },
       { path: AppRoute.ENQUIRY_DETAIL, element: <EnquiryDetail /> },
       { path: AppRoute.QUOTATIONS, element: <Quotations /> },
