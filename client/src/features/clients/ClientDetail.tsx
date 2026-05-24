@@ -238,7 +238,7 @@ export function ClientDetail() {
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
-                className="h-full shrink-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5 px-5 text-sm font-semibold transition-all"
+                className="h-full shrink-0 rounded-none border-0 !border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5 data-[state=active]:shadow-none px-5 text-sm font-semibold transition-all"
               >
                 {tab.label}
               </TabsTrigger>
