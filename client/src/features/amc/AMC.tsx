@@ -21,7 +21,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Textarea } from "../../components/ui/textarea";
 
-const mockAMCContracts = [
+export const mockAMCContracts = [
   {
     id: 1,
     amcNo: "AMC-2026-001",
@@ -143,7 +143,7 @@ const mockAMCContracts = [
   },
 ];
 
-const mockScheduledVisits = [
+export const mockScheduledVisits = [
   {
     id: 1,
     amcNo: "AMC-2026-001",

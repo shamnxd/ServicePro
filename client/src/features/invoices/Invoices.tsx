@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "../../components/ui/select";
 
-const mockInvoices = [
+export const mockInvoices = [
   {
     id: 1,
     invoiceNo: "INV-2026-001",
