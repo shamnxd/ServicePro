@@ -10,16 +10,29 @@ interface AuthState {
   error: string | null;
 }
 
-const initialState: AuthState = {
-  user: null,
-  accessToken: null,
-  loading: true, // Stays true until restoreSession completes — prevents flash redirect to /login
-  error: null,
-};
+const ACCESS_TOKEN_KEY = "accessToken";
 
-/**
- * Helper to decode user payload claims securely from active JWT
- */
+function loadStoredToken(): string | null {
+  try {
+    return sessionStorage.getItem(ACCESS_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function saveStoredToken(token: string | null): void {
+  try {
+    if (token) {
+      sessionStorage.setItem(ACCESS_TOKEN_KEY, token);
+    } else {
+      sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+    }
+  } catch {
+    /* ignore storage errors */
+  }
+}
+
+/** Decode user payload claims from JWT */
 function decodeJwt(token: string): User | null {
   try {
     const base64Url = token.split(".")[1];
@@ -31,10 +44,19 @@ function decodeJwt(token: string): User | null {
         .join("")
     );
     return JSON.parse(jsonPayload) as User;
-  } catch (e) {
+  } catch {
     return null;
   }
 }
+
+const storedToken = loadStoredToken();
+
+const initialState: AuthState = {
+  user: storedToken ? decodeJwt(storedToken) : null,
+  accessToken: storedToken,
+  loading: true, // Stays true until restoreSession completes — prevents flash redirect to /login
+  error: null,
+};
 
 // Thunk: Authenticate Dispatcher Credentials
 export const loginUser = createAsyncThunk(
@@ -96,8 +118,12 @@ const authSlice = createSlice({
     setCredentials: (state, action: PayloadAction<{ user?: User; accessToken: string | null }>) => {
       if (action.payload.user) {
         state.user = action.payload.user;
+      } else if (action.payload.accessToken) {
+        const decoded = decodeJwt(action.payload.accessToken);
+        if (decoded) state.user = decoded;
       }
       state.accessToken = action.payload.accessToken;
+      saveStoredToken(action.payload.accessToken);
       state.error = null;
     },
     setError: (state, action: PayloadAction<string | null>) => {
@@ -107,6 +133,7 @@ const authSlice = createSlice({
       state.user = null;
       state.accessToken = null;
       state.error = null;
+      saveStoredToken(null);
     },
   },
 });

@@ -1,5 +1,29 @@
-import axios from "axios";
+import axios, { AxiosHeaders } from "axios";
 import { setCredentials, logOut } from "../store/slices/authSlice";
+import { ApiRoute } from "../constants/routes.enum";
+
+const ACCESS_TOKEN_KEY = "accessToken";
+
+function getAccessToken(store: { getState: () => { auth: { accessToken: string | null } } }): string | null {
+  const fromStore = store.getState().auth.accessToken;
+  if (fromStore) return fromStore;
+  try {
+    return sessionStorage.getItem(ACCESS_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function attachBearerToken(config: import("axios").InternalAxRequestConfig, token: string) {
+  if (!config.headers) {
+    config.headers = new AxiosHeaders();
+  }
+  if (config.headers instanceof AxiosHeaders) {
+    config.headers.set("Authorization", `Bearer ${token}`);
+  } else {
+    (config.headers as Record<string, string>).Authorization = `Bearer ${token}`;
+  }
+}
 
 export const api = axios.create({
   baseURL: "http://localhost:5000/api/v1",
@@ -10,12 +34,12 @@ export const api = axios.create({
  * Configure request & response interceptors dynamically with the Redux Store
  */
 export const setupInterceptors = (store: any) => {
-  // Request Interceptor: Automatically attach in-memory Bearer token
+  // Request Interceptor: Automatically attach Bearer token (Redux + sessionStorage)
   api.interceptors.request.use(
     (config) => {
-      const token = store.getState().auth.accessToken;
-      if (token && config.headers) {
-        config.headers.Authorization = `Bearer ${token}`;
+      const token = getAccessToken(store);
+      if (token) {
+        attachBearerToken(config, token);
       }
       return config;
     },
@@ -27,32 +51,32 @@ export const setupInterceptors = (store: any) => {
     (response) => response.data,
     async (error) => {
       const originalRequest = error.config;
-      
+
       if (
         error.response?.status === 401 &&
+        originalRequest &&
         !originalRequest._retry &&
-        !originalRequest.url.includes("/auth/login") &&
-        !originalRequest.url.includes("/auth/refresh")
+        !originalRequest.url?.includes("/auth/login") &&
+        !originalRequest.url?.includes("/auth/refresh")
       ) {
         originalRequest._retry = true;
         try {
-          // Request new access token from cookie-secured refresh endpoint
-          const refreshResponse = await axios.post(
-            "http://localhost:5000/api/v1/auth/refresh",
-            {},
-            { withCredentials: true }
-          );
-          
-          const newAccessToken = refreshResponse.data.accessToken;
-          
-          // Save fresh token to Redux Store
+          const refreshResponse = await api.post(ApiRoute.AUTH_REFRESH, {}, {
+            _retry: true,
+          } as import("axios").AxiosRequestConfig & { _retry?: boolean });
+
+          const newAccessToken =
+            refreshResponse?.accessToken ??
+            (refreshResponse as { data?: { accessToken?: string } })?.data?.accessToken;
+
+          if (!newAccessToken) {
+            throw new Error("Refresh response missing accessToken");
+          }
+
           store.dispatch(setCredentials({ accessToken: newAccessToken }));
-          
-          // Retry the original request
-          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          attachBearerToken(originalRequest, newAccessToken);
           return api(originalRequest);
         } catch (refreshError) {
-          // If refresh cookie expired/invalid, clear session and log user out
           store.dispatch(logOut());
           return Promise.reject(refreshError);
         }
