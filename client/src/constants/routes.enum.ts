@@ -17,6 +17,7 @@ export enum AppRoute {
   AMC_DETAIL = "/amc/:id",
   AMC_PLANS = "/amc-plans",
   STAFF = "/staff",
+  STAFF_DETAIL = "/staff/:id",
   INVOICES = "/invoices",
   REPORTS = "/reports",
 }
@@ -33,5 +34,6 @@ export enum ApiRoute {
   COMPLAINTS = "/complaints",
   // SMR Routes
   SMRS = "/smrs",
+  STAFF = "/staff",
 }
 

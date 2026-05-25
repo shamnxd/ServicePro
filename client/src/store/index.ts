@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import authReducer from "./slices/authSlice";
+import authReducer, { setCredentials, logOut } from "./slices/authSlice";
 import { setupInterceptors } from "../api/index";
 
 export const store = configureStore({
@@ -8,8 +8,10 @@ export const store = configureStore({
   },
 });
 
-// Inject the active store into our API configuration layer to enable robust auto-refresh interceptors
-setupInterceptors(store);
+setupInterceptors(store, {
+  setAccessToken: (token) => store.dispatch(setCredentials({ accessToken: token })),
+  logout: () => store.dispatch(logOut()),
+});
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

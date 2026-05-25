@@ -8,13 +8,13 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, loading } = useAppSelector((state) => state.auth);
+  const { user, accessToken, loading } = useAppSelector((state) => state.auth);
 
   if (loading) {
     return <LoadingScreen />;
   }
 
-  if (!user) {
+  if (!user || !accessToken) {
     return <Navigate to={AppRoute.LOGIN} replace />;
   }
 

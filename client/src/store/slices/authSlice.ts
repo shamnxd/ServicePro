@@ -2,34 +2,13 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { loginApi, logoutApi, refreshApi } from "../../api/auth.api";
 import { User } from "../../interfaces/user.interface";
 import { LoginRequest } from "../../interfaces/auth.interface";
+import { readAccessToken, writeAccessToken } from "../../utils/auth-storage";
 
 interface AuthState {
   user: User | null;
   accessToken: string | null;
   loading: boolean;
   error: string | null;
-}
-
-const ACCESS_TOKEN_KEY = "accessToken";
-
-function loadStoredToken(): string | null {
-  try {
-    return sessionStorage.getItem(ACCESS_TOKEN_KEY);
-  } catch {
-    return null;
-  }
-}
-
-function saveStoredToken(token: string | null): void {
-  try {
-    if (token) {
-      sessionStorage.setItem(ACCESS_TOKEN_KEY, token);
-    } else {
-      sessionStorage.removeItem(ACCESS_TOKEN_KEY);
-    }
-  } catch {
-    /* ignore storage errors */
-  }
 }
 
 /** Decode user payload claims from JWT */
@@ -49,7 +28,7 @@ function decodeJwt(token: string): User | null {
   }
 }
 
-const storedToken = loadStoredToken();
+const storedToken = readAccessToken();
 
 const initialState: AuthState = {
   user: storedToken ? decodeJwt(storedToken) : null,
@@ -64,6 +43,9 @@ export const loginUser = createAsyncThunk(
   async (credentials: LoginRequest, { dispatch, rejectWithValue }) => {
     try {
       const response = await loginApi(credentials);
+      if (!response?.accessToken) {
+        throw new Error("Login response missing access token");
+      }
       dispatch(setCredentials({ user: response.user, accessToken: response.accessToken }));
       return response.user;
     } catch (err: any) {
@@ -123,7 +105,7 @@ const authSlice = createSlice({
         if (decoded) state.user = decoded;
       }
       state.accessToken = action.payload.accessToken;
-      saveStoredToken(action.payload.accessToken);
+      writeAccessToken(action.payload.accessToken);
       state.error = null;
     },
     setError: (state, action: PayloadAction<string | null>) => {
@@ -133,7 +115,7 @@ const authSlice = createSlice({
       state.user = null;
       state.accessToken = null;
       state.error = null;
-      saveStoredToken(null);
+      writeAccessToken(null);
     },
   },
 });

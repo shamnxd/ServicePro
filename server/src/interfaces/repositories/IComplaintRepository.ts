@@ -1,5 +1,6 @@
 import { IBaseRepository } from "./IBaseRepository";
 import { IComplaint } from "../models/IComplaint";
+import { StaffWorkHistoryItem } from "../models/IStaff";
 
 export interface GetComplaintsQuery {
   search?: string;
@@ -20,4 +21,5 @@ export interface PaginatedComplaints {
 
 export interface IComplaintRepository extends IBaseRepository<IComplaint> {
   findPaginated(query: GetComplaintsQuery): Promise<PaginatedComplaints>;
+  findWorkHistoryByStaffId(staffId: string, staffName?: string): Promise<StaffWorkHistoryItem[]>;
 }

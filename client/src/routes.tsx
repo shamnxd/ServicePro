@@ -15,6 +15,7 @@ import { AMC } from "./features/amc/AMC";
 import { AMCDetail } from "./features/amc/AMCDetail";
 import { AMCPlans } from "./features/amc/AMCPlans";
 import { Staff } from "./features/staff/Staff";
+import { StaffDetail } from "./features/staff/StaffDetail";
 import { Invoices } from "./features/invoices/Invoices";
 import { Reports } from "./features/reports/Reports";
 import { Kanban } from "./features/kanban/Kanban";
@@ -52,6 +53,7 @@ export const router = createBrowserRouter([
       { path: AppRoute.AMC_DETAIL, element: <AMCDetail /> },
       { path: AppRoute.AMC_PLANS, element: <AMCPlans /> },
       { path: AppRoute.STAFF, element: <Staff /> },
+      { path: AppRoute.STAFF_DETAIL, element: <StaffDetail /> },
       { path: AppRoute.INVOICES, element: <Invoices /> },
       { path: AppRoute.REPORTS, element: <Reports /> },
     ],

@@ -456,6 +456,7 @@ export function Clients() {
             columns={columns}
             isLoading={isLoading}
             rowKey={(client) => client.id || client.companyName}
+            rowNumberStart={startItem || 1}
             emptyMessage={
               <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
                 <p className="text-sm">No clients found</p>

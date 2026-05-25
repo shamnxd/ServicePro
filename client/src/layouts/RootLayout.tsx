@@ -21,6 +21,12 @@ import {
   Sun,
   Moon,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { logoutUser } from "../store/slices/authSlice";
 
@@ -191,21 +197,7 @@ export function RootLayout() {
             })}
           </nav>
 
-          {/* User section */}
           <div className="border-t border-sidebar-border p-4">
-            <div className="flex items-center gap-3 mb-3 px-2 py-2 bg-muted/30 rounded-xl">
-              <div className="h-10 w-10 rounded-full overflow-hidden ring-2 ring-primary/20 shadow-lg shrink-0">
-                <img
-                  src={`https://i.pravatar.cc/150?u=${user?.email ?? "default"}`}
-                  alt={user?.username ?? "User"}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <div className="flex-1 overflow-hidden">
-                <p className="text-sm font-semibold text-foreground truncate">{user?.username ?? "—"}</p>
-                <p className="text-xs text-muted-foreground truncate">{user?.email ?? "—"}</p>
-              </div>
-            </div>
             <button
               onClick={() => dispatch(logoutUser())}
               className="flex items-center gap-2 w-full px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-red-50 hover:text-red-600 rounded-xl transition-colors dark:hover:bg-red-950/40 dark:hover:text-red-400"
@@ -236,9 +228,6 @@ export function RootLayout() {
                     (item.href && item.href !== "/" && location.pathname.startsWith(item.href))
                 )?.name || "Dashboard"}
               </h2>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Welcome back, Admin
-              </p>
             </div>
           </div>
 
@@ -361,13 +350,48 @@ export function RootLayout() {
               )}
             </div>
 
-            <div className="ml-2 h-10 w-10 rounded-full overflow-hidden ring-2 ring-primary/20 cursor-pointer hover:ring-primary/40 transition-all shadow-md shrink-0">
-              <img
-                src={`https://i.pravatar.cc/150?u=dd`}
-                alt="Admin"
-                className="h-full w-full object-cover"
-              />
-            </div>
+            {/* Admin profile */}
+            {user && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="ml-1 flex items-center gap-2.5 pl-3 border-l border-border hover:bg-muted/50 rounded-xl py-1.5 pr-2 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                  >
+                    <div className="h-9 w-9 rounded-full overflow-hidden ring-2 ring-primary/20 shadow-sm shrink-0">
+                      <img
+                        src={`https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(user.username || user.email)}&backgroundColor=be185d&fontSize=40&fontWeight=700`}
+                        alt={user.username}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <div className="hidden sm:block text-left min-w-0 max-w-[140px] lg:max-w-[180px]">
+                      <p className="text-sm font-semibold text-foreground truncate leading-tight">
+                        {user.username}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground truncate">{user.email}</p>
+                    </div>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0 hidden sm:block" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <div className="px-3 py-2.5 border-b border-border">
+                    <p className="text-sm font-semibold text-foreground truncate">{user.username}</p>
+                    <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                  </div>
+                  <DropdownMenuItem
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      dispatch(logoutUser());
+                    }}
+                    className="cursor-pointer text-destructive focus:text-destructive"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </header>
 

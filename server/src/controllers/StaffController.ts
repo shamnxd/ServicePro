@@ -1,0 +1,98 @@
+import { Request, Response, NextFunction } from "express";
+import { inject, autoInjectable } from "tsyringe";
+import { IUseCase } from "../interfaces/usecases/IUseCase";
+import { IStaff, StaffWorkHistoryItem } from "../interfaces/models/IStaff";
+import { CreateStaffDto, UpdateStaffDto } from "../dtos/staff.dto";
+import { GetStaffQuery, PaginatedStaff } from "../interfaces/repositories/IStaffRepository";
+import { StatusCode } from "../constants/statusCodes";
+
+@autoInjectable()
+export class StaffController {
+  constructor(
+    @inject("CreateStaffUseCase")
+    private _createStaffUseCase?: IUseCase<CreateStaffDto, IStaff>,
+    @inject("GetStaffUseCase")
+    private _getStaffUseCase?: IUseCase<GetStaffQuery, PaginatedStaff>,
+    @inject("GetStaffByIdUseCase")
+    private _getStaffByIdUseCase?: IUseCase<string, IStaff | null>,
+    @inject("UpdateStaffUseCase")
+    private _updateStaffUseCase?: IUseCase<{ id: string; data: UpdateStaffDto }, IStaff | null>,
+    @inject("DeleteStaffUseCase")
+    private _deleteStaffUseCase?: IUseCase<string, boolean>,
+    @inject("GetStaffWorkHistoryUseCase")
+    private _getStaffWorkHistoryUseCase?: IUseCase<string, StaffWorkHistoryItem[]>
+  ) {}
+
+  public create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const staff = await this._createStaffUseCase!.execute(req.body as CreateStaffDto);
+      res.status(StatusCode.CREATED).json({ success: true, data: staff });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getAll = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const query: GetStaffQuery = {
+        search: req.query.search as string | undefined,
+        page: req.query.page ? parseInt(req.query.page as string, 10) : 1,
+        limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 10,
+        status: req.query.status as string | undefined,
+        employmentType: req.query.employmentType as string | undefined,
+        activeOnly: req.query.activeOnly !== "false"
+      };
+      const result = await this._getStaffUseCase!.execute(query);
+      res.status(StatusCode.OK).json({ success: true, ...result });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const staff = await this._getStaffByIdUseCase!.execute(req.params.id);
+      if (!staff) {
+        res.status(StatusCode.NOT_FOUND).json({ success: false, message: "Staff not found" });
+        return;
+      }
+      res.status(StatusCode.OK).json({ success: true, data: staff });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getWorkHistory = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const history = await this._getStaffWorkHistoryUseCase!.execute(req.params.id);
+      res.status(StatusCode.OK).json({ success: true, data: history });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const staff = await this._updateStaffUseCase!.execute({
+        id: req.params.id,
+        data: req.body as UpdateStaffDto
+      });
+      if (!staff) {
+        res.status(StatusCode.NOT_FOUND).json({ success: false, message: "Staff not found" });
+        return;
+      }
+      res.status(StatusCode.OK).json({ success: true, data: staff });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public delete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      await this._deleteStaffUseCase!.execute(req.params.id);
+      res.status(StatusCode.OK).json({ success: true, message: "Staff deleted successfully" });
+    } catch (error) {
+      next(error);
+    }
+  };
+}

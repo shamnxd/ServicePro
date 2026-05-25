@@ -353,6 +353,7 @@ export function ClientComplaints() {
             columns={columns}
             isLoading={isLoading}
             rowKey={(c) => c.id || (c as any)._id || c.complaintNo}
+            rowNumberStart={startItem || 1}
             onRowClick={(c) => navigate(`/complaints/${c.id || (c as any)._id}`)}
             emptyMessage={
               <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">

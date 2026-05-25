@@ -121,7 +121,7 @@ export function ComplaintDetail() {
 
   const openReassign = () => {
     if (complaint) {
-      setSelectedTechs(complaint.assignedTo || []);
+      setSelectedTechs(complaint.assignedStaffIds?.length ? complaint.assignedStaffIds : []);
       setIsReassignOpen(true);
     }
   };
@@ -129,7 +129,7 @@ export function ComplaintDetail() {
   const handleSaveReassign = async () => {
     if (!complaint || !id) return;
     try {
-      const res = await updateComplaintApi(id, { assignedTo: selectedTechs });
+      const res = await updateComplaintApi(id, { assignedStaffIds: selectedTechs });
       if (res.success) {
         setComplaint(res.data);
         setIsReassignOpen(false);
@@ -244,7 +244,7 @@ export function ComplaintDetail() {
 
           {/* Tabs inside Header Card */}
           <div className="px-4 sm:px-6">
-            <TabsList className="w-full h-12 bg-transparent p-0 rounded overflow-x-auto flex-nowrap justify-start gap-6 lg:gap-8">
+            <TabsList className="w-fit h-12 bg-transparent p-0 rounded inline-flex flex-nowrap justify-start gap-6 lg:gap-8">
               {[
                 { value: "details", label: "Details" },
                 { value: "service", label: "SM Report" },
@@ -253,7 +253,7 @@ export function ComplaintDetail() {
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
-                  className="h-full shrink-0 rounded border-0 !border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary px-4 text-xs font-bold uppercase tracking-wider transition-all hover:text-primary"
+                  className="flex-none w-auto h-full shrink-0 rounded border-0 !border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary px-4 text-xs font-bold uppercase tracking-wider transition-all hover:text-primary"
                 >
                   {tab.label}
                 </TabsTrigger>
@@ -296,18 +296,18 @@ export function ComplaintDetail() {
                             Reassign
                           </Button>
                         </div>
-                        {(!complaint.assignedTo || complaint.assignedTo.length === 0) ? (
+                        {(!complaint.assignedTo?.length && !complaint.assignedStaffIds?.length) ? (
                           <div className="mt-1 p-2.5 rounded-lg border border-dashed border-border/60 bg-muted/10 text-center">
-                            <p className="text-xs text-muted-foreground italic font-medium">No technicians assigned</p>
+                            <p className="text-xs text-muted-foreground italic font-medium">No staff assigned</p>
                           </div>
                         ) : (
                           <div className="flex flex-wrap gap-2 mt-1">
-                            {complaint.assignedTo.map((tech) => (
-                              <div key={tech} className="flex items-center gap-1.5 bg-pink-500/5 border border-pink-500/10 px-2 py-1 rounded-full text-xs font-semibold text-foreground">
+                            {(complaint.assignedTo ?? []).map((name) => (
+                              <div key={name} className="flex items-center gap-1.5 bg-pink-500/5 border border-pink-500/10 px-2 py-1 rounded-full text-xs font-semibold text-foreground">
                                 <div className="h-5 w-5 rounded-full bg-pink-700 text-white font-extrabold flex items-center justify-center text-[9px] shrink-0">
-                                  {tech.charAt(0)}
+                                  {name.charAt(0)}
                                 </div>
-                                <span>{tech}</span>
+                                <span>{name}</span>
                               </div>
                             ))}
                           </div>
@@ -638,6 +638,7 @@ export function ComplaintDetail() {
               selected={selectedTechs}
               onChange={setSelectedTechs}
               label="Assigned Staff"
+              placement="top"
             />
             <div className="flex justify-end gap-2 pt-3 border-t border-border/50">
               <Button variant="outline" size="sm" onClick={() => setIsReassignOpen(false)} className="font-bold">

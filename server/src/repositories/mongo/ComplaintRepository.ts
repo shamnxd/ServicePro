@@ -2,6 +2,7 @@ import { injectable } from "tsyringe";
 import { BaseRepository } from "./BaseRepository";
 import { IComplaintRepository, GetComplaintsQuery, PaginatedComplaints } from "../../interfaces/repositories/IComplaintRepository";
 import { IComplaint } from "../../interfaces/models/IComplaint";
+import { StaffWorkHistoryItem } from "../../interfaces/models/IStaff";
 import { ComplaintModel, IComplaintDocument } from "../../models/Complaint";
 
 @injectable()
@@ -24,6 +25,7 @@ export class ComplaintRepository extends BaseRepository<IComplaintDocument, ICom
       priority: doc.priority,
       status: doc.status,
       assignedTo: Array.isArray(doc.assignedTo) ? doc.assignedTo : (doc.assignedTo ? [doc.assignedTo] : []),
+      assignedStaffIds: Array.isArray(doc.assignedStaffIds) ? doc.assignedStaffIds : [],
       location: doc.location,
       expectedResolution: doc.expectedResolution,
       remarks: doc.remarks.map(r => ({
@@ -92,5 +94,27 @@ export class ComplaintRepository extends BaseRepository<IComplaintDocument, ICom
       limit,
       totalPages: Math.ceil(total / limit)
     };
+  }
+
+  public async findWorkHistoryByStaffId(staffId: string, staffName?: string): Promise<StaffWorkHistoryItem[]> {
+    const orConditions: Record<string, unknown>[] = [{ assignedStaffIds: staffId }];
+    if (staffName) {
+      orConditions.push({ assignedTo: staffName });
+    }
+    const docs = await this.model
+      .find({ $or: orConditions })
+      .sort({ date: -1 })
+      .exec();
+
+    return docs.map((doc) => ({
+      complaintId: doc._id.toString(),
+      complaintNo: doc.complaintNo,
+      clientName: doc.clientName,
+      issue: doc.issue,
+      status: doc.status,
+      priority: doc.priority,
+      date: doc.date,
+      location: doc.location
+    }));
   }
 }

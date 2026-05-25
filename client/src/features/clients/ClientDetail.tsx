@@ -228,7 +228,7 @@ export function ClientDetail() {
 
           {/* Tabs inside Header Card */}
           <div className="px-4 sm:px-6">
-            <TabsList className="w-full h-12 bg-transparent p-0 rounded overflow-x-auto flex-nowrap justify-start gap-6 lg:gap-8">
+            <TabsList className="w-fit h-12 bg-transparent p-0 rounded inline-flex flex-nowrap justify-start gap-6 lg:gap-8">
               {[
                 { value: "overview", label: "Overview" },
                 { value: "amc", label: "AMC Details" },
@@ -238,7 +238,7 @@ export function ClientDetail() {
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
-                  className="h-full shrink-0 rounded border-0 !border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary px-4 text-xs font-bold uppercase tracking-wider transition-all hover:text-primary"
+                  className="flex-none w-auto h-full shrink-0 rounded border-0 !border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary px-4 text-xs font-bold uppercase tracking-wider transition-all hover:text-primary"
                 >
                   {tab.label}
                 </TabsTrigger>

@@ -17,6 +17,7 @@ export interface Complaint {
   priority: "Critical" | "High" | "Medium" | "Low";
   status: "Pending" | "In Progress" | "Resolved";
   assignedTo?: string[];
+  assignedStaffIds?: string[];
   location: string;
   expectedResolution: string;
   remarks: Remark[];

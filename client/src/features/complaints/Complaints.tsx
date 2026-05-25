@@ -212,7 +212,7 @@ export function Complaints() {
         description,
         priority: priority as any,
         status: "Pending" as any,
-        assignedTo: assignedTechnicians,
+        assignedStaffIds: assignedTechnicians,
         location,
         expectedResolution: new Date(expectedResolution).toISOString(),
         remarks: [],
@@ -497,6 +497,7 @@ export function Complaints() {
                     selected={assignedTechnicians}
                     onChange={setAssignedTechnicians}
                     label="Assign Staff"
+                    placement="top"
                   />
                 </div>
 
@@ -613,6 +614,7 @@ export function Complaints() {
             columns={columns}
             isLoading={isLoading}
             rowKey={(c) => c.id || (c as any)._id || c.complaintNo}
+            rowNumberStart={startItem || 1}
             onRowClick={(c) => navigate(`/complaints/${c.id || (c as any)._id}`)}
             emptyMessage={
               <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">

@@ -38,6 +38,7 @@ const complaintSchema = new Schema<IComplaintDocument>(
       default: "Pending"
     },
     assignedTo: { type: [String], default: [] },
+    assignedStaffIds: { type: [String], default: [] },
     location: { type: String, required: true, trim: true },
     expectedResolution: { type: Date, required: true },
     remarks: { type: [remarkSchema], default: [] }

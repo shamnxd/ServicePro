@@ -10,6 +10,8 @@ import { IComplaintRepository, GetComplaintsQuery, PaginatedComplaints } from ".
 import { ComplaintRepository } from "../repositories/mongo/ComplaintRepository";
 import { ISMRRepository } from "../interfaces/repositories/ISMRRepository";
 import { SMRRepository } from "../repositories/mongo/SMRRepository";
+import { IStaffRepository } from "../interfaces/repositories/IStaffRepository";
+import { StaffRepository } from "../repositories/mongo/StaffRepository";
 
 import { IUseCase } from "../interfaces/usecases/IUseCase";
 import { LoginRequestDto, LoginResponseDto } from "../dtos/auth.dto";
@@ -42,11 +44,23 @@ import { GetSMRsByComplaintUseCase } from "../usecases/smrs/GetSMRsByComplaintUs
 import { UpdateSMRUseCase } from "../usecases/smrs/UpdateSMRUseCase";
 import { ApproveSMRUseCase, SMRApprovalInput } from "../usecases/smrs/ApproveSMRUseCase";
 
+import { IStaff } from "../interfaces/models/IStaff";
+import { StaffWorkHistoryItem } from "../interfaces/models/IStaff";
+import { CreateStaffDto, UpdateStaffDto } from "../dtos/staff.dto";
+import { GetStaffQuery, PaginatedStaff } from "../interfaces/repositories/IStaffRepository";
+import { CreateStaffUseCase } from "../usecases/staff/CreateStaffUseCase";
+import { GetStaffUseCase } from "../usecases/staff/GetStaffUseCase";
+import { GetStaffByIdUseCase } from "../usecases/staff/GetStaffByIdUseCase";
+import { UpdateStaffUseCase } from "../usecases/staff/UpdateStaffUseCase";
+import { DeleteStaffUseCase } from "../usecases/staff/DeleteStaffUseCase";
+import { GetStaffWorkHistoryUseCase } from "../usecases/staff/GetStaffWorkHistoryUseCase";
+
 // Register repositories
 container.registerSingleton<IUserRepository>("UserRepository", UserRepository);
 container.registerSingleton<IClientRepository>("ClientRepository", ClientRepository);
 container.registerSingleton<IComplaintRepository>("ComplaintRepository", ComplaintRepository);
 container.registerSingleton<ISMRRepository>("SMRRepository", SMRRepository);
+container.registerSingleton<IStaffRepository>("StaffRepository", StaffRepository);
 
 // Register use case abstractions
 container.registerSingleton<IUseCase<LoginRequestDto, LoginResponseDto>>("LoginUseCase", LoginUseCase);
@@ -71,4 +85,11 @@ container.registerSingleton<IUseCase<string, ISMR | null>>("GetSMRByIdUseCase", 
 container.registerSingleton<IUseCase<string, ISMR[]>>("GetSMRsByComplaintUseCase", GetSMRsByComplaintUseCase);
 container.registerSingleton<IUseCase<{ id: string; data: UpdateSMRDto }, ISMR | null>>("UpdateSMRUseCase", UpdateSMRUseCase);
 container.registerSingleton<IUseCase<SMRApprovalInput, ISMR | null>>("ApproveSMRUseCase", ApproveSMRUseCase);
+
+container.registerSingleton<IUseCase<CreateStaffDto, IStaff>>("CreateStaffUseCase", CreateStaffUseCase);
+container.registerSingleton<IUseCase<GetStaffQuery, PaginatedStaff>>("GetStaffUseCase", GetStaffUseCase);
+container.registerSingleton<IUseCase<string, IStaff | null>>("GetStaffByIdUseCase", GetStaffByIdUseCase);
+container.registerSingleton<IUseCase<{ id: string; data: UpdateStaffDto }, IStaff | null>>("UpdateStaffUseCase", UpdateStaffUseCase);
+container.registerSingleton<IUseCase<string, boolean>>("DeleteStaffUseCase", DeleteStaffUseCase);
+container.registerSingleton<IUseCase<string, StaffWorkHistoryItem[]>>("GetStaffWorkHistoryUseCase", GetStaffWorkHistoryUseCase);
 

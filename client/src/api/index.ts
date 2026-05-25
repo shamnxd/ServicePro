@@ -1,17 +1,21 @@
 import axios, { AxiosHeaders } from "axios";
-import { setCredentials, logOut } from "../store/slices/authSlice";
 import { ApiRoute } from "../constants/routes.enum";
+import { readAccessToken, writeAccessToken } from "../utils/auth-storage";
 
-const ACCESS_TOKEN_KEY = "accessToken";
+type AuthCallbacks = {
+  setAccessToken: (token: string) => void;
+  logout: () => void;
+};
 
-function getAccessToken(store: { getState: () => { auth: { accessToken: string | null } } }): string | null {
-  const fromStore = store.getState().auth.accessToken;
-  if (fromStore) return fromStore;
-  try {
-    return sessionStorage.getItem(ACCESS_TOKEN_KEY);
-  } catch {
-    return null;
-  }
+type StoreLike = {
+  getState: () => { auth: { accessToken: string | null } };
+};
+
+function resolveAccessToken(store?: StoreLike | null): string | null {
+  const fromStorage = readAccessToken();
+  if (fromStorage) return fromStorage;
+  const fromStore = store?.getState().auth.accessToken;
+  return fromStore && fromStore.trim() ? fromStore : null;
 }
 
 function attachBearerToken(config: import("axios").InternalAxRequestConfig, token: string) {
@@ -27,17 +31,21 @@ function attachBearerToken(config: import("axios").InternalAxRequestConfig, toke
 
 export const api = axios.create({
   baseURL: "http://localhost:5000/api/v1",
-  withCredentials: true, // Transmit HTTP-only cookies (refresh token)
+  withCredentials: true,
 });
 
+let authCallbacks: AuthCallbacks | null = null;
+
 /**
- * Configure request & response interceptors dynamically with the Redux Store
+ * Wire interceptors after the Redux store exists. Callbacks avoid importing authSlice here
+ * (circular dependency: authSlice → auth.api → index.ts).
  */
-export const setupInterceptors = (store: any) => {
-  // Request Interceptor: Automatically attach Bearer token (Redux + sessionStorage)
+export const setupInterceptors = (store: StoreLike, callbacks: AuthCallbacks) => {
+  authCallbacks = callbacks;
+
   api.interceptors.request.use(
     (config) => {
-      const token = getAccessToken(store);
+      const token = resolveAccessToken(store);
       if (token) {
         attachBearerToken(config, token);
       }
@@ -46,7 +54,6 @@ export const setupInterceptors = (store: any) => {
     (error) => Promise.reject(error)
   );
 
-  // Response Interceptor: Self-healing token refresh logic on 401 Unauthorized
   api.interceptors.response.use(
     (response) => response.data,
     async (error) => {
@@ -73,11 +80,13 @@ export const setupInterceptors = (store: any) => {
             throw new Error("Refresh response missing accessToken");
           }
 
-          store.dispatch(setCredentials({ accessToken: newAccessToken }));
+          writeAccessToken(newAccessToken);
+          authCallbacks?.setAccessToken(newAccessToken);
           attachBearerToken(originalRequest, newAccessToken);
           return api(originalRequest);
         } catch (refreshError) {
-          store.dispatch(logOut());
+          writeAccessToken(null);
+          authCallbacks?.logout();
           return Promise.reject(refreshError);
         }
       }

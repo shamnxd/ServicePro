@@ -89,10 +89,10 @@ export function EnquiryDetail() {
                   </div>
                 </div>
                 <div className="px-4 lg:px-5">
-                  <TabsList className="h-12 bg-transparent p-0 gap-8">
+                  <TabsList className="w-fit h-12 bg-transparent p-0 rounded inline-flex flex-nowrap justify-start gap-6 lg:gap-8">
                     <TabsTrigger
                       value="details"
-                      className="h-full rounded-md !border-b-2 border-0 border-transparent data-[state=active]:border-pink-600 data-[state=active]:text-pink-700 data-[state=active]:bg-pink-50/50 data-[state=active]:shadow-none px-4 text-sm font-bold transition-all"
+                      className="flex-none w-auto shrink-0 h-full rounded-md !border-b-2 border-0 border-transparent data-[state=active]:border-pink-600 data-[state=active]:text-pink-700 data-[state=active]:bg-pink-50/50 data-[state=active]:shadow-none px-4 text-sm font-bold transition-all"
                     >
                       Enquiry Details
                     </TabsTrigger>

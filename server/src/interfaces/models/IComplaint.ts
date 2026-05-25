@@ -17,6 +17,7 @@ export interface IComplaint {
   priority: "Critical" | "High" | "Medium" | "Low";
   status: "Pending" | "In Progress" | "Resolved";
   assignedTo?: string[];
+  assignedStaffIds?: string[];
   location: string;
   expectedResolution: Date;
   remarks: IRemark[];
