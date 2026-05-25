@@ -6,6 +6,8 @@ import cookieParser from "cookie-parser";
 import { env } from "./config/env";
 import { authRouter } from "./routes/auth.routes";
 import { clientRouter } from "./routes/client.routes";
+import { complaintRouter } from "./routes/complaint.routes";
+import { smrRouter } from "./routes/smr.routes";
 import { errorHandler } from "./middleware/error.middleware";
 
 const app = express();
@@ -26,8 +28,11 @@ app.get("/health", (req, res) => {
 // Modular Routes
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/clients", clientRouter);
+app.use("/api/v1/complaints", complaintRouter);
+app.use("/api/v1/smrs", smrRouter);
 
 // Centralized error handler (must be registered last)
 app.use(errorHandler);
 
 export default app;
+

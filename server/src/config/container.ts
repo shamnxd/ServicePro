@@ -5,6 +5,12 @@ import { UserRepository } from "../repositories/mongo/UserRepository";
 import { IClientRepository, GetClientsQuery, PaginatedClients } from "../interfaces/repositories/IClientRepository";
 import { ClientRepository } from "../repositories/mongo/ClientRepository";
 
+// Complaints & SMR Repositories
+import { IComplaintRepository, GetComplaintsQuery, PaginatedComplaints } from "../interfaces/repositories/IComplaintRepository";
+import { ComplaintRepository } from "../repositories/mongo/ComplaintRepository";
+import { ISMRRepository } from "../interfaces/repositories/ISMRRepository";
+import { SMRRepository } from "../repositories/mongo/SMRRepository";
+
 import { IUseCase } from "../interfaces/usecases/IUseCase";
 import { LoginRequestDto, LoginResponseDto } from "../dtos/auth.dto";
 import { LoginUseCase } from "../usecases/auth/LoginUseCase";
@@ -18,9 +24,29 @@ import { GetClientByIdUseCase } from "../usecases/clients/GetClientByIdUseCase";
 import { UpdateClientUseCase } from "../usecases/clients/UpdateClientUseCase";
 import { DeleteClientUseCase } from "../usecases/clients/DeleteClientUseCase";
 
+// Complaints Use Cases
+import { IComplaint } from "../interfaces/models/IComplaint";
+import { CreateComplaintDto, UpdateComplaintDto } from "../dtos/complaint.dto";
+import { CreateComplaintUseCase } from "../usecases/complaints/CreateComplaintUseCase";
+import { GetComplaintsUseCase } from "../usecases/complaints/GetComplaintsUseCase";
+import { GetComplaintByIdUseCase } from "../usecases/complaints/GetComplaintByIdUseCase";
+import { UpdateComplaintUseCase } from "../usecases/complaints/UpdateComplaintUseCase";
+import { DeleteComplaintUseCase } from "../usecases/complaints/DeleteComplaintUseCase";
+
+// SMR Use Cases
+import { ISMR } from "../interfaces/models/ISMR";
+import { CreateSMRDto, UpdateSMRDto } from "../dtos/smr.dto";
+import { CreateSMRUseCase } from "../usecases/smrs/CreateSMRUseCase";
+import { GetSMRByIdUseCase } from "../usecases/smrs/GetSMRByIdUseCase";
+import { GetSMRsByComplaintUseCase } from "../usecases/smrs/GetSMRsByComplaintUseCase";
+import { UpdateSMRUseCase } from "../usecases/smrs/UpdateSMRUseCase";
+import { ApproveSMRUseCase, SMRApprovalInput } from "../usecases/smrs/ApproveSMRUseCase";
+
 // Register repositories
 container.registerSingleton<IUserRepository>("UserRepository", UserRepository);
 container.registerSingleton<IClientRepository>("ClientRepository", ClientRepository);
+container.registerSingleton<IComplaintRepository>("ComplaintRepository", ComplaintRepository);
+container.registerSingleton<ISMRRepository>("SMRRepository", SMRRepository);
 
 // Register use case abstractions
 container.registerSingleton<IUseCase<LoginRequestDto, LoginResponseDto>>("LoginUseCase", LoginUseCase);
@@ -31,3 +57,18 @@ container.registerSingleton<IUseCase<GetClientsQuery, PaginatedClients>>("GetCli
 container.registerSingleton<IUseCase<string, IClient | null>>("GetClientByIdUseCase", GetClientByIdUseCase);
 container.registerSingleton<IUseCase<{ id: string; data: UpdateClientDto }, IClient>>("UpdateClientUseCase", UpdateClientUseCase);
 container.registerSingleton<IUseCase<string, boolean>>("DeleteClientUseCase", DeleteClientUseCase);
+
+// Complaints Use Cases
+container.registerSingleton<IUseCase<CreateComplaintDto, IComplaint>>("CreateComplaintUseCase", CreateComplaintUseCase);
+container.registerSingleton<IUseCase<GetComplaintsQuery, PaginatedComplaints>>("GetComplaintsUseCase", GetComplaintsUseCase);
+container.registerSingleton<IUseCase<string, IComplaint | null>>("GetComplaintByIdUseCase", GetComplaintByIdUseCase);
+container.registerSingleton<IUseCase<{ id: string; data: UpdateComplaintDto }, IComplaint | null>>("UpdateComplaintUseCase", UpdateComplaintUseCase);
+container.registerSingleton<IUseCase<string, boolean>>("DeleteComplaintUseCase", DeleteComplaintUseCase);
+
+// SMR Use Cases
+container.registerSingleton<IUseCase<CreateSMRDto, ISMR>>("CreateSMRUseCase", CreateSMRUseCase);
+container.registerSingleton<IUseCase<string, ISMR | null>>("GetSMRByIdUseCase", GetSMRByIdUseCase);
+container.registerSingleton<IUseCase<string, ISMR[]>>("GetSMRsByComplaintUseCase", GetSMRsByComplaintUseCase);
+container.registerSingleton<IUseCase<{ id: string; data: UpdateSMRDto }, ISMR | null>>("UpdateSMRUseCase", UpdateSMRUseCase);
+container.registerSingleton<IUseCase<SMRApprovalInput, ISMR | null>>("ApproveSMRUseCase", ApproveSMRUseCase);
+
