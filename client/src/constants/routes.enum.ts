@@ -4,12 +4,15 @@ export enum AppRoute {
   KANBAN = "/kanban",
   CLIENTS = "/clients",
   CLIENT_DETAIL = "/clients/:id",
+  CLIENT_COMPLAINTS = "/clients/:clientId/complaints",
   ENQUIRIES = "/enquiries",
   ENQUIRY_DETAIL = "/enquiries/:id",
   QUOTATIONS = "/quotations",
   QUOTATION_DETAIL = "/quotations/:id",
   COMPLAINTS = "/complaints",
   COMPLAINT_DETAIL = "/complaints/:id",
+  COMPLAINT_SMR_CREATE = "/complaints/:id/smr/create",
+  COMPLAINT_SMR_EDIT = "/complaints/:id/smr/edit",
   AMC = "/amc",
   AMC_DETAIL = "/amc/:id",
   AMC_PLANS = "/amc-plans",
@@ -26,4 +29,9 @@ export enum ApiRoute {
   // Client Routes
   CLIENTS = "/clients",
   CLIENT_BY_ID = "/clients/:id",
+  // Complaints Routes
+  COMPLAINTS = "/complaints",
+  // SMR Routes
+  SMRS = "/smrs",
 }
+

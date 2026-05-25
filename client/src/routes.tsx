@@ -9,6 +9,8 @@ import { Quotations } from "./features/quotations/Quotations";
 import { QuotationDetail } from "./features/quotations/QuotationDetail";
 import { Complaints } from "./features/complaints/Complaints";
 import { ComplaintDetail } from "./features/complaints/ComplaintDetail";
+import { SMRCreatePage } from "./features/complaints/SMRCreatePage";
+import { ClientComplaints } from "./features/complaints/ClientComplaints";
 import { AMC } from "./features/amc/AMC";
 import { AMCDetail } from "./features/amc/AMCDetail";
 import { AMCPlans } from "./features/amc/AMCPlans";
@@ -37,12 +39,15 @@ export const router = createBrowserRouter([
       { path: AppRoute.KANBAN, element: <Kanban /> },
       { path: AppRoute.CLIENTS, element: <Clients /> },
       { path: AppRoute.CLIENT_DETAIL, element: <ClientDetail /> },
+      { path: AppRoute.CLIENT_COMPLAINTS, element: <ClientComplaints /> },
       { path: AppRoute.ENQUIRIES, element: <Enquiries /> },
       { path: AppRoute.ENQUIRY_DETAIL, element: <EnquiryDetail /> },
       { path: AppRoute.QUOTATIONS, element: <Quotations /> },
       { path: AppRoute.QUOTATION_DETAIL, element: <QuotationDetail /> },
       { path: AppRoute.COMPLAINTS, element: <Complaints /> },
       { path: AppRoute.COMPLAINT_DETAIL, element: <ComplaintDetail /> },
+      { path: AppRoute.COMPLAINT_SMR_CREATE, element: <SMRCreatePage mode="create" /> },
+      { path: AppRoute.COMPLAINT_SMR_EDIT, element: <SMRCreatePage mode="edit" /> },
       { path: AppRoute.AMC, element: <AMC /> },
       { path: AppRoute.AMC_DETAIL, element: <AMCDetail /> },
       { path: AppRoute.AMC_PLANS, element: <AMCPlans /> },
