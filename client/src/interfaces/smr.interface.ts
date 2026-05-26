@@ -27,6 +27,7 @@ export interface SMR {
   id?: string;
   smrNo: string;
   complaintId?: string;
+  amcVisitId?: string;
   clientId: string;
   clientName: string;
   clientLocation: string;
