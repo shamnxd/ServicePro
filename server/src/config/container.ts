@@ -75,6 +75,21 @@ import { AddAmcRemarkUseCase } from "../usecases/amc/AddAmcRemarkUseCase";
 import { RecordAmcPaymentUseCase } from "../usecases/amc/RecordAmcPaymentUseCase";
 import { AddAmcRemarkDto, RecordAmcPaymentDto } from "../dtos/amcRemark.dto";
 
+import { IEnquiryRepository, GetEnquiriesQuery, PaginatedEnquiries } from "../interfaces/repositories/IEnquiryRepository";
+import { EnquiryRepository } from "../repositories/mongo/EnquiryRepository";
+import { IEnquiry } from "../interfaces/models/IEnquiry";
+import { CreateEnquiryDto, UpdateEnquiryDto } from "../dtos/enquiry.dto";
+import { CreateEnquiryUseCase } from "../usecases/enquiries/CreateEnquiryUseCase";
+import { GetEnquiriesUseCase } from "../usecases/enquiries/GetEnquiriesUseCase";
+import { GetEnquiryByIdUseCase } from "../usecases/enquiries/GetEnquiryByIdUseCase";
+import { UpdateEnquiryUseCase } from "../usecases/enquiries/UpdateEnquiryUseCase";
+import { DeleteEnquiryUseCase } from "../usecases/enquiries/DeleteEnquiryUseCase";
+import { AddEnquiryRemarkUseCase } from "../usecases/enquiries/AddEnquiryRemarkUseCase";
+import { EditEnquiryRemarkUseCase } from "../usecases/enquiries/EditEnquiryRemarkUseCase";
+import { EditAmcRemarkUseCase } from "../usecases/amc/EditAmcRemarkUseCase";
+import { AddEnquiryDrawingUseCase, AddEnquiryDrawingInput } from "../usecases/enquiries/AddEnquiryDrawingUseCase";
+import { AddEnquiryRemarkDto, EditEnquiryRemarkDto } from "../dtos/enquiryRemark.dto";
+
 // Register repositories
 container.registerSingleton<IUserRepository>("UserRepository", UserRepository);
 container.registerSingleton<IClientRepository>("ClientRepository", ClientRepository);
@@ -83,6 +98,7 @@ container.registerSingleton<ISMRRepository>("SMRRepository", SMRRepository);
 container.registerSingleton<IStaffRepository>("StaffRepository", StaffRepository);
 container.registerSingleton<IAmcRepository>("AmcRepository", AmcRepository);
 container.registerSingleton<IAmcVisitRepository>("AmcVisitRepository", AmcVisitRepository);
+container.registerSingleton<IEnquiryRepository>("EnquiryRepository", EnquiryRepository);
 
 // Register use case abstractions
 container.registerSingleton<IUseCase<LoginRequestDto, LoginResponseDto>>("LoginUseCase", LoginUseCase);
@@ -134,4 +150,28 @@ container.registerSingleton<
 container.registerSingleton<
   IUseCase<{ amcId: string; data: RecordAmcPaymentDto; user: string }, IAmc | null>
 >("RecordAmcPaymentUseCase", RecordAmcPaymentUseCase);
+
+container.registerSingleton<IUseCase<{ data: CreateEnquiryDto; user: string }, IEnquiry>>(
+  "CreateEnquiryUseCase",
+  CreateEnquiryUseCase,
+);
+container.registerSingleton<IUseCase<GetEnquiriesQuery, PaginatedEnquiries>>("GetEnquiriesUseCase", GetEnquiriesUseCase);
+container.registerSingleton<IUseCase<string, IEnquiry | null>>("GetEnquiryByIdUseCase", GetEnquiryByIdUseCase);
+container.registerSingleton<
+  IUseCase<{ id: string; data: UpdateEnquiryDto; user: string }, IEnquiry | null>
+>("UpdateEnquiryUseCase", UpdateEnquiryUseCase);
+container.registerSingleton<IUseCase<string, boolean>>("DeleteEnquiryUseCase", DeleteEnquiryUseCase);
+container.registerSingleton<
+  IUseCase<{ enquiryId: string; data: AddEnquiryRemarkDto; user: string }, IEnquiry | null>
+>("AddEnquiryRemarkUseCase", AddEnquiryRemarkUseCase);
+container.registerSingleton<IUseCase<AddEnquiryDrawingInput, IEnquiry | null>>(
+  "AddEnquiryDrawingUseCase",
+  AddEnquiryDrawingUseCase,
+);
+container.registerSingleton<
+  IUseCase<{ enquiryId: string; remarkKey: string; data: EditEnquiryRemarkDto; user: string }, IEnquiry | null>
+>("EditEnquiryRemarkUseCase", EditEnquiryRemarkUseCase);
+container.registerSingleton<
+  IUseCase<{ amcId: string; remarkKey: string; data: EditEnquiryRemarkDto; user: string }, IAmc | null>
+>("EditAmcRemarkUseCase", EditAmcRemarkUseCase);
 

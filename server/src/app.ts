@@ -3,6 +3,8 @@ import "./config/container"; // Register containers
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import path from "path";
+import fs from "fs";
 import { env } from "./config/env";
 import { authRouter } from "./routes/auth.routes";
 import { clientRouter } from "./routes/client.routes";
@@ -10,6 +12,7 @@ import { complaintRouter } from "./routes/complaint.routes";
 import { smrRouter } from "./routes/smr.routes";
 import { staffRouter } from "./routes/staff.routes";
 import { amcRouter } from "./routes/amc.routes";
+import { enquiryRouter } from "./routes/enquiry.routes";
 import { errorHandler } from "./middleware/error.middleware";
 
 const app = express();
@@ -21,6 +24,13 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
+
+// Local file uploads (when FILE_STORAGE_PROVIDER=local)
+if (env.FILE_STORAGE_PROVIDER === "local") {
+  const uploadPath = path.resolve(env.UPLOAD_DIR);
+  fs.mkdirSync(uploadPath, { recursive: true });
+  app.use("/uploads", express.static(uploadPath));
+}
 
 // Base Health Check
 app.get("/health", (req, res) => {
@@ -34,6 +44,7 @@ app.use("/api/v1/complaints", complaintRouter);
 app.use("/api/v1/smrs", smrRouter);
 app.use("/api/v1/staff", staffRouter);
 app.use("/api/v1/amc", amcRouter);
+app.use("/api/v1/enquiries", enquiryRouter);
 
 // Centralized error handler (must be registered last)
 app.use(errorHandler);
