@@ -37,14 +37,7 @@ const navigation = [
   { name: "Enquiries", href: "/enquiries", icon: FileText },
   { name: "Quotations", href: "/quotations", icon: FileSpreadsheet },
   { name: "Complaints", href: "/complaints", icon: AlertCircle },
-  {
-    name: "AMC",
-    icon: Calendar,
-    submenu: [
-      { name: "AMC Contracts", href: "/amc" },
-      { name: "AMC Plans", href: "/amc-plans" },
-    ]
-  },
+  { name: "AMC", href: "/amc", icon: Calendar },
   { name: "Staff", href: "/staff", icon: UserCog },
   { name: "Invoices", href: "/invoices", icon: Receipt },
   { name: "Reports", href: "/reports", icon: BarChart3 },

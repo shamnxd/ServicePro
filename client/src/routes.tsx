@@ -13,7 +13,8 @@ import { SMRCreatePage } from "./features/complaints/SMRCreatePage";
 import { ClientComplaints } from "./features/complaints/ClientComplaints";
 import { AMC } from "./features/amc/AMC";
 import { AMCDetail } from "./features/amc/AMCDetail";
-import { AMCPlans } from "./features/amc/AMCPlans";
+import { AmcSMRCreatePage } from "./features/amc/AmcSMRCreatePage";
+import { AmcVisitDetailPage } from "./features/amc/AmcVisitDetailPage";
 import { Staff } from "./features/staff/Staff";
 import { StaffDetail } from "./features/staff/StaffDetail";
 import { Invoices } from "./features/invoices/Invoices";
@@ -51,7 +52,8 @@ export const router = createBrowserRouter([
       { path: AppRoute.COMPLAINT_SMR_EDIT, element: <SMRCreatePage mode="edit" /> },
       { path: AppRoute.AMC, element: <AMC /> },
       { path: AppRoute.AMC_DETAIL, element: <AMCDetail /> },
-      { path: AppRoute.AMC_PLANS, element: <AMCPlans /> },
+      { path: AppRoute.AMC_VISIT_DETAIL, element: <AmcVisitDetailPage /> },
+      { path: AppRoute.AMC_VISIT_SMR_CREATE, element: <AmcSMRCreatePage /> },
       { path: AppRoute.STAFF, element: <Staff /> },
       { path: AppRoute.STAFF_DETAIL, element: <StaffDetail /> },
       { path: AppRoute.INVOICES, element: <Invoices /> },

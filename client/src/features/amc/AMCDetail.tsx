@@ -1,91 +1,180 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router";
-import { ArrowLeft, Calendar, Building, Phone, Mail, MapPin, DollarSign, MessageSquare } from "lucide-react";
+import {
+  ArrowLeft,
+  Calendar,
+  Building,
+  Phone,
+  Mail,
+  MapPin,
+  Loader2,
+  CalendarClock,
+  CheckCircle2,
+  MessageSquare,
+  Users,
+  FileText,
+  IndianRupee,
+} from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
-import { ServiceTracking } from "../../components/ServiceTracking";
-import { Textarea } from "../../components/ui/textarea";
 import { ScrollArea } from "../../components/ui/scroll-area";
-
-// Mock data - in real app, this would be fetched based on ID
-const mockAMCContracts = [
-  {
-    id: 1,
-    amcNo: "AMC-2026-001",
-    clientName: "ABC Corporation",
-    contactPerson: "John Doe",
-    phone: "+91 98765 43210",
-    email: "john@abccorp.com",
-    location: "Mumbai - Main Office",
-    startDate: "2026-01-01",
-    endDate: "2026-12-31",
-    frequency: "Quarterly",
-    nextVisit: "2026-06-01",
-    status: "Active",
-    amount: 120000,
-    visitsCompleted: 2,
-    totalVisits: 4,
-    serviceType: "HVAC Maintenance",
-    planName: "Premium Plan",
-    serviceLogs: [
-      {
-        id: 1,
-        date: "2026-01-15",
-        travelTime: 45,
-        workTime: 180,
-        petrolExpense: 600,
-        otherExpenses: 0,
-        materials: [
-          { name: "Filter Replacement", quantity: 4, cost: 2000 },
-          { name: "Refrigerant Top-up", quantity: 1, cost: 1500 },
-        ],
-        remarks: "Regular quarterly maintenance completed. All units working optimally.",
-        technician: "Rajesh Kumar",
-      },
-      {
-        id: 2,
-        date: "2026-04-10",
-        travelTime: 50,
-        workTime: 150,
-        petrolExpense: 600,
-        otherExpenses: 200,
-        materials: [
-          { name: "Filter Replacement", quantity: 4, cost: 2000 },
-        ],
-        remarks: "Second quarter maintenance. Minor cleaning required.",
-        technician: "Rajesh Kumar",
-      },
-    ],
-    remarks: [
-      { user: "Admin", date: "2026-01-01", text: "Contract activated. Premium HVAC maintenance plan." },
-      { user: "Rajesh Kumar", date: "2026-01-15", text: "First visit completed successfully." },
-    ],
-  },
-];
+import { Textarea } from "../../components/ui/textarea";
+import type { AmcContract, AmcVisit } from "../../interfaces/amc.interface";
+import { getAmcByIdApi, getAmcVisitsApi, addAmcRemarkApi } from "../../api/amc.api";
+import { AmcFormModal } from "../../components/AmcFormModal";
+import { AmcScheduleVisitModal } from "../../components/AmcScheduleVisitModal";
+import { NextVisitCell } from "../../components/NextVisitCell";
+import { calculateNextPreferredVisitDate } from "../../utils/calculateAmcVisits";
+import { toast } from "sonner";
 
 const getStatusColor = (status: string) => {
-  const colors = {
+  const colors: Record<string, string> = {
     Active: "bg-green-500/10 text-green-500",
     Expired: "bg-red-500/10 text-red-500",
     "Due for Renewal": "bg-amber-500/10 text-amber-500",
+    Scheduled: "bg-blue-500/10 text-blue-600",
+    Completed: "bg-green-500/10 text-green-600",
+    Cancelled: "bg-muted text-muted-foreground",
   };
-  return colors[status as keyof typeof colors] || "bg-muted text-muted-foreground";
+  return colors[status] ?? "bg-muted text-muted-foreground";
 };
+
+function fmtDate(value?: string | null): string {
+  if (!value) return "—";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("en-IN", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function fmtCurrency(amount: number): string {
+  if (!amount) return "—";
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
 
 export function AMCDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [contract, setContract] = useState<AmcContract | null>(null);
+  const [visits, setVisits] = useState<AmcVisit[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("details");
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isScheduleOpen, setIsScheduleOpen] = useState(false);
+  const [editVisit, setEditVisit] = useState<AmcVisit | null>(null);
   const [newRemark, setNewRemark] = useState("");
 
-  const contract = mockAMCContracts.find(c => c.id === Number(id)) || mockAMCContracts[0];
+  const fetchContractData = useCallback(async () => {
+    if (!id) return;
+    const [contractRes, visitsRes] = await Promise.all([
+      getAmcByIdApi(id),
+      getAmcVisitsApi(id),
+    ]);
+    if (contractRes.success) setContract(contractRes.data);
+    else toast.error("Contract not found");
+    if (visitsRes.success) setVisits(visitsRes.data);
+  }, [id]);
+
+  const loadContract = useCallback(async () => {
+    if (!id) return;
+    setIsLoading(true);
+    try {
+      await fetchContractData();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load contract");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [id, fetchContractData]);
+
+  const refreshContractData = useCallback(async () => {
+    try {
+      await fetchContractData();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to refresh contract");
+    }
+  }, [fetchContractData]);
+
+  useEffect(() => {
+    loadContract();
+  }, [loadContract]);
+
+  const handleScheduleSuccess = useCallback(() => {
+    setActiveTab("visits");
+    refreshContractData();
+  }, [refreshContractData]);
+
+  const handleAddRemark = async () => {
+    if (!id || !newRemark.trim()) return;
+    try {
+      const res = await addAmcRemarkApi(id, newRemark.trim());
+      if (res.success) {
+        setContract(res.data);
+        setNewRemark("");
+        toast.success("Remark added");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to add remark");
+    }
+  };
+
+  const closeScheduleModal = () => {
+    setIsScheduleOpen(false);
+    setEditVisit(null);
+  };
+
+  const openSchedule = (visit?: AmcVisit | null) => {
+    setEditVisit(visit ?? null);
+    setActiveTab("visits");
+    setIsScheduleOpen(true);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 gap-3 text-muted-foreground">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="text-sm">Loading contract...</span>
+      </div>
+    );
+  }
+
+  if (!contract) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 gap-4">
+        <p className="text-muted-foreground">AMC contract not found</p>
+        <Button variant="outline" onClick={() => navigate("/amc")}>
+          Back to AMC
+        </Button>
+      </div>
+    );
+  }
+
+  const remarks = contract.remarks ?? [];
+  const payments = contract.payments ?? [];
+  const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
+  const pendingAmount = Math.max(0, (contract.amount || 0) - totalPaid);
+  const visitProgress =
+    contract.totalVisits > 0
+      ? Math.round((contract.visitsCompleted / contract.totalVisits) * 100)
+      : 0;
 
   return (
     <div className="h-full bg-background">
       <ScrollArea className="h-full">
         <div className="p-2 lg:p-0">
           <div className="mx-auto space-y-4">
-            <Tabs defaultValue="details" className="space-y-4">
-              {/* Unified Header Card */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
               <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
                 <div className="p-4 lg:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/50">
                   <div className="flex items-center gap-4">
@@ -101,14 +190,28 @@ export function AMCDetail() {
                     <div className="h-8 w-px bg-border hidden md:block" />
                     <div>
                       <h1 className="text-xl font-bold text-foreground tracking-tight">{contract.amcNo}</h1>
-                      <p className="text-[11px] text-muted-foreground uppercase font-bold tracking-wider">{contract.clientName}</p>
+                      <p className="text-[11px] text-muted-foreground uppercase font-bold tracking-wider">
+                        {contract.clientName}
+                      </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 self-end md:self-auto">
-                    <span className={`px-2.5 py-1 text-[11px] font-bold uppercase rounded-full ${getStatusColor(contract.status)}`}>
+                  <div className="flex flex-wrap items-center gap-2 self-end md:self-auto">
+                    <span
+                      className={`px-2.5 py-1 text-[11px] font-bold uppercase rounded-full ${getStatusColor(contract.status)}`}
+                    >
                       {contract.status}
                     </span>
-                    <Button size="sm" className="bg-pink-700 hover:bg-pink-800 h-9 px-4 font-semibold">Edit Contract</Button>
+                    <Button size="sm" variant="outline" className="h-9" onClick={() => openSchedule()}>
+                      <CalendarClock className="h-4 w-4 mr-1.5" />
+                      Schedule Visit
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="bg-pink-700 hover:bg-pink-800 h-9 px-4 font-semibold"
+                      onClick={() => setIsEditOpen(true)}
+                    >
+                      Edit Contract
+                    </Button>
                   </div>
                 </div>
                 <div className="px-4 lg:px-5">
@@ -120,10 +223,10 @@ export function AMCDetail() {
                       Contract Details
                     </TabsTrigger>
                     <TabsTrigger
-                      value="service"
+                      value="visits"
                       className="flex-none w-auto shrink-0 h-full rounded-md !border-b-2 border-0 border-transparent data-[state=active]:border-pink-600 data-[state=active]:bg-pink-50/50 data-[state=active]:shadow-none data-[state=active]:text-pink-700 px-4 text-sm font-bold transition-all"
                     >
-                      Service History
+                      Scheduled Visits
                     </TabsTrigger>
                     <TabsTrigger
                       value="remarks"
@@ -135,204 +238,278 @@ export function AMCDetail() {
                 </div>
               </div>
 
-              <TabsContent value="details" className="m-0">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    {/* Contract Information Card */}
-                    <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
-                      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/50">
-                        <div className="h-8 w-8 rounded-lg bg-pink-500/10 flex items-center justify-center shrink-0">
-                          <Calendar className="h-4 w-4 text-pink-600" />
-                        </div>
-                        <h3 className="text-base font-semibold text-foreground">Contract Information</h3>
+              <TabsContent value="details" className="m-0 space-y-4">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
+                    <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/50">
+                      <div className="h-8 w-8 rounded-lg bg-pink-500/10 flex items-center justify-center shrink-0">
+                        <Calendar className="h-4 w-4 text-pink-600" />
                       </div>
-                      <div className="space-y-3">
-                        <div>
-                          <label className="text-xs font-medium text-gray-500 uppercase">Contract Number</label>
-                          <p className="mt-1 text-gray-900 font-semibold">{contract.amcNo}</p>
-                        </div>
-                        <div>
-                          <label className="text-xs font-medium text-gray-500 uppercase">Plan Type</label>
-                          <p className="mt-1 text-gray-900">{contract.planName}</p>
-                        </div>
-                        <div>
-                          <label className="text-xs font-medium text-gray-500 uppercase">Service Type</label>
-                          <p className="mt-1 text-gray-900">{contract.serviceType}</p>
-                        </div>
-                        <div>
-                          <label className="text-xs font-medium text-gray-500 uppercase">Frequency</label>
-                          <p className="mt-1 text-gray-900">{contract.frequency}</p>
-                        </div>
-                        <div>
-                          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Contract Value</label>
-                          <p className="mt-0.5 text-pink-700 font-bold text-xl">₹{contract.amount.toLocaleString()}</p>
-                        </div>
-                      </div>
+                      <h3 className="text-base font-semibold text-foreground">Contract Information</h3>
                     </div>
-
-                    {/* Client Information Card */}
-                    <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
-                      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/50">
-                        <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
-                          <Building className="h-4 w-4 text-blue-500" />
-                        </div>
-                        <h3 className="text-base font-semibold text-foreground">Client Information</h3>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between gap-2">
+                        <span className="text-muted-foreground">Service Type</span>
+                        <span className="font-medium text-foreground text-right">{contract.serviceType}</span>
                       </div>
-                      <div className="space-y-3">
-                        <div>
-                          <label className="text-xs font-medium text-gray-500 uppercase">Client Name</label>
-                          <p className="mt-1 text-gray-900 font-semibold">{contract.clientName}</p>
-                        </div>
-                        <div>
-                          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Contact Person</label>
-                          <div className="mt-0.5 flex items-center gap-2">
-                            <div className="h-6 w-6 rounded-full overflow-hidden shrink-0 border border-blue-100">
-                              <img
-                                src={`https://i.pravatar.cc/150?u=${encodeURIComponent(contract.contactPerson)}`}
-                                alt={contract.contactPerson}
-                                className="h-full w-full object-cover"
-                              />
-                            </div>
-                            <p className="text-sm text-gray-900 font-medium">{contract.contactPerson}</p>
-                          </div>
-                        </div>
-                        <div>
-                          <label className="text-xs font-medium text-gray-500 uppercase">Phone</label>
-                          <div className="mt-1 flex items-center gap-2">
-                            <Phone className="h-4 w-4 text-gray-400" />
-                            <p className="text-gray-900">{contract.phone}</p>
-                          </div>
-                        </div>
-                        <div>
-                          <label className="text-xs font-medium text-gray-500 uppercase">Email</label>
-                          <div className="mt-1 flex items-center gap-2">
-                            <Mail className="h-4 w-4 text-gray-400" />
-                            <p className="text-gray-900">{contract.email}</p>
-                          </div>
-                        </div>
-                        <div>
-                          <label className="text-xs font-medium text-gray-500 uppercase">Location</label>
-                          <div className="mt-1 flex items-center gap-2">
-                            <MapPin className="h-4 w-4 text-gray-400" />
-                            <p className="text-gray-900">{contract.location}</p>
-                          </div>
-                        </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Frequency</span>
+                        <span className="font-medium text-foreground">{contract.frequency}</span>
                       </div>
-                    </div>
-
-                    {/* Contract Period & Progress Card */}
-                    <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
-                      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/50">
-                        <div className="h-8 w-8 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
-                          <DollarSign className="h-4 w-4 text-green-500" />
-                        </div>
-                        <h3 className="text-base font-semibold text-foreground">Period & Progress</h3>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Start Date</span>
+                        <span className="font-medium text-foreground">{fmtDate(contract.startDate)}</span>
                       </div>
-                      <div className="space-y-4">
-                        <div className="space-y-3">
-                          <div>
-                            <label className="text-xs font-medium text-gray-500 uppercase">Start Date</label>
-                            <p className="mt-1 text-gray-900">{new Date(contract.startDate).toLocaleDateString()}</p>
-                          </div>
-                          <div>
-                            <label className="text-xs font-medium text-gray-500 uppercase">End Date</label>
-                            <p className="mt-1 text-gray-900">{new Date(contract.endDate).toLocaleDateString()}</p>
-                          </div>
-                          {contract.nextVisit && (
-                            <div>
-                              <label className="text-xs font-medium text-gray-500 uppercase">Next Visit</label>
-                              <p className="mt-1 text-pink-700 font-semibold">{new Date(contract.nextVisit).toLocaleDateString()}</p>
-                            </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">End Date</span>
+                        <span className="font-medium text-foreground">{fmtDate(contract.endDate)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Preferred Visit</span>
+                        <NextVisitCell
+                          nextVisit={calculateNextPreferredVisitDate(
+                            contract.startDate,
+                            contract.endDate,
+                            contract.visitsCompleted,
+                            contract.totalVisits
                           )}
+                          emptyLabel="All visits done"
+                        />
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Scheduled Visit</span>
+                        <NextVisitCell nextVisit={contract.nextVisit} emptyLabel="Not scheduled" />
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Contract Amount</span>
+                        <span className="font-semibold text-foreground">{fmtCurrency(contract.amount)}</span>
+                      </div>
+                      {contract.notes?.trim() && (
+                        <div className="pt-2 border-t border-border/50">
+                          <span className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">
+                            AMC Notes
+                          </span>
+                          <p className="text-sm text-foreground mt-1.5 whitespace-pre-wrap">{contract.notes}</p>
                         </div>
+                      )}
+                    </div>
+                  </div>
 
-                        <div>
-                          <div className="flex justify-between items-baseline mb-2">
-                            <label className="text-xs font-medium text-gray-500 uppercase">Visits Progress</label>
-                            <span className="text-sm font-semibold text-gray-900">
-                              {contract.visitsCompleted}/{contract.totalVisits}
-                            </span>
-                          </div>
-                          <div className="w-full bg-muted rounded-full h-3">
-                            <div
-                              className="bg-pink-600 h-3 rounded-full transition-all shadow-[0_0_8px_rgba(219,39,119,0.4)]"
-                              style={{
-                                width: `${(contract.visitsCompleted / contract.totalVisits) * 100}%`,
-                              }}
-                            />
-                          </div>
-                          <div className="grid grid-cols-2 gap-3 mt-4">
-                            <div className="bg-green-500/10 rounded-lg p-3 text-center">
-                              <p className="text-xs text-muted-foreground mb-1">Completed</p>
-                              <p className="text-2xl font-bold text-green-500">{contract.visitsCompleted}</p>
-                            </div>
-                            <div className="bg-muted/50 rounded-lg p-3 text-center">
-                              <p className="text-xs text-muted-foreground mb-1">Remaining</p>
-                              <p className="text-2xl font-bold text-foreground">{contract.totalVisits - contract.visitsCompleted}</p>
-                            </div>
-                          </div>
-                        </div>
+                  <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
+                    <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/50">
+                      <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                        <Building className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <h3 className="text-base font-semibold text-foreground">Client Details</h3>
+                    </div>
+                    <div className="space-y-3 text-sm">
+                      <p className="font-semibold text-foreground">{contract.clientName}</p>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Phone className="h-3.5 w-3.5" />
+                        {contract.phone}
+                      </div>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Mail className="h-3.5 w-3.5" />
+                        {contract.email}
+                      </div>
+                      <div className="flex items-start gap-2 text-muted-foreground">
+                        <MapPin className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                        {contract.location}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
+                    <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/50">
+                      <div className="h-8 w-8 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
+                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      </div>
+                      <h3 className="text-base font-semibold text-foreground">Visit Progress</h3>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Completed</span>
+                        <span className="font-bold text-foreground">
+                          {contract.visitsCompleted} / {contract.totalVisits}
+                        </span>
+                      </div>
+                      <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                        <div
+                          className="bg-green-500 h-2 rounded-full transition-all"
+                          style={{ width: `${visitProgress}%` }}
+                        />
                       </div>
                     </div>
                   </div>
                 </div>
+
+                <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
+                  <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/50">
+                    <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+                      <IndianRupee className="h-4 w-4 text-amber-600" />
+                    </div>
+                    <h3 className="text-base font-semibold text-foreground">Payment Summary</h3>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                    <div className="rounded-lg bg-muted/40 p-3">
+                      <p className="text-xs text-muted-foreground font-medium">Contract Amount</p>
+                      <p className="text-lg font-bold text-foreground mt-0.5">{fmtCurrency(contract.amount)}</p>
+                    </div>
+                    <div className="rounded-lg bg-green-500/5 p-3 border border-green-500/20">
+                      <p className="text-xs text-muted-foreground font-medium">Advance Paid</p>
+                      <p className="text-lg font-bold text-green-700 mt-0.5">
+                        {fmtCurrency(contract.advancePaid ?? 0)}
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-amber-500/5 p-3 border border-amber-500/20">
+                      <p className="text-xs text-muted-foreground font-medium">Pending Amount</p>
+                      <p className="text-lg font-bold text-amber-700 mt-0.5">{fmtCurrency(pendingAmount)}</p>
+                    </div>
+                  </div>
+
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                    Payment History
+                  </h4>
+                  {payments.length === 0 ? (
+                    <p className="text-sm text-muted-foreground italic py-2">No payments recorded yet.</p>
+                  ) : (
+                    <div className="divide-y divide-border rounded-lg border border-border overflow-hidden">
+                      {payments.map((p, idx) => (
+                        <div key={idx} className="px-4 py-3 flex flex-wrap justify-between gap-2 text-sm">
+                          <div>
+                            <span className="font-semibold text-foreground">{fmtCurrency(p.amount)}</span>
+                            <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-muted font-medium">
+                              {p.type}
+                            </span>
+                            {p.note?.trim() && (
+                              <p className="text-xs text-muted-foreground mt-0.5">{p.note}</p>
+                            )}
+                          </div>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(p.date).toLocaleString()}
+                            {p.recordedBy ? ` · ${p.recordedBy}` : ""}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </TabsContent>
 
-              <TabsContent value="service" className="m-0">
-                <div className="bg-card rounded-xl border border-border p-4 lg:p-6 shadow-sm">
-                  <ServiceTracking
-                    serviceType="AMC"
-                    serviceNo={contract.amcNo}
-                    logs={contract.serviceLogs}
-                  />
+              <TabsContent value="visits" className="m-0 space-y-4">
+                <div className="flex justify-between items-center">
+                  <p className="text-sm text-muted-foreground">
+                    {visits.length} visit{visits.length !== 1 ? "s" : ""} on record
+                  </p>
+                  <Button
+                    size="sm"
+                    className="bg-pink-700 hover:bg-pink-800 text-white"
+                    onClick={() => openSchedule()}
+                  >
+                    <CalendarClock className="h-4 w-4 mr-1.5" />
+                    Schedule Visit
+                  </Button>
                 </div>
+
+                {visits.length === 0 ? (
+                  <div className="bg-card rounded-xl border border-border p-10 text-center text-muted-foreground">
+                    <CalendarClock className="h-10 w-10 mx-auto mb-2 opacity-40" />
+                    <p className="font-medium">No visits scheduled yet</p>
+                    <p className="text-sm mt-1">Schedule the first AMC visit for this contract.</p>
+                  </div>
+                ) : (
+                  <div className="bg-card rounded-xl border border-border divide-y divide-border overflow-hidden">
+                    {visits.map((visit) => {
+                      const staffNames =
+                        visit.assignedStaff?.map((s) => s.fullName).join(", ") ||
+                        (visit.assignedStaffIds?.length ? "Staff assigned" : null);
+
+                      return (
+                        <button
+                          key={visit.id}
+                          type="button"
+                          className="w-full text-left p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:bg-muted/30 transition-colors"
+                          onClick={() => visit.id && navigate(`/amc/${id}/visits/${visit.id}`)}
+                        >
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className="font-semibold text-foreground">{fmtDate(visit.scheduledDate)}</p>
+                              <span
+                                className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded-full ${getStatusColor(visit.status)}`}
+                              >
+                                {visit.status}
+                              </span>
+                              {visit.smrId ? (
+                                <span className="text-[10px] font-semibold text-pink-700 flex items-center gap-1">
+                                  <FileText className="h-3 w-3" />
+                                  SMR linked
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-medium text-muted-foreground">No SMR yet</span>
+                              )}
+                            </div>
+                            {staffNames && (
+                              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                                <Users className="h-3 w-3 shrink-0" />
+                                {staffNames}
+                              </p>
+                            )}
+                            {visit.notes?.trim() && (
+                              <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{visit.notes}</p>
+                            )}
+                          </div>
+                          <span className="text-xs font-semibold text-pink-700 shrink-0">View details →</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </TabsContent>
 
               <TabsContent value="remarks" className="m-0">
                 <div className="space-y-6">
                   <div className="space-y-3">
-                    {contract.remarks.length > 0 ? (
-                      contract.remarks.map((remark, idx) => (
-                        <div key={idx} className="bg-card rounded-xl border border-border p-5 shadow-sm">
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-3">
-                              <div className="h-8 w-8 rounded-full overflow-hidden shrink-0 border border-pink-500/20 shadow-sm">
-                                <img
-                                  src={`https://i.pravatar.cc/150?u=${encodeURIComponent(remark.user)}`}
-                                  alt={remark.user}
-                                  className="h-full w-full object-cover"
-                                />
+                    {remarks.length > 0 ? (
+                      remarks.map((remark, idx) => (
+                        <div key={idx} className="bg-card rounded-xl border border-border p-4 shadow-sm">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <div className="h-6 w-6 rounded-full bg-pink-700 text-white font-extrabold flex items-center justify-center text-[10px]">
+                                {remark.user.charAt(0)}
                               </div>
-                              <span className="font-medium text-foreground">{remark.user}</span>
+                              <span className="font-bold text-foreground text-xs">{remark.user}</span>
                             </div>
-                            <span className="text-sm text-muted-foreground">{remark.date}</span>
+                            <span className="text-[11px] font-bold text-muted-foreground">
+                              {new Date(remark.date).toLocaleString()}
+                            </span>
                           </div>
-                          <p className="text-muted-foreground pl-11">{remark.text}</p>
+                          <p className="text-muted-foreground text-xs pl-8 leading-relaxed">{remark.text}</p>
                         </div>
                       ))
                     ) : (
-                      <p className="text-gray-500 italic text-center py-8">No remarks yet</p>
+                      <p className="text-muted-foreground italic text-center py-6 text-xs font-semibold">
+                        No follow-up remarks recorded.
+                      </p>
                     )}
                   </div>
 
-                  <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
-                    <h4 className="font-semibold text-foreground mb-4">Add New Remark</h4>
+                  <div className="bg-card rounded-xl border border-border p-5 shadow-sm space-y-4">
+                    <h4 className="font-bold text-foreground text-xs uppercase tracking-wider">
+                      Add Follow-up Remark
+                    </h4>
                     <div className="space-y-3">
                       <Textarea
-                        placeholder="Add a remark or update..."
+                        placeholder="Add a progress remark or site notes..."
                         value={newRemark}
                         onChange={(e) => setNewRemark(e.target.value)}
-                        rows={4}
+                        rows={3}
                         className="resize-none"
                       />
                       <div className="flex justify-end">
                         <Button
-                          className="gap-2"
-                          onClick={() => {
-                            if (newRemark.trim()) {
-                              setNewRemark("");
-                            }
-                          }}
+                          onClick={handleAddRemark}
+                          disabled={!newRemark.trim()}
+                          className="bg-pink-700 hover:bg-pink-800 text-white h-9 px-4 font-bold flex items-center gap-1.5 text-xs"
                         >
                           <MessageSquare className="h-4 w-4" />
                           Add Remark
@@ -346,6 +523,21 @@ export function AMCDetail() {
           </div>
         </div>
       </ScrollArea>
+
+      <AmcFormModal
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        onSuccess={loadContract}
+        contract={contract}
+      />
+
+      <AmcScheduleVisitModal
+        isOpen={isScheduleOpen}
+        onClose={closeScheduleModal}
+        onSuccess={handleScheduleSuccess}
+        contract={contract}
+        visit={editVisit}
+      />
     </div>
   );
 }
