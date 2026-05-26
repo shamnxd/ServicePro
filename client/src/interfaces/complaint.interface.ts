@@ -1,4 +1,5 @@
 export interface Remark {
+  id?: string;
   user: string;
   date: string;
   text: string;

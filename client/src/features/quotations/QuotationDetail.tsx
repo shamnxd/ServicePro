@@ -4,7 +4,7 @@ import { ArrowLeft, Building, Calendar, FileText, Download, MessageSquare, Dolla
 import { Button } from "../../components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Label } from "../../components/ui/label";
-import { Textarea } from "../../components/ui/textarea";
+import { RemarksPanel } from "../../components/RemarksPanel";
 import { ScrollArea } from "../../components/ui/scroll-area";
 
 // Mock data
@@ -45,6 +45,7 @@ export function QuotationDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [newRemark, setNewRemark] = useState("");
+  const [remarks, setRemarks] = useState(mockQuotations[0].remarks);
 
   const quotation = mockQuotations.find(q => q.id === Number(id)) || mockQuotations[0];
 
@@ -194,58 +195,32 @@ export function QuotationDetail() {
               </TabsContent>
 
               <TabsContent value="remarks" className="m-0">
-                <div className="mx-auto space-y-6">
-                  <div className="space-y-3">
-                    {quotation.remarks.length > 0 ? (
-                      quotation.remarks.map((remark, idx) => (
-                        <div key={idx} className="bg-card rounded-xl border border-border p-5 shadow-sm">
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-3">
-                              <div className="h-8 w-8 rounded-full overflow-hidden shrink-0 border border-pink-500/20 shadow-sm">
-                                <img
-                                  src={`https://i.pravatar.cc/150?u=${encodeURIComponent(remark.user)}`}
-                                  alt={remark.user}
-                                  className="h-full w-full object-cover"
-                                />
-                              </div>
-                              <span className="font-medium text-foreground">{remark.user}</span>
-                            </div>
-                            <span className="text-sm text-muted-foreground">{remark.date}</span>
-                          </div>
-                          <p className="text-muted-foreground pl-11">{remark.text}</p>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-gray-500 italic text-center py-8">No remarks yet</p>
-                    )}
-                  </div>
-
-                  <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
-                    <h4 className="font-semibold text-foreground mb-4">Add New Remark</h4>
-                    <div className="space-y-3">
-                      <Textarea
-                        placeholder="Add a remark or note..."
-                        value={newRemark}
-                        onChange={(e) => setNewRemark(e.target.value)}
-                        rows={4}
-                        className="resize-none"
-                      />
-                      <div className="flex justify-end">
-                        <Button
-                          className="gap-2"
-                          onClick={() => {
-                            if (newRemark.trim()) {
-                              setNewRemark("");
-                            }
-                          }}
-                        >
-                          <MessageSquare className="h-4 w-4" />
-                          Add Remark
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <RemarksPanel
+                  remarks={remarks.map((r, i) => ({
+                    id: String(i),
+                    user: r.user,
+                    date: r.date,
+                    text: r.text,
+                  }))}
+                  newRemark={newRemark}
+                  onNewRemarkChange={setNewRemark}
+                  onAddRemark={() => {
+                    if (!newRemark.trim()) return;
+                    setRemarks((prev) => [
+                      ...prev,
+                      { user: "Admin", date: new Date().toISOString(), text: newRemark.trim() },
+                    ]);
+                    setNewRemark("");
+                  }}
+                  onEditRemark={(remarkKey, text) => {
+                    setRemarks((prev) =>
+                      prev.map((r, i) => (String(i) === remarkKey ? { ...r, text } : r)),
+                    );
+                  }}
+                  emptyMessage="No remarks yet"
+                  placeholder="Add a remark or note..."
+                  sectionTitle="Add New Remark"
+                />
               </TabsContent>
             </Tabs>
           </div>

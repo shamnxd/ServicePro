@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from "react-router";
 import { ArrowLeft, Phone, Building, MapPin, Calendar, AlertCircle, MessageSquare, Clipboard, CheckCircle2, ShieldCheck, ShieldAlert, Shield, Mail, User, Pencil } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
-import { Textarea } from "../../components/ui/textarea";
+import { RemarksPanel } from "../../components/RemarksPanel";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../components/ui/dialog";
 import {
   AlertDialog,
@@ -40,6 +40,7 @@ export function ComplaintDetail() {
   const [smrs, setSmrs] = useState<SMR[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [newRemark, setNewRemark] = useState("");
+  const [isEditingRemark, setIsEditingRemark] = useState(false);
   
   // Modal states
   const [isApprovalOpen, setIsApprovalOpen] = useState(false);
@@ -90,6 +91,27 @@ export function ComplaintDetail() {
   useEffect(() => {
     fetchComplaintDetails();
   }, [id]);
+
+  const handleEditRemark = async (remarkKey: string, text: string) => {
+    if (!complaint || !id) return;
+    setIsEditingRemark(true);
+    try {
+      const updatedRemarks = complaint.remarks.map((r, i) => {
+        const key = r.id ?? String(i);
+        return key === remarkKey ? { ...r, text: text.trim() } : r;
+      });
+      const res = await updateComplaintApi(id, { remarks: updatedRemarks as never });
+      if (res.success) {
+        setComplaint(res.data);
+        toast.success("Remark updated");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update remark");
+    } finally {
+      setIsEditingRemark(false);
+    }
+  };
 
   const handleAddRemark = async () => {
     if (!complaint || !newRemark.trim() || !id) return;
@@ -572,53 +594,18 @@ export function ComplaintDetail() {
 
               {/* REMARKS TAB */}
               <TabsContent value="remarks" className="m-0">
-                <div className="space-y-6">
-                  {/* List Remarks */}
-                  <div className="space-y-3">
-                    {complaint.remarks.length > 0 ? (
-                      complaint.remarks.map((remark, idx) => (
-                        <div key={idx} className="bg-card rounded-xl border border-border p-4 shadow-sm">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <div className="h-6 w-6 rounded-full bg-pink-700 text-white font-extrabold flex items-center justify-center text-[10px]">
-                                {remark.user.charAt(0)}
-                              </div>
-                              <span className="font-bold text-foreground text-xs">{remark.user}</span>
-                            </div>
-                            <span className="text-[11px] font-bold text-muted-foreground">{new Date(remark.date).toLocaleString()}</span>
-                          </div>
-                          <p className="text-muted-foreground text-xs pl-8 leading-relaxed">{remark.text}</p>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-muted-foreground italic text-center py-6 text-xs font-semibold">No follow-up remarks recorded.</p>
-                    )}
-                  </div>
-
-                  {/* Add Remark Form */}
-                  <div className="bg-card rounded-xl border border-border p-5 shadow-sm space-y-4">
-                    <h4 className="font-bold text-foreground text-xs uppercase tracking-wider">Add Follow-up Remark</h4>
-                    <div className="space-y-3">
-                      <Textarea
-                        placeholder="Add a progress remark or site notes..."
-                        value={newRemark}
-                        onChange={(e) => setNewRemark(e.target.value)}
-                        rows={3}
-                        className="resize-none"
-                      />
-                      <div className="flex justify-end">
-                        <Button
-                          onClick={handleAddRemark}
-                          disabled={!newRemark.trim()}
-                          className="bg-pink-700 hover:bg-pink-800 text-white h-9 px-4 font-bold flex items-center gap-1.5 text-xs"
-                        >
-                          <MessageSquare className="h-4 w-4" />
-                          Add Remark
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <RemarksPanel
+                  remarks={complaint.remarks}
+                  newRemark={newRemark}
+                  onNewRemarkChange={setNewRemark}
+                  onAddRemark={handleAddRemark}
+                  onEditRemark={handleEditRemark}
+                  isEditingRemark={isEditingRemark}
+                  disabled={complaint.status === "Resolved"}
+                  emptyMessage="No follow-up remarks recorded."
+                  placeholder="Add a progress remark or site notes..."
+                  sectionTitle="Add Follow-up Remark"
+                />
               </TabsContent>
 
             </Tabs>

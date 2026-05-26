@@ -2,6 +2,7 @@ export type AmcContractStatus = "Active" | "Due for Renewal" | "Expired";
 export type AmcFrequency = "Monthly" | "Quarterly" | "Bi-Annual" | "Annual";
 
 export interface AmcRemark {
+  id?: string;
   user: string;
   date: string;
   text: string;

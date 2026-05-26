@@ -91,6 +91,14 @@ export async function addAmcRemarkApi(
   return await api.post(`${ApiRoute.AMC}/${amcId}/remarks`, { text });
 }
 
+export async function updateAmcRemarkApi(
+  amcId: string,
+  remarkKey: string,
+  text: string,
+): Promise<{ success: boolean; data: AmcContract }> {
+  return await api.put(`${ApiRoute.AMC}/${amcId}/remarks/${remarkKey}`, { text });
+}
+
 export async function recordAmcPaymentApi(
   amcId: string,
   data: { amount: number; type: "Advance" | "Payment"; note?: string }

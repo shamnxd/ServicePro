@@ -10,7 +10,6 @@ import {
   Loader2,
   CalendarClock,
   CheckCircle2,
-  MessageSquare,
   Users,
   FileText,
   IndianRupee,
@@ -18,9 +17,9 @@ import {
 import { Button } from "../../components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { ScrollArea } from "../../components/ui/scroll-area";
-import { Textarea } from "../../components/ui/textarea";
+import { RemarksPanel } from "../../components/RemarksPanel";
 import type { AmcContract, AmcVisit } from "../../interfaces/amc.interface";
-import { getAmcByIdApi, getAmcVisitsApi, addAmcRemarkApi } from "../../api/amc.api";
+import { getAmcByIdApi, getAmcVisitsApi, addAmcRemarkApi, updateAmcRemarkApi } from "../../api/amc.api";
 import { AmcFormModal } from "../../components/AmcFormModal";
 import { AmcScheduleVisitModal } from "../../components/AmcScheduleVisitModal";
 import { NextVisitCell } from "../../components/NextVisitCell";
@@ -71,6 +70,7 @@ export function AMCDetail() {
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
   const [editVisit, setEditVisit] = useState<AmcVisit | null>(null);
   const [newRemark, setNewRemark] = useState("");
+  const [isEditingRemark, setIsEditingRemark] = useState(false);
 
   const fetchContractData = useCallback(async () => {
     if (!id) return;
@@ -126,6 +126,23 @@ export function AMCDetail() {
     } catch (err) {
       console.error(err);
       toast.error("Failed to add remark");
+    }
+  };
+
+  const handleEditRemark = async (remarkKey: string, text: string) => {
+    if (!id) return;
+    setIsEditingRemark(true);
+    try {
+      const res = await updateAmcRemarkApi(id, remarkKey, text);
+      if (res.success) {
+        setContract(res.data);
+        toast.success("Remark updated");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update remark");
+    } finally {
+      setIsEditingRemark(false);
     }
   };
 
@@ -467,57 +484,17 @@ export function AMCDetail() {
               </TabsContent>
 
               <TabsContent value="remarks" className="m-0">
-                <div className="space-y-6">
-                  <div className="space-y-3">
-                    {remarks.length > 0 ? (
-                      remarks.map((remark, idx) => (
-                        <div key={idx} className="bg-card rounded-xl border border-border p-4 shadow-sm">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <div className="h-6 w-6 rounded-full bg-pink-700 text-white font-extrabold flex items-center justify-center text-[10px]">
-                                {remark.user.charAt(0)}
-                              </div>
-                              <span className="font-bold text-foreground text-xs">{remark.user}</span>
-                            </div>
-                            <span className="text-[11px] font-bold text-muted-foreground">
-                              {new Date(remark.date).toLocaleString()}
-                            </span>
-                          </div>
-                          <p className="text-muted-foreground text-xs pl-8 leading-relaxed">{remark.text}</p>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-muted-foreground italic text-center py-6 text-xs font-semibold">
-                        No follow-up remarks recorded.
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="bg-card rounded-xl border border-border p-5 shadow-sm space-y-4">
-                    <h4 className="font-bold text-foreground text-xs uppercase tracking-wider">
-                      Add Follow-up Remark
-                    </h4>
-                    <div className="space-y-3">
-                      <Textarea
-                        placeholder="Add a progress remark or site notes..."
-                        value={newRemark}
-                        onChange={(e) => setNewRemark(e.target.value)}
-                        rows={3}
-                        className="resize-none"
-                      />
-                      <div className="flex justify-end">
-                        <Button
-                          onClick={handleAddRemark}
-                          disabled={!newRemark.trim()}
-                          className="bg-pink-700 hover:bg-pink-800 text-white h-9 px-4 font-bold flex items-center gap-1.5 text-xs"
-                        >
-                          <MessageSquare className="h-4 w-4" />
-                          Add Remark
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <RemarksPanel
+                  remarks={remarks}
+                  newRemark={newRemark}
+                  onNewRemarkChange={setNewRemark}
+                  onAddRemark={handleAddRemark}
+                  onEditRemark={handleEditRemark}
+                  isEditingRemark={isEditingRemark}
+                  emptyMessage="No follow-up remarks recorded."
+                  placeholder="Add a progress remark or site notes..."
+                  sectionTitle="Add Follow-up Remark"
+                />
               </TabsContent>
             </Tabs>
           </div>
