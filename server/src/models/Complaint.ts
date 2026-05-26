@@ -6,14 +6,11 @@ export interface IComplaintDocument extends Document, Omit<IComplaint, "id"> {
   updatedAt: Date;
 }
 
-const remarkSchema = new Schema(
-  {
-    user: { type: String, required: true },
-    date: { type: Date, required: true, default: Date.now },
-    text: { type: String, required: true }
-  },
-  { _id: false }
-);
+const remarkSchema = new Schema({
+  user: { type: String, required: true },
+  date: { type: Date, required: true, default: Date.now },
+  text: { type: String, required: true },
+});
 
 const complaintSchema = new Schema<IComplaintDocument>(
   {

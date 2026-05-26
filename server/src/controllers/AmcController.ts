@@ -6,6 +6,7 @@ import { ISMR } from "../interfaces/models/ISMR";
 import { CreateAmcDto, UpdateAmcDto } from "../dtos/amc.dto";
 import { ScheduleAmcVisitDto, UpdateAmcVisitDto } from "../dtos/amcVisit.dto";
 import { AddAmcRemarkDto, RecordAmcPaymentDto } from "../dtos/amcRemark.dto";
+import { EditEnquiryRemarkDto } from "../dtos/enquiryRemark.dto";
 import { GetAmcQuery, PaginatedAmc } from "../interfaces/repositories/IAmcRepository";
 import { IAmcVisit } from "../interfaces/models/IAmcVisit";
 import { ISMRRepository } from "../interfaces/repositories/ISMRRepository";
@@ -38,7 +39,12 @@ export class AmcController {
       { amcId: string; data: RecordAmcPaymentDto; user: string },
       IAmc | null
     >,
-    @inject("SMRRepository") private _smrRepository?: ISMRRepository
+    @inject("SMRRepository") private _smrRepository?: ISMRRepository,
+    @inject("EditAmcRemarkUseCase")
+    private _editAmcRemarkUseCase?: IUseCase<
+      { amcId: string; remarkKey: string; data: EditEnquiryRemarkDto; user: string },
+      IAmc | null
+    >,
   ) {}
 
   public create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -128,6 +134,25 @@ export class AmcController {
         return;
       }
       res.status(StatusCode.OK).json({ success: true, data: visit });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public editRemark = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const amc = await this._editAmcRemarkUseCase!.execute({
+        amcId: req.params.id,
+        remarkKey: req.params.remarkId,
+        data: req.body as EditEnquiryRemarkDto,
+        user: authReq.user?.username || "Admin",
+      });
+      if (!amc) {
+        res.status(StatusCode.NOT_FOUND).json({ success: false, message: "AMC contract or remark not found" });
+        return;
+      }
+      res.status(StatusCode.OK).json({ success: true, data: amc });
     } catch (error) {
       next(error);
     }

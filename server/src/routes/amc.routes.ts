@@ -5,6 +5,7 @@ import { validateDto } from "../middleware/dto.middleware";
 import { CreateAmcSchema, UpdateAmcSchema } from "../dtos/amc.dto";
 import { ScheduleAmcVisitSchema, UpdateAmcVisitSchema } from "../dtos/amcVisit.dto";
 import { AddAmcRemarkSchema, RecordAmcPaymentSchema } from "../dtos/amcRemark.dto";
+import { EditEnquiryRemarkSchema } from "../dtos/enquiryRemark.dto";
 
 const router = Router();
 const controller = new AmcController();
@@ -14,6 +15,7 @@ router.use(requireAuth);
 router.post("/", validateDto(CreateAmcSchema), controller.create);
 router.get("/", controller.getAll);
 router.post("/:id/remarks", validateDto(AddAmcRemarkSchema), controller.addRemark);
+router.put("/:id/remarks/:remarkId", validateDto(EditEnquiryRemarkSchema), controller.editRemark);
 router.post("/:id/payments", validateDto(RecordAmcPaymentSchema), controller.recordPayment);
 router.get("/:id/visits", controller.getVisits);
 router.get("/:id/visits/:visitId/smr", controller.getVisitSmr);

@@ -31,7 +31,12 @@ export class AmcRepository extends BaseRepository<IAmcDocument, IAmc> implements
       totalVisits: doc.totalVisits,
       serviceType: doc.serviceType,
       notes: doc.notes,
-      remarks: doc.remarks ?? [],
+      remarks: (doc.remarks ?? []).map((r: { _id?: { toString(): string }; user: string; date: Date; text: string }) => ({
+        id: r._id?.toString(),
+        user: r.user,
+        date: r.date,
+        text: r.text,
+      })),
       advancePaid: doc.advancePaid ?? 0,
       payments: doc.payments ?? [],
       createdAt: doc.createdAt,

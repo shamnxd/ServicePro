@@ -28,10 +28,11 @@ export class ComplaintRepository extends BaseRepository<IComplaintDocument, ICom
       assignedStaffIds: Array.isArray(doc.assignedStaffIds) ? doc.assignedStaffIds : [],
       location: doc.location,
       expectedResolution: doc.expectedResolution,
-      remarks: doc.remarks.map(r => ({
+      remarks: doc.remarks.map((r) => ({
+        id: (r as { _id?: { toString(): string } })._id?.toString(),
         user: r.user,
         date: r.date,
-        text: r.text
+        text: r.text,
       })),
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt

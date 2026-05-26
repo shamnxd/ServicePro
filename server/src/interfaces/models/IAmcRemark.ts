@@ -1,4 +1,5 @@
 export interface IAmcRemark {
+  id?: string;
   user: string;
   date: Date;
   text: string;

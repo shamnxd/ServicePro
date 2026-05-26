@@ -1,4 +1,5 @@
 export interface IRemark {
+  id?: string;
   user: string;
   date: Date | string;
   text: string;
