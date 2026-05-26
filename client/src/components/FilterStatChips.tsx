@@ -1,0 +1,96 @@
+import { cn } from "../lib/utils";
+
+export type FilterChipTone = "primary" | "green" | "amber" | "blue" | "red" | "orange";
+
+export type FilterStatChipOption<T extends string> = {
+  value: T;
+  label: string;
+  count: number;
+  tone?: FilterChipTone;
+};
+
+const TONE_STYLES: Record<
+  FilterChipTone,
+  { count: string; countOnPrimary: string; activeChip: string }
+> = {
+  primary: {
+    count: "bg-primary/12 text-primary",
+    countOnPrimary: "bg-white/25 text-primary-foreground",
+    activeChip: "bg-primary text-primary-foreground border-primary shadow-sm",
+  },
+  green: {
+    count: "bg-green-500/10 text-green-700",
+    countOnPrimary: "bg-green-500/20 text-green-800",
+    activeChip: "bg-green-500/10 text-foreground border-green-500/25 ring-1 ring-green-500/20 shadow-sm",
+  },
+  amber: {
+    count: "bg-amber-500/10 text-amber-700",
+    countOnPrimary: "bg-amber-500/20 text-amber-800",
+    activeChip: "bg-amber-500/10 text-foreground border-amber-500/25 ring-1 ring-amber-500/20 shadow-sm",
+  },
+  blue: {
+    count: "bg-blue-500/10 text-blue-700",
+    countOnPrimary: "bg-blue-500/20 text-blue-800",
+    activeChip: "bg-blue-500/10 text-foreground border-blue-500/25 ring-1 ring-blue-500/20 shadow-sm",
+  },
+  red: {
+    count: "bg-red-500/10 text-red-700",
+    countOnPrimary: "bg-red-500/20 text-red-800",
+    activeChip: "bg-red-500/10 text-foreground border-red-500/25 ring-1 ring-red-500/20 shadow-sm",
+  },
+  orange: {
+    count: "bg-orange-500/10 text-orange-700",
+    countOnPrimary: "bg-orange-500/20 text-orange-800",
+    activeChip: "bg-orange-500/10 text-foreground border-orange-500/25 ring-1 ring-orange-500/20 shadow-sm",
+  },
+};
+
+interface FilterStatChipsProps<T extends string> {
+  options: FilterStatChipOption<T>[];
+  value: T;
+  onChange: (value: T) => void;
+  className?: string;
+}
+
+export function FilterStatChips<T extends string>({
+  options,
+  value,
+  onChange,
+  className = "",
+}: FilterStatChipsProps<T>) {
+  return (
+    <div className={cn("flex flex-wrap gap-2.5", className)}>
+      {options.map((opt) => {
+        const isActive = value === opt.value;
+        const tone = opt.tone ?? "primary";
+        const styles = TONE_STYLES[tone];
+
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => onChange(opt.value)}
+            className={cn(
+              "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-sm font-medium transition-all border",
+              isActive
+                ? styles.activeChip
+                : "bg-card text-muted-foreground border-border hover:border-primary/30 hover:text-foreground",
+            )}
+          >
+            <span className={isActive && tone === "primary" ? "text-primary-foreground" : undefined}>
+              {opt.label}
+            </span>
+            <span
+              className={cn(
+                "min-w-[1.5rem] px-2 py-0.5 rounded-full text-xs font-bold tabular-nums text-center",
+                isActive ? styles.countOnPrimary : styles.count,
+              )}
+            >
+              {opt.count}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}

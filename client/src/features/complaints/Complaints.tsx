@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
 import {
   Plus, Search, Eye, AlertCircle, Calendar, MapPin,
-  Filter, ChevronLeft, ChevronRight, UserPlus, MoreVertical, Loader2,
+  ChevronLeft, ChevronRight, UserPlus, MoreVertical, Loader2,
 } from "lucide-react";
 import { StaffSelectDropdown } from "../../components/StaffSelectDropdown";
 import { Button } from "../../components/ui/button";
@@ -37,6 +37,7 @@ import { toast } from "sonner";
 import { ClientFormModal } from "../clients/ClientFormModal";
 import { useDebounce } from "../../hooks/useDebounce";
 import { ReusableTable } from "../../components/ReusableTable";
+import { FilterStatChips } from "../../components/FilterStatChips";
 
 type StatusFilter = "all" | "Pending" | "In Progress" | "Resolved" | "Critical";
 
@@ -272,13 +273,12 @@ export function Complaints() {
     c.contactPerson.toLowerCase().includes(debouncedClientSearch.toLowerCase())
   );
 
-  // ── Stat Cards (act as filter) ────────────────────────────────────────
-  const statCards = [
-    { label: "Total", value: stats.total, color: "text-foreground", filter: "all" as StatusFilter, bg: activeFilter === "all" ? "bg-primary/5 ring-1 ring-primary/20" : "bg-card" },
-    { label: "Pending", value: stats.pending, color: "text-amber-500", filter: "Pending" as StatusFilter, bg: activeFilter === "Pending" ? "bg-amber-500/10 ring-1 ring-amber-500/30" : "bg-card" },
-    { label: "In Progress", value: stats.inProgress, color: "text-blue-500", filter: "In Progress" as StatusFilter, bg: activeFilter === "In Progress" ? "bg-blue-500/10 ring-1 ring-blue-500/30" : "bg-card" },
-    { label: "Resolved", value: stats.resolved, color: "text-green-500", filter: "Resolved" as StatusFilter, bg: activeFilter === "Resolved" ? "bg-green-500/10 ring-1 ring-green-500/30" : "bg-card" },
-    { label: "Critical", value: stats.critical, color: "text-red-500", filter: "Critical" as StatusFilter, bg: activeFilter === "Critical" ? "bg-red-500/10 ring-1 ring-red-500/30" : "bg-card" },
+  const filterChips = [
+    { value: "all" as StatusFilter, label: "Total", count: stats.total, tone: "primary" as const },
+    { value: "Pending" as StatusFilter, label: "Pending", count: stats.pending, tone: "amber" as const },
+    { value: "In Progress" as StatusFilter, label: "In Progress", count: stats.inProgress, tone: "blue" as const },
+    { value: "Resolved" as StatusFilter, label: "Resolved", count: stats.resolved, tone: "green" as const },
+    { value: "Critical" as StatusFilter, label: "Critical", count: stats.critical, tone: "red" as const },
   ];
 
   // ── Table Columns ─────────────────────────────────────────────────────
@@ -531,22 +531,7 @@ export function Complaints() {
         />
       </div>
 
-      {/* ── Stat Cards (clickable filters) ─────────────────────────── */}
-      <div className="hidden sm:grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
-        {statCards.map((card) => (
-          <button
-            key={card.label}
-            onClick={() => setActiveFilter(card.filter)}
-            className={`rounded-lg shadow-sm border border-border p-3 sm:p-4 text-left transition-all cursor-pointer hover:shadow-md ${card.bg} ${activeFilter === card.filter ? "shadow-md" : ""}`}
-          >
-            <p className="text-[11px] sm:text-xs text-muted-foreground font-medium leading-tight">{card.label}</p>
-            <div className={`text-xl sm:text-2xl font-bold mt-1 ${card.color}`}>{card.value}</div>
-          </button>
-        ))}
-      </div>
-
-      {/* ── Search + Filter Tabs ────────────────────────────────────── */}
-      <div className="bg-card rounded-lg shadow-sm border border-border p-4 space-y-3">
+      <div className="bg-card rounded-lg shadow-sm border border-border p-4 space-y-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
@@ -556,27 +541,7 @@ export function Complaints() {
             className="pl-10"
           />
         </div>
-
-        {/* Filter tabs */}
-        <div className="flex flex-wrap gap-2">
-          {(Object.keys(filterLabels) as StatusFilter[]).map((key) => (
-            <button
-              key={key}
-              onClick={() => setActiveFilter(key)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all border ${
-                activeFilter === key
-                  ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                  : "bg-muted/50 text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
-              }`}
-            >
-              {key !== "all" && <Filter className="h-3 w-3" />}
-              {filterLabels[key]}
-              {key === "Pending" && <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${activeFilter === key ? "bg-white/20" : "bg-border"}`}>{stats.pending}</span>}
-              {key === "In Progress" && <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${activeFilter === key ? "bg-white/20" : "bg-border"}`}>{stats.inProgress}</span>}
-              {key === "Resolved" && <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${activeFilter === key ? "bg-white/20" : "bg-border"}`}>{stats.resolved}</span>}
-            </button>
-          ))}
-        </div>
+        <FilterStatChips options={filterChips} value={activeFilter} onChange={setActiveFilter} />
       </div>
 
       {/* ── Table Container ─────────────────────────────────────────── */}
