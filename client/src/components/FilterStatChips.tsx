@@ -1,6 +1,6 @@
 import { cn } from "../lib/utils";
 
-export type FilterChipTone = "primary" | "green" | "amber" | "blue" | "red" | "orange";
+export type FilterChipTone = "primary" | "pink" | "green" | "amber" | "blue" | "red" | "orange";
 
 export type FilterStatChipOption<T extends string> = {
   value: T;
@@ -17,6 +17,11 @@ const TONE_STYLES: Record<
     count: "bg-primary/12 text-primary",
     countOnPrimary: "bg-white/25 text-primary-foreground",
     activeChip: "bg-primary text-primary-foreground border-primary shadow-sm",
+  },
+  pink: {
+    count: "bg-pink-500/10 text-pink-700",
+    countOnPrimary: "bg-pink-500/20 text-pink-800",
+    activeChip: "bg-pink-500/10 text-foreground border-pink-500/25 ring-1 ring-pink-500/20 shadow-sm",
   },
   green: {
     count: "bg-green-500/10 text-green-700",

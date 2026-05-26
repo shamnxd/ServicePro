@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
 import {
   Plus, Search, Edit, Trash2, Eye, MapPin, Phone, Mail,
-  Loader2, ChevronLeft, ChevronRight, MoreVertical, Filter, UserX, UserCheck,
+  Loader2, ChevronLeft, ChevronRight, MoreVertical, UserX, UserCheck,
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -28,6 +28,7 @@ import { getStaffApi, deleteStaffApi, updateStaffApi } from "../../api/staff.api
 import { StaffFormModal } from "../../components/StaffFormModal";
 import { useDebounce } from "../../hooks/useDebounce";
 import { ReusableTable } from "../../components/ReusableTable";
+import { FilterStatChips } from "../../components/FilterStatChips";
 import { toast } from "sonner";
 
 type EmploymentFilter = "all" | "Permanent" | "Temporary";
@@ -71,12 +72,6 @@ export function Staff() {
       console.error(err);
     }
   }, []);
-
-  const employmentCounts: Record<EmploymentFilter, number> = {
-    all: stats.total,
-    Permanent: stats.permanent,
-    Temporary: stats.temporary,
-  };
 
   const fetchStaff = useCallback(async (page: number, search: string, employment: EmploymentFilter) => {
     setIsLoading(true);
@@ -320,28 +315,10 @@ export function Staff() {
   const startItem = total === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
   const endItem = Math.min(currentPage * PAGE_SIZE, total);
 
-  const statCards = [
-    {
-      label: "All Types",
-      value: stats.total,
-      color: "text-foreground",
-      filter: "all" as EmploymentFilter,
-      bg: employmentFilter === "all" ? "bg-primary/5 ring-1 ring-primary/20" : "bg-card",
-    },
-    {
-      label: "Permanent",
-      value: stats.permanent,
-      color: "text-pink-700",
-      filter: "Permanent" as EmploymentFilter,
-      bg: employmentFilter === "Permanent" ? "bg-pink-500/10 ring-1 ring-pink-500/30" : "bg-card",
-    },
-    {
-      label: "Temporary",
-      value: stats.temporary,
-      color: "text-amber-600",
-      filter: "Temporary" as EmploymentFilter,
-      bg: employmentFilter === "Temporary" ? "bg-amber-500/10 ring-1 ring-amber-500/30" : "bg-card",
-    },
+  const filterChips = [
+    { value: "all" as EmploymentFilter, label: "All Types", count: stats.total, tone: "primary" as const },
+    { value: "Permanent" as EmploymentFilter, label: "Permanent", count: stats.permanent, tone: "pink" as const },
+    { value: "Temporary" as EmploymentFilter, label: "Temporary", count: stats.temporary, tone: "amber" as const },
   ];
 
   const employmentTypeBadge = (type: string) =>
@@ -365,25 +342,7 @@ export function Staff() {
         </Button>
       </div>
 
-      {/* Stat cards — desktop/tablet */}
-      <div className="hidden sm:grid grid-cols-3 gap-2 sm:gap-3">
-        {statCards.map((card) => (
-          <button
-            key={card.label}
-            type="button"
-            onClick={() => setEmploymentFilter(card.filter)}
-            className={`rounded-lg shadow-sm border border-border p-3 sm:p-4 text-left transition-all cursor-pointer hover:shadow-md ${card.bg} ${
-              employmentFilter === card.filter ? "shadow-md" : ""
-            }`}
-          >
-            <p className="text-[11px] sm:text-xs text-muted-foreground font-medium leading-tight">{card.label}</p>
-            <div className={`text-xl sm:text-2xl font-bold mt-1 ${card.color}`}>{card.value}</div>
-          </button>
-        ))}
-      </div>
-
-      {/* Search + filter tabs */}
-      <div className="bg-card rounded-lg shadow-sm border border-border p-4 space-y-3">
+      <div className="bg-card rounded-lg shadow-sm border border-border p-4 space-y-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
@@ -393,30 +352,11 @@ export function Staff() {
             className="pl-10"
           />
         </div>
-        <div className="flex flex-wrap gap-2">
-          {(Object.keys(employmentFilterLabels) as EmploymentFilter[]).map((key) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setEmploymentFilter(key)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all border ${
-                employmentFilter === key
-                  ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                  : "bg-muted/50 text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
-              }`}
-            >
-              {key !== "all" && <Filter className="h-3 w-3" />}
-              {employmentFilterLabels[key]}
-              <span
-                className={`ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
-                  employmentFilter === key ? "bg-white/20" : "bg-border"
-                }`}
-              >
-                {employmentCounts[key]}
-              </span>
-            </button>
-          ))}
-        </div>
+        <FilterStatChips
+          options={filterChips}
+          value={employmentFilter}
+          onChange={setEmploymentFilter}
+        />
       </div>
 
       <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
