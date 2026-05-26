@@ -37,5 +37,6 @@ export enum ApiRoute {
   SMRS = "/smrs",
   STAFF = "/staff",
   AMC = "/amc",
+  ENQUIRIES = "/enquiries",
 }
 
