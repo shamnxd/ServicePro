@@ -2,6 +2,7 @@ import { injectable, inject } from "tsyringe";
 import { IUseCase } from "../../interfaces/usecases/IUseCase";
 import { ISMRRepository } from "../../interfaces/repositories/ISMRRepository";
 import { IComplaintRepository } from "../../interfaces/repositories/IComplaintRepository";
+import { IAmcVisitRepository } from "../../interfaces/repositories/IAmcVisitRepository";
 import { CreateSMRDto } from "../../dtos/smr.dto";
 import { ISMR } from "../../interfaces/models/ISMR";
 import { BadRequestError } from "../../errors/BadRequestError";
@@ -12,7 +13,9 @@ export class CreateSMRUseCase implements IUseCase<CreateSMRDto, ISMR> {
     @inject("SMRRepository")
     private _smrRepository: ISMRRepository,
     @inject("ComplaintRepository")
-    private _complaintRepository: IComplaintRepository
+    private _complaintRepository: IComplaintRepository,
+    @inject("AmcVisitRepository")
+    private _amcVisitRepository: IAmcVisitRepository
   ) {}
 
   public async execute(dto: CreateSMRDto): Promise<ISMR> {
@@ -23,7 +26,18 @@ export class CreateSMRUseCase implements IUseCase<CreateSMRDto, ISMR> {
       }
     }
 
+    if (dto.amcVisitId) {
+      const existingSmr = await this._smrRepository.findByAmcVisitId(dto.amcVisitId);
+      if (existingSmr) {
+        throw new BadRequestError("An SMR report already exists for this AMC visit");
+      }
+    }
+
     const smr = await this._smrRepository.create(dto);
+
+    if (smr.amcVisitId && smr.id) {
+      await this._amcVisitRepository.update(smr.amcVisitId, { smrId: smr.id });
+    }
 
     // If SMR is created for a complaint, auto-transition the complaint to "In Progress"
     if (smr.complaintId) {

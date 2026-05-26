@@ -15,6 +15,7 @@ export class SMRRepository extends BaseRepository<ISMRDocument, ISMR> implements
       id: doc._id.toString(),
       smrNo: doc.smrNo,
       complaintId: doc.complaintId,
+      amcVisitId: doc.amcVisitId || "",
       clientId: doc.clientId,
       clientName: doc.clientName,
       clientLocation: doc.clientLocation,
@@ -76,5 +77,10 @@ export class SMRRepository extends BaseRepository<ISMRDocument, ISMR> implements
   public async findByClientId(clientId: string): Promise<ISMR[]> {
     const docs = await this.model.find({ clientId }).sort({ createdAt: -1 }).exec();
     return docs.map(doc => this.toDomain(doc));
+  }
+
+  public async findByAmcVisitId(amcVisitId: string): Promise<ISMR | null> {
+    const doc = await this.model.findOne({ amcVisitId }).exec();
+    return doc ? this.toDomain(doc) : null;
   }
 }

@@ -44,6 +44,7 @@ const smrSchema = new Schema<ISMRDocument>(
   {
     smrNo: { type: String, required: true, unique: true, trim: true },
     complaintId: { type: String, ref: "Complaint", default: "" },
+    amcVisitId: { type: String, default: "" },
     clientId: { type: String, required: true, ref: "Client" },
     clientName: { type: String, required: true, trim: true },
     clientLocation: { type: String, required: true, trim: true },

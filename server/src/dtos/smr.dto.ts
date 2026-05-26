@@ -27,6 +27,7 @@ export const SMRApprovalSchema = z.object({
 
 export const CreateSMRSchema = z.object({
   complaintId: z.string().optional().or(z.literal("")),
+  amcVisitId: z.string().optional().or(z.literal("")),
   clientId: z.string().min(1, "Client ID is required"),
   clientName: z.string().min(1, "Client name is required"),
   clientLocation: z.string().min(1, "Client location is required"),
