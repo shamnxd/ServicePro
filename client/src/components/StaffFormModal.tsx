@@ -16,7 +16,7 @@ import {
   StaffEmploymentType,
 } from "../interfaces/staff.interface";
 import { createStaffApi, updateStaffApi } from "../api/staff.api";
-import { readAccessToken } from "../utils/auth-storage";
+import { useAppSelector } from "../store/hooks";
 import { toast } from "sonner";
 
 const inputClassName =
@@ -41,6 +41,7 @@ const initialForm = {
 };
 
 export function StaffFormModal({ isOpen, onClose, onSuccess, staff = null }: StaffFormModalProps) {
+  const accessToken = useAppSelector((state) => state.auth.accessToken);
   const [form, setForm] = useState(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -72,7 +73,7 @@ export function StaffFormModal({ isOpen, onClose, onSuccess, staff = null }: Sta
       toast.error("Enter a custom role name");
       return;
     }
-    if (!readAccessToken()) {
+    if (!accessToken) {
       toast.error("Your session expired. Please sign in again.");
       return;
     }

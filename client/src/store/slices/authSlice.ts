@@ -2,7 +2,6 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { loginApi, logoutApi, refreshApi } from "../../api/auth.api";
 import { User } from "../../interfaces/user.interface";
 import { LoginRequest } from "../../interfaces/auth.interface";
-import { readAccessToken, writeAccessToken } from "../../utils/auth-storage";
 
 interface AuthState {
   user: User | null;
@@ -28,16 +27,13 @@ function decodeJwt(token: string): User | null {
   }
 }
 
-const storedToken = readAccessToken();
-
 const initialState: AuthState = {
-  user: storedToken ? decodeJwt(storedToken) : null,
-  accessToken: storedToken,
-  loading: true, // Stays true until restoreSession completes — prevents flash redirect to /login
+  user: null,
+  accessToken: null,
+  loading: true,
   error: null,
 };
 
-// Thunk: Authenticate Dispatcher Credentials
 export const loginUser = createAsyncThunk(
   "auth/login",
   async (credentials: LoginRequest, { dispatch, rejectWithValue }) => {
@@ -56,7 +52,6 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-// Thunk: Secure Corporate Logout
 export const logoutUser = createAsyncThunk(
   "auth/logout",
   async (_, { dispatch }) => {
@@ -70,7 +65,7 @@ export const logoutUser = createAsyncThunk(
   }
 );
 
-// Thunk: Silent Boot-time Session Restoration
+/** Restore access token from HTTP-only refresh cookie into Redux. */
 export const restoreSession = createAsyncThunk(
   "auth/restore",
   async (_, { dispatch }) => {
@@ -84,6 +79,7 @@ export const restoreSession = createAsyncThunk(
       }
     } catch (err) {
       console.warn("Silent session restoration failed");
+      dispatch(logOut());
     } finally {
       dispatch(setLoading(false));
     }
@@ -105,7 +101,6 @@ const authSlice = createSlice({
         if (decoded) state.user = decoded;
       }
       state.accessToken = action.payload.accessToken;
-      writeAccessToken(action.payload.accessToken);
       state.error = null;
     },
     setError: (state, action: PayloadAction<string | null>) => {
@@ -115,7 +110,6 @@ const authSlice = createSlice({
       state.user = null;
       state.accessToken = null;
       state.error = null;
-      writeAccessToken(null);
     },
   },
 });
