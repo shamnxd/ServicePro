@@ -3,6 +3,8 @@ import { AppError } from "../errors/AppError";
 import { StatusCode } from "../constants/statusCodes";
 import { Logger } from "../utils/logger";
 
+type MongoDupKeyError = Error & { name?: string; code?: number; keyPattern?: Record<string, unknown> };
+
 export const errorHandler = (
   err: Error,
   req: Request,
@@ -20,6 +22,19 @@ export const errorHandler = (
       success: false,
       message: err.message
     });
+    return;
+  }
+
+  // Mongo duplicate key (e.g. unique indexes)
+  const mongoErr = err as MongoDupKeyError;
+  if (mongoErr?.name === "MongoServerError" && mongoErr?.code === 11000) {
+    const dupField = mongoErr?.keyPattern ? Object.keys(mongoErr.keyPattern)[0] : undefined;
+    const message =
+      dupField === "amcNo"
+        ? "AMC number already exists. Please retry."
+        : "Duplicate value error. Please change and retry.";
+
+    res.status(StatusCode.CONFLICT).json({ success: false, message });
     return;
   }
 

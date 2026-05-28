@@ -4,6 +4,7 @@ import { BaseRepository } from "./BaseRepository";
 import { IAmcRepository, GetAmcQuery, PaginatedAmc } from "../../interfaces/repositories/IAmcRepository";
 import { IAmc } from "../../interfaces/models/IAmc";
 import { AmcModel, IAmcDocument } from "../../models/Amc";
+import { CounterModel } from "../../models/Counter";
 
 @injectable()
 export class AmcRepository extends BaseRepository<IAmcDocument, IAmc> implements IAmcRepository {
@@ -46,8 +47,40 @@ export class AmcRepository extends BaseRepository<IAmcDocument, IAmc> implements
 
   public override async create(item: Partial<IAmc>): Promise<IAmc> {
     const year = new Date().getFullYear();
-    const count = await this.model.countDocuments().exec();
-    const pad = String(count + 1).padStart(3, "0");
+    const counterKey = `amcNo:${year}`;
+
+    // Initialize counter based on existing max, only once per year key.
+    const latest = await this.model
+      .findOne({ amcNo: new RegExp(`^AMC-${year}-`) })
+      .sort({ amcNo: -1 })
+      .select({ amcNo: 1 })
+      .lean<{ amcNo?: string } | null>()
+      .exec();
+    const latestSeq = (() => {
+      const no = latest?.amcNo;
+      if (!no) return 0;
+      const m = no.match(/AMC-\d{4}-(\d+)/);
+      if (!m) return 0;
+      const n = parseInt(m[1], 10);
+      return Number.isFinite(n) ? n : 0;
+    })();
+
+    await CounterModel.updateOne(
+      { key: counterKey },
+      { $setOnInsert: { key: counterKey, seq: latestSeq } },
+      { upsert: true }
+    ).exec();
+
+    const counter = await CounterModel.findOneAndUpdate(
+      { key: counterKey },
+      { $inc: { seq: 1 } },
+      { new: true }
+    )
+      .lean<{ seq: number }>()
+      .exec();
+
+    const seq = counter?.seq ?? latestSeq + 1;
+    const pad = String(seq).padStart(3, "0");
     const amcNo = `AMC-${year}-${pad}`;
 
     const createdDoc = new this.model({
