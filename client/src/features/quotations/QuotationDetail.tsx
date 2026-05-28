@@ -1,61 +1,171 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router";
-import { ArrowLeft, Building, Calendar, FileText, Download, MessageSquare, DollarSign } from "lucide-react";
+import {
+  ArrowLeft,
+  Building,
+  Calendar,
+  FileText,
+  Loader2,
+  Pencil,
+  MessageSquare,
+} from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
-import { Label } from "../../components/ui/label";
-import { RemarksPanel } from "../../components/RemarksPanel";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
+import { RemarksPanel, remarkKey } from "../../components/RemarksPanel";
 import { ScrollArea } from "../../components/ui/scroll-area";
+import {
+  getQuotationByIdApi,
+  updateQuotationApi,
+  addQuotationRemarkApi,
+  updateQuotationRemarkApi,
+} from "../../api/quotation.api";
+import { Quotation, QuotationStatus } from "../../interfaces/quotation.interface";
+import { AppRoute } from "../../constants/routes.enum";
+import { toast } from "sonner";
 
-// Mock data
-const mockQuotations = [
-  {
-    id: 1,
-    quotationNo: "QUO-2026-001",
-    date: "2026-05-12",
-    clientName: "ABC Corporation",
-    enquiryNo: "ENQ-2026-001",
-    amount: 850000,
-    gst: 153000,
-    total: 1003000,
-    status: "Pending Approval",
-    validUntil: "2026-06-12",
-    items: [
-      { description: "HVAC Unit Installation", qty: 2, rate: 300000, total: 600000 },
-      { description: "Ducting Work", qty: 1, rate: 150000, total: 150000 },
-      { description: "Electrical Wiring", qty: 1, rate: 100000, total: 100000 },
-    ],
-    remarks: [
-      { user: "Admin", date: "2026-05-12", text: "Quotation sent to client" },
-    ],
-  },
+const QUOTATION_STATUSES: QuotationStatus[] = [
+  "Draft",
+  "Pending Approval",
+  "Approved",
+  "Rejected",
+  "Expired",
 ];
 
+function formatInr(n: number) {
+  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
+}
+
 const getStatusColor = (status: string) => {
-  const colors = {
+  const colors: Record<string, string> = {
+    Draft: "bg-slate-500/10 text-slate-600",
     "Pending Approval": "bg-amber-500/10 text-amber-500",
     Approved: "bg-green-500/10 text-green-500",
     Rejected: "bg-red-500/10 text-red-500",
     Expired: "bg-muted text-muted-foreground",
   };
-  return colors[status as keyof typeof colors] || "bg-muted text-muted-foreground";
+  return colors[status] ?? "bg-muted text-muted-foreground";
 };
 
 export function QuotationDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [newRemark, setNewRemark] = useState("");
-  const [remarks, setRemarks] = useState(mockQuotations[0].remarks);
 
-  const quotation = mockQuotations.find(q => q.id === Number(id)) || mockQuotations[0];
+  const [quotation, setQuotation] = useState<Quotation | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("details");
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [newRemark, setNewRemark] = useState("");
+  const [isAddingRemark, setIsAddingRemark] = useState(false);
+  const [isEditingRemark, setIsEditingRemark] = useState(false);
+
+  const loadQuotation = useCallback(async () => {
+    if (!id) return;
+    setIsLoading(true);
+    try {
+      const res = await getQuotationByIdApi(id);
+      if (res.success) setQuotation(res.data);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load quotation");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    loadQuotation();
+  }, [loadQuotation]);
+
+  const handleStatusChange = async (status: QuotationStatus) => {
+    if (!quotation?.id || status === quotation.status) return;
+    setIsUpdatingStatus(true);
+    try {
+      const res = await updateQuotationApi(quotation.id, { status });
+      if (res.success) {
+        setQuotation(res.data);
+        toast.success("Status updated");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update status");
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
+  const handleAddRemark = async () => {
+    if (!quotation?.id || !newRemark.trim()) return;
+    setIsAddingRemark(true);
+    try {
+      const res = await addQuotationRemarkApi(quotation.id, newRemark.trim());
+      if (res.success) {
+        setQuotation(res.data);
+        setNewRemark("");
+        toast.success("Remark added");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to add remark");
+    } finally {
+      setIsAddingRemark(false);
+    }
+  };
+
+  const handleEditRemark = async (key: string, text: string) => {
+    if (!quotation?.id) return;
+    setIsEditingRemark(true);
+    try {
+      const res = await updateQuotationRemarkApi(quotation.id, key, text);
+      if (res.success) {
+        setQuotation(res.data);
+        toast.success("Remark updated");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update remark");
+    } finally {
+      setIsEditingRemark(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-pink-700" />
+      </div>
+    );
+  }
+
+  if (!quotation) {
+    return (
+      <div className="p-6 text-center">
+        <p className="text-muted-foreground">Quotation not found</p>
+        <Button variant="link" onClick={() => navigate("/quotations")}>
+          Back to quotations
+        </Button>
+      </div>
+    );
+  }
+
+  const remarks = (quotation.remarks ?? []).map((r, i) => ({
+    ...r,
+    date: typeof r.date === "string" ? r.date : new Date(r.date).toISOString(),
+    id: r.id ?? remarkKey(r, i),
+  }));
 
   return (
     <div className="h-full bg-background">
       <ScrollArea className="h-full">
         <div className="p-2 lg:p-0">
           <div className="mx-auto space-y-4">
-            <Tabs defaultValue="details" className="space-y-4">
-              {/* Unified Header Card */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
               <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
                 <div className="p-4 lg:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/50">
                   <div className="flex items-center gap-4">
@@ -74,15 +184,32 @@ export function QuotationDetail() {
                       <p className="text-[11px] text-muted-foreground uppercase font-bold tracking-wider">{quotation.clientName}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 self-end md:self-auto">
-                    <span className={`px-2.5 py-1 text-[11px] font-bold uppercase rounded-full ${getStatusColor(quotation.status)}`}>
-                      {quotation.status}
-                    </span>
-                    <Button variant="outline" size="sm" className="gap-2 h-9 px-3 font-semibold">
-                      <Download className="h-4 w-4" />
-                      PDF
+                  <div className="flex flex-wrap items-center gap-2 self-end md:self-auto">
+                    <Select
+                      value={quotation.status}
+                      onValueChange={(v) => handleStatusChange(v as QuotationStatus)}
+                      disabled={isUpdatingStatus}
+                    >
+                      <SelectTrigger className={`h-9 w-[180px] text-xs font-bold uppercase border-0 ${getStatusColor(quotation.status)}`}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {QUOTATION_STATUSES.map((s) => (
+                          <SelectItem key={s} value={s}>
+                            {s}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => quotation.id && navigate(`${AppRoute.QUOTATIONS}/${quotation.id}/edit`)}
+                      className="h-9 px-4 font-semibold gap-1.5"
+                    >
+                      <Pencil className="h-4 w-4" />
+                      Edit
                     </Button>
-                    <Button size="sm" className="bg-pink-700 hover:bg-pink-800 h-9 px-4 font-semibold">Send to Client</Button>
                   </div>
                 </div>
                 <div className="px-4 lg:px-5">
@@ -91,141 +218,124 @@ export function QuotationDetail() {
                       value="details"
                       className="flex-none w-auto shrink-0 h-full rounded-md !border-b-2 border-0 border-transparent data-[state=active]:border-pink-600 data-[state=active]:bg-pink-50/50 data-[state=active]:shadow-none data-[state=active]:text-pink-700 px-4 text-sm font-bold transition-all"
                     >
-                      Quotation Details
+                      Details
                     </TabsTrigger>
                     <TabsTrigger
                       value="remarks"
-                      className="flex-none w-auto shrink-0 h-full rounded-md !border-b-2 border-0 border-transparent data-[state=active]:border-pink-600 data-[state=active]:bg-pink-50/50 data-[state=active]:shadow-none data-[state=active]:text-pink-700 px-4 text-sm font-bold transition-all"
+                      className="flex-none w-auto shrink-0 h-full rounded-md !border-b-2 border-0 border-transparent data-[state=active]:border-pink-600 data-[state=active]:bg-pink-50/50 data-[state=active]:shadow-none data-[state=active]:text-pink-700 px-4 text-sm font-bold transition-all gap-1.5"
                     >
+                      <MessageSquare className="h-4 w-4" />
                       Remarks
+                      {remarks.length > 0 && (
+                        <span className="ml-1 text-[10px] bg-pink-100 text-pink-700 px-1.5 py-0.5 rounded-full">{remarks.length}</span>
+                      )}
                     </TabsTrigger>
                   </TabsList>
                 </div>
               </div>
 
-              <TabsContent value="details" className="m-0">
-                <div className="space-y-4">
-                  {/* Overview Cards */}
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                    <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Quotation Date</label>
-                      </div>
-                      <p className="text-base font-semibold text-foreground">{new Date(quotation.date).toLocaleDateString()}</p>
-                    </div>
-                    <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Valid Until</label>
-                      </div>
-                      <p className="text-base font-semibold text-pink-600">{new Date(quotation.validUntil).toLocaleDateString()}</p>
-                    </div>
-                    <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <FileText className="h-3.5 w-3.5 text-muted-foreground" />
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Enquiry Ref</label>
-                      </div>
-                      <p className="text-base font-semibold text-blue-500">{quotation.enquiryNo}</p>
-                    </div>
-                    <div className="bg-pink-500/10 rounded-xl border border-pink-500/20 p-4 shadow-sm">
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <DollarSign className="h-3.5 w-3.5 text-pink-600" />
-                        <label className="text-[10px] font-bold text-pink-600 uppercase tracking-wider">Total Amount</label>
-                      </div>
-                      <p className="text-xl font-bold text-pink-600">₹{quotation.total.toLocaleString()}</p>
-                    </div>
-                  </div>
-
-                  {/* Line Items */}
-                  <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-                    <div className="px-4 py-3 bg-muted/50 border-b border-border/50">
-                      <h3 className="text-base font-semibold text-foreground">Line Items</h3>
-                    </div>
+              <TabsContent value="details" className="m-0 space-y-4">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  <div className="lg:col-span-2 bg-card rounded-xl border border-border p-5 space-y-4">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Line Items</h3>
                     <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead className="bg-muted/30 border-b border-border/50">
-                          <tr>
-                            <th className="px-4 py-2 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Description</th>
-                            <th className="px-4 py-2 text-center text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Quantity</th>
-                            <th className="px-4 py-2 text-right text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Rate (₹)</th>
-                            <th className="px-4 py-2 text-right text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Total (₹)</th>
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b text-left text-muted-foreground text-xs uppercase">
+                            <th className="pb-2 font-semibold">Description</th>
+                            <th className="pb-2 font-semibold text-right">Qty</th>
+                            <th className="pb-2 font-semibold text-right">Rate</th>
+                            <th className="pb-2 font-semibold text-right">Total</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-border/50">
-                          {quotation.items.map((item, idx) => (
-                            <tr key={idx} className="hover:bg-muted/30 transition-colors">
-                              <td className="px-4 py-3 text-sm text-foreground">{item.description}</td>
-                              <td className="px-4 py-3 text-center text-sm text-muted-foreground">{item.qty}</td>
-                              <td className="px-4 py-3 text-right text-sm text-muted-foreground">₹{item.rate.toLocaleString()}</td>
-                              <td className="px-4 py-3 text-right text-sm text-foreground font-semibold">₹{item.total.toLocaleString()}</td>
+                        <tbody>
+                          {quotation.items.map((item, i) => (
+                            <tr key={i} className="border-b border-border/50 last:border-0">
+                              <td className="py-2.5 pr-4">{item.description}</td>
+                              <td className="py-2.5 text-right">{item.qty}</td>
+                              <td className="py-2.5 text-right">{formatInr(item.rate)}</td>
+                              <td className="py-2.5 text-right font-medium">{formatInr(item.total)}</td>
                             </tr>
                           ))}
                         </tbody>
-                        <tfoot className="bg-muted/50 border-t border-border/50">
-                          <tr>
-                            <td colSpan={3} className="px-4 py-2 text-right text-xs font-medium text-muted-foreground">Subtotal</td>
-                            <td className="px-4 py-2 text-right text-sm font-semibold text-foreground">₹{quotation.amount.toLocaleString()}</td>
-                          </tr>
-                          <tr>
-                            <td colSpan={3} className="px-4 py-2 text-right text-xs font-medium text-muted-foreground">GST (18%)</td>
-                            <td className="px-4 py-2 text-right text-sm font-semibold text-foreground">₹{quotation.gst.toLocaleString()}</td>
-                          </tr>
-                          <tr className="bg-pink-500/5">
-                            <td colSpan={3} className="px-4 py-3 text-right text-sm font-bold text-foreground">Total Amount</td>
-                            <td className="px-4 py-3 text-right font-bold text-pink-600 text-lg">₹{quotation.total.toLocaleString()}</td>
-                          </tr>
-                        </tfoot>
                       </table>
                     </div>
+                    <div className="flex justify-end pt-2 border-t">
+                      <div className="text-right space-y-1 text-sm w-48">
+                        <p className="flex justify-between">
+                          <span className="text-muted-foreground">Subtotal</span>
+                          <span>{formatInr(quotation.amount)}</span>
+                        </p>
+                        <p className="flex justify-between">
+                          <span className="text-muted-foreground">GST ({quotation.gstPercent}%)</span>
+                          <span>{formatInr(quotation.gst)}</span>
+                        </p>
+                        <p className="flex justify-between text-base font-bold pt-1 border-t">
+                          <span>Total</span>
+                          <span className="text-pink-700">{formatInr(quotation.total)}</span>
+                        </p>
+                      </div>
+                    </div>
+                    {quotation.notes && (
+                      <div className="pt-2 border-t">
+                        <p className="text-xs font-bold uppercase text-muted-foreground mb-1">Notes</p>
+                        <p className="text-sm text-foreground">{quotation.notes}</p>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Terms & Conditions Placeholder */}
-                  <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
-                    <h3 className="text-lg font-semibold text-foreground mb-4">Terms & Conditions</h3>
-                    <div className="space-y-2 text-sm text-muted-foreground">
-                      <p>1. Payment terms: 50% advance, 50% on completion</p>
-                      <p>2. GST @ 18% applicable on all items</p>
-                      <p>3. Delivery timeline: 4-6 weeks from date of order confirmation</p>
-                      <p>4. Installation and commissioning included</p>
-                      <p>5. 1 year comprehensive warranty on all equipment</p>
+                  <div className="space-y-4">
+                    <div className="bg-card rounded-xl border border-border p-5 space-y-3">
+                      <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Summary</h3>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center gap-2">
+                          <Building className="h-4 w-4 text-muted-foreground" />
+                          <span>{quotation.clientName}</span>
+                        </div>
+                        {quotation.enquiryNo && (
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-mono">{quotation.enquiryNo}</span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <span>
+                            Valid until{" "}
+                            {new Date(quotation.validUntil).toLocaleDateString("en-IN", {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            })}
+                          </span>
+                        </div>
+                      </div>
+                      <span className={`inline-block px-2.5 py-1 text-[11px] font-bold uppercase rounded-full ${getStatusColor(quotation.status)}`}>
+                        {quotation.status}
+                      </span>
                     </div>
                   </div>
                 </div>
               </TabsContent>
 
               <TabsContent value="remarks" className="m-0">
-                <RemarksPanel
-                  remarks={remarks.map((r, i) => ({
-                    id: String(i),
-                    user: r.user,
-                    date: r.date,
-                    text: r.text,
-                  }))}
-                  newRemark={newRemark}
-                  onNewRemarkChange={setNewRemark}
-                  onAddRemark={() => {
-                    if (!newRemark.trim()) return;
-                    setRemarks((prev) => [
-                      ...prev,
-                      { user: "Admin", date: new Date().toISOString(), text: newRemark.trim() },
-                    ]);
-                    setNewRemark("");
-                  }}
-                  onEditRemark={(remarkKey, text) => {
-                    setRemarks((prev) =>
-                      prev.map((r, i) => (String(i) === remarkKey ? { ...r, text } : r)),
-                    );
-                  }}
-                  emptyMessage="No remarks yet"
-                  placeholder="Add a remark or note..."
-                  sectionTitle="Add New Remark"
-                />
+                <div className="bg-card rounded-xl border border-border p-5">
+                  <RemarksPanel
+                    remarks={remarks}
+                    newRemark={newRemark}
+                    onNewRemarkChange={setNewRemark}
+                    onAddRemark={handleAddRemark}
+                    onEditRemark={handleEditRemark}
+                    isSubmitting={isAddingRemark}
+                    isEditingRemark={isEditingRemark}
+                  />
+                </div>
               </TabsContent>
             </Tabs>
           </div>
         </div>
       </ScrollArea>
+
     </div>
   );
 }
