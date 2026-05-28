@@ -90,6 +90,19 @@ import { EditAmcRemarkUseCase } from "../usecases/amc/EditAmcRemarkUseCase";
 import { AddEnquiryDrawingUseCase, AddEnquiryDrawingInput } from "../usecases/enquiries/AddEnquiryDrawingUseCase";
 import { AddEnquiryRemarkDto, EditEnquiryRemarkDto } from "../dtos/enquiryRemark.dto";
 
+import { IQuotationRepository, GetQuotationsQuery, PaginatedQuotations } from "../interfaces/repositories/IQuotationRepository";
+import { QuotationRepository } from "../repositories/mongo/QuotationRepository";
+import { IQuotation } from "../interfaces/models/IQuotation";
+import { CreateQuotationDto, UpdateQuotationDto } from "../dtos/quotation.dto";
+import { CreateQuotationUseCase } from "../usecases/quotations/CreateQuotationUseCase";
+import { GetQuotationsUseCase } from "../usecases/quotations/GetQuotationsUseCase";
+import { GetQuotationByIdUseCase } from "../usecases/quotations/GetQuotationByIdUseCase";
+import { UpdateQuotationUseCase } from "../usecases/quotations/UpdateQuotationUseCase";
+import { DeleteQuotationUseCase } from "../usecases/quotations/DeleteQuotationUseCase";
+import { AddQuotationRemarkUseCase } from "../usecases/quotations/AddQuotationRemarkUseCase";
+import { EditQuotationRemarkUseCase } from "../usecases/quotations/EditQuotationRemarkUseCase";
+import { AddQuotationRemarkDto, EditQuotationRemarkDto } from "../dtos/quotationRemark.dto";
+
 // Register repositories
 container.registerSingleton<IUserRepository>("UserRepository", UserRepository);
 container.registerSingleton<IClientRepository>("ClientRepository", ClientRepository);
@@ -99,6 +112,7 @@ container.registerSingleton<IStaffRepository>("StaffRepository", StaffRepository
 container.registerSingleton<IAmcRepository>("AmcRepository", AmcRepository);
 container.registerSingleton<IAmcVisitRepository>("AmcVisitRepository", AmcVisitRepository);
 container.registerSingleton<IEnquiryRepository>("EnquiryRepository", EnquiryRepository);
+container.registerSingleton<IQuotationRepository>("QuotationRepository", QuotationRepository);
 
 // Register use case abstractions
 container.registerSingleton<IUseCase<LoginRequestDto, LoginResponseDto>>("LoginUseCase", LoginUseCase);
@@ -174,4 +188,24 @@ container.registerSingleton<
 container.registerSingleton<
   IUseCase<{ amcId: string; remarkKey: string; data: EditEnquiryRemarkDto; user: string }, IAmc | null>
 >("EditAmcRemarkUseCase", EditAmcRemarkUseCase);
+
+container.registerSingleton<IUseCase<CreateQuotationDto, IQuotation>>(
+  "CreateQuotationUseCase",
+  CreateQuotationUseCase,
+);
+container.registerSingleton<IUseCase<GetQuotationsQuery, PaginatedQuotations>>(
+  "GetQuotationsUseCase",
+  GetQuotationsUseCase,
+);
+container.registerSingleton<IUseCase<string, IQuotation | null>>("GetQuotationByIdUseCase", GetQuotationByIdUseCase);
+container.registerSingleton<
+  IUseCase<{ id: string; data: UpdateQuotationDto }, IQuotation | null>
+>("UpdateQuotationUseCase", UpdateQuotationUseCase);
+container.registerSingleton<IUseCase<string, boolean>>("DeleteQuotationUseCase", DeleteQuotationUseCase);
+container.registerSingleton<
+  IUseCase<{ quotationId: string; data: AddQuotationRemarkDto; user: string }, IQuotation | null>
+>("AddQuotationRemarkUseCase", AddQuotationRemarkUseCase);
+container.registerSingleton<
+  IUseCase<{ quotationId: string; remarkKey: string; data: EditQuotationRemarkDto; user: string }, IQuotation | null>
+>("EditQuotationRemarkUseCase", EditQuotationRemarkUseCase);
 

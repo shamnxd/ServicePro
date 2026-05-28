@@ -1,0 +1,44 @@
+import { injectable, inject } from "tsyringe";
+import { IUseCase } from "../../interfaces/usecases/IUseCase";
+import { IQuotationRepository } from "../../interfaces/repositories/IQuotationRepository";
+import { IEnquiryRepository } from "../../interfaces/repositories/IEnquiryRepository";
+import { CreateQuotationDto } from "../../dtos/quotation.dto";
+import { IQuotation } from "../../interfaces/models/IQuotation";
+import { computeQuotationTotals, normalizeLineItems } from "../../utils/quotationTotals";
+
+@injectable()
+export class CreateQuotationUseCase implements IUseCase<CreateQuotationDto, IQuotation> {
+  constructor(
+    @inject("QuotationRepository") private _quotationRepository: IQuotationRepository,
+    @inject("EnquiryRepository") private _enquiryRepository: IEnquiryRepository,
+  ) {}
+
+  public async execute(dto: CreateQuotationDto): Promise<IQuotation> {
+    const items = normalizeLineItems(dto.items);
+    const gstPercent = dto.gstPercent ?? 18;
+    const { amount, gst, total } = computeQuotationTotals(items, gstPercent);
+
+    const quotation = await this._quotationRepository.create({
+      date: dto.date,
+      validUntil: dto.validUntil,
+      clientId: dto.clientId,
+      clientName: dto.clientName,
+      enquiryId: dto.enquiryId?.trim() || undefined,
+      enquiryNo: dto.enquiryNo?.trim() || undefined,
+      amount,
+      gstPercent,
+      gst,
+      total,
+      status: dto.status ?? "Pending Approval",
+      items,
+      remarks: [],
+      notes: dto.notes ?? "",
+    });
+
+    if (dto.enquiryId?.trim()) {
+      await this._enquiryRepository.update(dto.enquiryId, { status: "Quotation Prepared" });
+    }
+
+    return quotation;
+  }
+}
