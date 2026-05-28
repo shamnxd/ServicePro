@@ -7,6 +7,7 @@ import { Enquiries } from "./features/enquiries/Enquiries";
 import { EnquiryDetail } from "./features/enquiries/EnquiryDetail";
 import { Quotations } from "./features/quotations/Quotations";
 import { QuotationDetail } from "./features/quotations/QuotationDetail";
+import { QuotationFormPage } from "./features/quotations/QuotationFormPage";
 import { Complaints } from "./features/complaints/Complaints";
 import { ComplaintDetail } from "./features/complaints/ComplaintDetail";
 import { SMRCreatePage } from "./features/complaints/SMRCreatePage";
@@ -45,6 +46,8 @@ export const router = createBrowserRouter([
       { path: AppRoute.ENQUIRIES, element: <Enquiries /> },
       { path: AppRoute.ENQUIRY_DETAIL, element: <EnquiryDetail /> },
       { path: AppRoute.QUOTATIONS, element: <Quotations /> },
+      { path: AppRoute.QUOTATION_CREATE, element: <QuotationFormPage /> },
+      { path: AppRoute.QUOTATION_EDIT, element: <QuotationFormPage /> },
       { path: AppRoute.QUOTATION_DETAIL, element: <QuotationDetail /> },
       { path: AppRoute.COMPLAINTS, element: <Complaints /> },
       { path: AppRoute.COMPLAINT_DETAIL, element: <ComplaintDetail /> },

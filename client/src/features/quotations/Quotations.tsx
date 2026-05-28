@@ -1,356 +1,322 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
-import { Plus, Search, FileText, Download, Eye, CheckCircle, Clock, MessageSquare } from "lucide-react";
+import { Plus, Eye, Edit, Trash2, Calendar, MoreVertical } from "lucide-react";
 import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../../components/ui/dialog";
-import { Label } from "../../components/ui/label";
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../../components/ui/dropdown-menu";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../components/ui/select";
-import { Textarea } from "../../components/ui/textarea";
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "../../components/ui/alert-dialog";
+import { getQuotationsApi, deleteQuotationApi } from "../../api/quotation.api";
+import { Quotation, QuotationStatus } from "../../interfaces/quotation.interface";
+import { AppRoute } from "../../constants/routes.enum";
+import { toast } from "sonner";
+import { useDebounce } from "../../hooks/useDebounce";
+import { ManagementListPage } from "../../components/ManagementListPage";
 
-const mockQuotations = [
-  {
-    id: 1,
-    quotationNo: "QUO-2026-001",
-    date: "2026-05-12",
-    clientName: "ABC Corporation",
-    enquiryNo: "ENQ-2026-001",
-    amount: 850000,
-    gst: 153000,
-    total: 1003000,
-    status: "Pending Approval",
-    validUntil: "2026-06-12",
-    items: [
-      { description: "HVAC Unit Installation", qty: 2, rate: 300000, total: 600000 },
-      { description: "Ducting Work", qty: 1, rate: 150000, total: 150000 },
-      { description: "Electrical Wiring", qty: 1, rate: 100000, total: 100000 },
-    ],
-    remarks: [
-      { user: "Admin", date: "2026-05-12", text: "Quotation sent to client" },
-    ],
-  },
-  {
-    id: 2,
-    quotationNo: "QUO-2026-002",
-    date: "2026-05-14",
-    clientName: "XYZ Industries",
-    enquiryNo: "ENQ-2026-002",
-    amount: 1250000,
-    gst: 225000,
-    total: 1475000,
-    status: "Approved",
-    validUntil: "2026-06-14",
-    items: [
-      { description: "Fire Alarm System", qty: 5, rate: 250000, total: 1250000 },
-    ],
-    remarks: [
-      { user: "Admin", date: "2026-05-14", text: "Quotation created" },
-      { user: "Client", date: "2026-05-15", text: "Approved. Please proceed" },
-    ],
-  },
-  {
-    id: 3,
-    quotationNo: "QUO-2026-003",
-    date: "2026-05-15",
-    clientName: "DEF Solutions",
-    enquiryNo: "ENQ-2026-003",
-    amount: 650000,
-    gst: 117000,
-    total: 767000,
-    status: "Pending Approval",
-    validUntil: "2026-06-15",
-    items: [
-      { description: "Electrical Panel Upgrade", qty: 3, rate: 150000, total: 450000 },
-      { description: "Circuit Breakers", qty: 10, rate: 20000, total: 200000 },
-    ],
-    remarks: [],
-  },
-  {
-    id: 4,
-    quotationNo: "QUO-2026-004",
-    date: "2026-05-10",
-    clientName: "GHI Enterprises",
-    enquiryNo: "ENQ-2026-004",
-    amount: 980000,
-    gst: 176400,
-    total: 1156400,
-    status: "Rejected",
-    validUntil: "2026-06-10",
-    items: [
-      { description: "Generator 500KVA", qty: 1, rate: 800000, total: 800000 },
-      { description: "Installation & Testing", qty: 1, rate: 180000, total: 180000 },
-    ],
-    remarks: [
-      { user: "Client", date: "2026-05-11", text: "Price too high, looking for alternatives" },
-    ],
-  },
-];
+type StatusFilter = "all" | QuotationStatus;
+
+const PAGE_SIZE = 10;
+
+function formatInr(n: number) {
+  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
+}
+
+function getStatusBadge(status: string) {
+  const map: Record<string, string> = {
+    Draft: "bg-slate-500/10 text-slate-600 dark:text-slate-400",
+    "Pending Approval": "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+    Approved: "bg-green-500/10 text-green-600 dark:text-green-400",
+    Rejected: "bg-red-500/10 text-red-600 dark:text-red-400",
+    Expired: "bg-muted text-muted-foreground",
+  };
+  return (
+    <span
+      className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide whitespace-nowrap ${
+        map[status] ?? "bg-muted text-muted-foreground"
+      }`}
+    >
+      {status}
+    </span>
+  );
+}
 
 export function Quotations() {
   const navigate = useNavigate();
+
+  const [quotations, setQuotations] = useState<Quotation[]>([]);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
+
   const [searchQuery, setSearchQuery] = useState("");
-  const [quotations] = useState(mockQuotations);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [selectedQuotation, setSelectedQuotation] = useState<any>(null);
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [newRemark, setNewRemark] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 400);
+  const [activeFilter, setActiveFilter] = useState<StatusFilter>("all");
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const filteredQuotations = quotations.filter((quotation) => {
-    const matchesSearch =
-      quotation.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      quotation.quotationNo.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesStatus = statusFilter === "all" || quotation.status === statusFilter;
-
-    return matchesSearch && matchesStatus;
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    approved: 0,
+    rejected: 0,
+    draft: 0,
   });
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Approved":
-        return "bg-green-500/10 text-green-500";
-      case "Pending Approval":
-        return "bg-amber-500/10 text-amber-500";
-      case "Rejected":
-        return "bg-red-500/10 text-red-500";
-      default:
-        return "bg-muted text-muted-foreground";
+  const fetchStats = useCallback(async () => {
+    try {
+      const [allRes, pendingRes, approvedRes, rejectedRes, draftRes] = await Promise.all([
+        getQuotationsApi({ page: 1, limit: 1 }),
+        getQuotationsApi({ page: 1, limit: 1, status: "Pending Approval" }),
+        getQuotationsApi({ page: 1, limit: 1, status: "Approved" }),
+        getQuotationsApi({ page: 1, limit: 1, status: "Rejected" }),
+        getQuotationsApi({ page: 1, limit: 1, status: "Draft" }),
+      ]);
+      setStats({
+        total: allRes.total ?? 0,
+        pending: pendingRes.total ?? 0,
+        approved: approvedRes.total ?? 0,
+        rejected: rejectedRes.total ?? 0,
+        draft: draftRes.total ?? 0,
+      });
+    } catch (err) {
+      console.error("Failed to fetch quotation stats:", err);
+    }
+  }, []);
+
+  const fetchQuotations = useCallback(async (page: number, search: string, filter: StatusFilter) => {
+    setIsLoading(true);
+    try {
+      const res = await getQuotationsApi({
+        search: search || undefined,
+        status: filter === "all" ? undefined : filter,
+        page,
+        limit: PAGE_SIZE,
+      });
+      if (res.success) {
+        setQuotations(res.data);
+        setTotal(res.total ?? 0);
+        setTotalPages(res.totalPages ?? 0);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load quotations");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const refreshList = useCallback(() => {
+    fetchQuotations(currentPage, debouncedSearch, activeFilter);
+    fetchStats();
+  }, [currentPage, debouncedSearch, activeFilter, fetchQuotations, fetchStats]);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
+
+  useEffect(() => {
+    fetchQuotations(currentPage, debouncedSearch, activeFilter);
+  }, [currentPage, debouncedSearch, activeFilter, fetchQuotations]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, activeFilter]);
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    try {
+      await deleteQuotationApi(deleteId);
+      toast.success("Quotation deleted");
+      setDeleteId(null);
+      refreshList();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete quotation");
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "Approved":
-        return <CheckCircle className="h-4 w-4" />;
-      case "Pending Approval":
-        return <Clock className="h-4 w-4" />;
-      default:
-        return <FileText className="h-4 w-4" />;
-    }
-  };
+  const renderActions = (row: Quotation) => (
+    <div className="flex justify-end" onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="h-8 w-8 p-0 hover:bg-muted rounded-full" onClick={(e) => e.stopPropagation()}>
+            <MoreVertical className="h-4 w-4 text-muted-foreground" />
+            <span className="sr-only">Open menu</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-[180px]">
+          <DropdownMenuItem
+            onSelect={(e) => {
+              e.preventDefault();
+              row.id && navigate(`${AppRoute.QUOTATIONS}/${row.id}`);
+            }}
+            className="cursor-pointer"
+          >
+            <Eye className="mr-2 h-4 w-4 text-blue-500" />
+            View Details
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={(e) => {
+              e.preventDefault();
+              row.id && navigate(`${AppRoute.QUOTATIONS}/${row.id}/edit`);
+            }}
+            className="cursor-pointer"
+          >
+            <Edit className="mr-2 h-4 w-4 text-green-500" />
+            Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            variant="destructive"
+            onSelect={(e) => {
+              e.preventDefault();
+              if (row.id) setDeleteId(row.id);
+            }}
+            className="cursor-pointer"
+          >
+            <Trash2 className="mr-2 h-4 w-4 text-destructive" />
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
 
-  return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-foreground">Quotation Management</h2>
-          <p className="text-muted-foreground mt-1">Create and track quotations</p>
+  const filterChips = [
+    { value: "all" as StatusFilter, label: "Total", count: stats.total, tone: "primary" as const },
+    { value: "Pending Approval" as StatusFilter, label: "Pending", count: stats.pending, tone: "amber" as const },
+    { value: "Approved" as StatusFilter, label: "Approved", count: stats.approved, tone: "green" as const },
+    { value: "Rejected" as StatusFilter, label: "Rejected", count: stats.rejected, tone: "red" as const },
+    { value: "Draft" as StatusFilter, label: "Draft", count: stats.draft, tone: "blue" as const },
+  ];
+
+  const columns = [
+    {
+      header: "Quotation No.",
+      accessor: (row: Quotation) => (
+        <div className="min-w-0">
+          <p className="font-semibold text-foreground leading-tight truncate">{row.quotationNo}</p>
+          <p className="text-[10px] text-muted-foreground mt-0.5 truncate">
+            {new Date(row.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+          </p>
         </div>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              Create Quotation
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Create New Quotation</DialogTitle>
-            </DialogHeader>
-            <form className="space-y-4 mt-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="enquiry">Enquiry *</Label>
-                  <Select>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select enquiry" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="enq1">ENQ-2026-001 - ABC Corporation</SelectItem>
-                      <SelectItem value="enq2">ENQ-2026-002 - XYZ Industries</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="quotationDate">Quotation Date *</Label>
-                  <Input id="quotationDate" type="date" className="mt-1" />
-                </div>
-                <div>
-                  <Label htmlFor="validUntil">Valid Until *</Label>
-                  <Input id="validUntil" type="date" className="mt-1" />
-                </div>
-                <div>
-                  <Label htmlFor="amount">Amount (₹) *</Label>
-                  <Input id="amount" type="number" placeholder="0.00" className="mt-1" />
-                </div>
-              </div>
-
-              <div className="border border-border rounded-lg p-4">
-                <h4 className="font-medium text-foreground mb-3">Line Items</h4>
-                <div className="space-y-3">
-                  <div className="grid grid-cols-12 gap-2 items-end">
-                    <div className="col-span-5">
-                      <Label htmlFor="itemDesc">Description</Label>
-                      <Input id="itemDesc" placeholder="Item description" className="mt-1" />
-                    </div>
-                    <div className="col-span-2">
-                      <Label htmlFor="itemQty">Quantity</Label>
-                      <Input id="itemQty" type="number" placeholder="0" className="mt-1" />
-                    </div>
-                    <div className="col-span-2">
-                      <Label htmlFor="itemRate">Rate</Label>
-                      <Input id="itemRate" type="number" placeholder="0.00" className="mt-1" />
-                    </div>
-                    <div className="col-span-2">
-                      <Label htmlFor="itemTotal">Total</Label>
-                      <Input id="itemTotal" type="number" placeholder="0.00" className="mt-1" disabled />
-                    </div>
-                    <div className="col-span-1">
-                      <Button type="button" size="sm" className="w-full">+</Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="gst">GST (%)</Label>
-                  <Input id="gst" type="number" placeholder="18" className="mt-1" />
-                </div>
-                <div>
-                  <Label htmlFor="grandTotal">Grand Total (₹)</Label>
-                  <Input id="grandTotal" type="number" placeholder="0.00" className="mt-1" disabled />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-4">
-                <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">Generate Quotation</Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Search and Filter */}
-      <div className="bg-card rounded-lg shadow-sm border border-border p-4">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-              placeholder="Search quotations..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+      ),
+      className: "px-4 py-4 w-[130px]",
+    },
+    {
+      header: "Client",
+      accessor: (row: Quotation) => (
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="h-7 w-7 rounded-full overflow-hidden shrink-0 border border-border shadow-sm">
+            <img
+              src={`https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(row.clientName)}&backgroundColor=be185d&fontSize=40&fontWeight=700`}
+              alt={row.clientName}
+              className="h-full w-full object-cover"
             />
           </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-[200px]">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="Approved">Approved</SelectItem>
-              <SelectItem value="Pending Approval">Pending Approval</SelectItem>
-              <SelectItem value="Rejected">Rejected</SelectItem>
-            </SelectContent>
-          </Select>
+          <p className="font-medium text-foreground leading-tight truncate max-w-[140px]">{row.clientName}</p>
         </div>
-      </div>
+      ),
+      className: "px-4 py-4 w-[160px]",
+    },
+    {
+      header: "Enquiry",
+      accessor: (row: Quotation) =>
+        row.enquiryNo ? (
+          <span className="text-sm text-foreground font-mono">{row.enquiryNo}</span>
+        ) : (
+          <span className="text-muted-foreground text-sm">—</span>
+        ),
+      className: "px-4 py-4 w-[120px]",
+    },
+    {
+      header: "Amount",
+      accessor: (row: Quotation) => (
+        <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatInr(row.total)}</span>
+      ),
+      className: "px-4 py-4 w-[110px]",
+    },
+    {
+      header: "Valid Until",
+      accessor: (row: Quotation) => (
+        <div className="flex items-center gap-1.5 text-sm text-muted-foreground whitespace-nowrap">
+          <Calendar className="h-3.5 w-3.5 shrink-0" />
+          {new Date(row.validUntil).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+        </div>
+      ),
+      className: "px-4 py-4 w-[120px]",
+    },
+    {
+      header: "Status",
+      accessor: (row: Quotation) => getStatusBadge(row.status),
+      className: "px-4 py-4 w-[140px]",
+    },
+    {
+      header: <span className="sr-only">Actions</span>,
+      className: "px-4 py-4 text-right w-[52px]",
+      accessor: (row: Quotation) => renderActions(row),
+    },
+  ];
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
-          <p className="text-sm text-muted-foreground">Total Quotations</p>
-          <p className="text-2xl font-bold text-foreground mt-1">{quotations.length}</p>
-        </div>
-        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
-          <p className="text-sm text-muted-foreground">Approved</p>
-          <p className="text-2xl font-bold text-green-500 mt-1">
-            {quotations.filter((q) => q.status === "Approved").length}
-          </p>
-        </div>
-        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
-          <p className="text-sm text-muted-foreground">Pending</p>
-          <p className="text-2xl font-bold text-amber-500 mt-1">
-            {quotations.filter((q) => q.status === "Pending Approval").length}
-          </p>
-        </div>
-        <div className="bg-card rounded-lg shadow-sm border border-border p-4">
-          <p className="text-sm text-muted-foreground">Total Value</p>
-          <p className="text-2xl font-bold text-blue-500 mt-1">
-            ₹{(quotations.reduce((sum, q) => sum + q.amount, 0) / 100000).toFixed(1)}L
-          </p>
-        </div>
-      </div>
+  return (
+    <>
+      <ManagementListPage
+        title="Quotation Management"
+        subtitle="Create and track customer quotations"
+        headerAction={
+          <Button
+            onClick={() => navigate(AppRoute.QUOTATION_CREATE)}
+            className="flex items-center gap-2 shrink-0 bg-pink-700 hover:bg-pink-800 text-white font-semibold"
+          >
+            <Plus className="h-4 w-4" />
+            Add Quotation
+          </Button>
+        }
+        searchPlaceholder="Search by quotation no., client, enquiry…"
+        searchValue={searchQuery}
+        onSearchChange={setSearchQuery}
+        filterOptions={filterChips}
+        filterValue={activeFilter}
+        onFilterChange={setActiveFilter}
+        columns={columns}
+        data={quotations}
+        isLoading={isLoading}
+        rowKey={(row) => row.id || row.quotationNo}
+        onRowClick={(row) => row.id && navigate(`${AppRoute.QUOTATIONS}/${row.id}`)}
+        emptyMessage="No quotations found"
+        currentPage={currentPage}
+        totalPages={totalPages}
+        total={total}
+        pageSize={PAGE_SIZE}
+        onPageChange={setCurrentPage}
+        entityLabel="quotations"
+      />
 
-      {/* Quotations Table */}
-      <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-muted/50 border-b border-border">
-              <tr>
-                <th className="px-4 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Quotation No</th>
-                <th className="px-4 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Date</th>
-                <th className="px-4 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Client</th>
-                <th className="px-4 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Enquiry No</th>
-                <th className="px-4 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Amount</th>
-                <th className="px-4 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Valid Until</th>
-                <th className="px-4 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Status</th>
-                <th className="px-4 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {filteredQuotations.map((quotation) => (
-                <tr key={quotation.id} className="hover:bg-muted/30 transition-colors">
-                  <td className="px-4 py-2.5 font-medium text-foreground text-sm">
-                    {quotation.quotationNo}
-                  </td>
-                  <td className="px-4 py-2.5 text-sm text-muted-foreground">
-                    {new Date(quotation.date).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-2.5 text-sm text-foreground">
-                    {quotation.clientName}
-                  </td>
-                  <td className="px-4 py-2.5 text-sm text-muted-foreground">
-                    {quotation.enquiryNo}
-                  </td>
-                  <td className="px-4 py-2.5 text-sm font-medium text-foreground">
-                    ₹{quotation.amount.toLocaleString()}
-                  </td>
-                  <td className="px-4 py-2.5 text-sm text-muted-foreground">
-                    {new Date(quotation.validUntil).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-2.5">
-                    <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(quotation.status)}`}>
-                      {getStatusIcon(quotation.status)}
-                      {quotation.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-2.5">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => navigate(`/quotations/${quotation.id}`)}
-                        className="text-blue-500 hover:text-blue-600 transition-colors"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </button>
-                      <button className="text-green-500 hover:text-green-600 transition-colors">
-                        <Download className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete quotation?</AlertDialogTitle>
+            <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

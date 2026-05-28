@@ -8,6 +8,8 @@ export enum AppRoute {
   ENQUIRIES = "/enquiries",
   ENQUIRY_DETAIL = "/enquiries/:id",
   QUOTATIONS = "/quotations",
+  QUOTATION_CREATE = "/quotations/create",
+  QUOTATION_EDIT = "/quotations/:id/edit",
   QUOTATION_DETAIL = "/quotations/:id",
   COMPLAINTS = "/complaints",
   COMPLAINT_DETAIL = "/complaints/:id",
@@ -38,5 +40,6 @@ export enum ApiRoute {
   STAFF = "/staff",
   AMC = "/amc",
   ENQUIRIES = "/enquiries",
+  QUOTATIONS = "/quotations",
 }
 
