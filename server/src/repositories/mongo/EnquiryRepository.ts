@@ -1,4 +1,5 @@
 import { injectable } from "tsyringe";
+import { Types } from "mongoose";
 import { BaseRepository } from "./BaseRepository";
 import {
   IEnquiryRepository,
@@ -15,15 +16,21 @@ export class EnquiryRepository extends BaseRepository<IEnquiryDocument, IEnquiry
   }
 
   protected toDomain(doc: IEnquiryDocument): IEnquiry {
+    const client = (doc as unknown as { clientRef?: any }).clientRef;
+    const clientName = client?.companyName ?? doc.clientName;
+    const contactPerson = client?.contactPerson ?? doc.contactPerson;
+    const phone = client?.phone ?? doc.phone;
+    const email = client?.email ?? doc.email;
+
     return {
       id: doc._id.toString(),
       enquiryNo: doc.enquiryNo,
       date: doc.date,
       clientId: doc.clientId,
-      clientName: doc.clientName,
-      contactPerson: doc.contactPerson,
-      phone: doc.phone,
-      email: doc.email,
+      clientName,
+      contactPerson,
+      phone,
+      email,
       requirement: doc.requirement,
       description: doc.description,
       status: doc.status,
@@ -66,10 +73,16 @@ export class EnquiryRepository extends BaseRepository<IEnquiryDocument, IEnquiry
     const createdDoc = new this.model({
       ...item,
       enquiryNo,
+      clientRef: item.clientId && Types.ObjectId.isValid(item.clientId) ? new Types.ObjectId(item.clientId) : null,
     });
 
     const savedDoc = await createdDoc.save();
     return this.toDomain(savedDoc);
+  }
+
+  public override async findById(id: string): Promise<IEnquiry | null> {
+    const doc = await this.model.findById(id).populate("clientRef").exec();
+    return doc ? this.toDomain(doc) : null;
   }
 
   public async findPaginated(query: GetEnquiriesQuery): Promise<PaginatedEnquiries> {
@@ -102,7 +115,7 @@ export class EnquiryRepository extends BaseRepository<IEnquiryDocument, IEnquiry
     const skip = (page - 1) * limit;
 
     const [docs, total] = await Promise.all([
-      this.model.find(mongoFilter).sort({ createdAt: -1 }).skip(skip).limit(limit).exec(),
+      this.model.find(mongoFilter).populate("clientRef").sort({ createdAt: -1 }).skip(skip).limit(limit).exec(),
       this.model.countDocuments(mongoFilter).exec(),
     ]);
 

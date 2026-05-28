@@ -52,7 +52,11 @@ const enquirySchema = new Schema<IEnquiryDocument>(
   {
     enquiryNo: { type: String, required: true, unique: true, trim: true },
     date: { type: Date, required: true, default: Date.now },
-    clientId: { type: String, required: true, ref: "Client" },
+    // Legacy: stored clientId as string. Keep for backwards compatibility.
+    clientId: { type: String, required: true, trim: true },
+    // New: proper reference for populate.
+    clientRef: { type: Schema.Types.ObjectId, ref: "Client", default: null, index: true },
+    // Legacy snapshot fields.
     clientName: { type: String, required: true, trim: true },
     contactPerson: { type: String, required: true, trim: true },
     phone: { type: String, required: true, trim: true },

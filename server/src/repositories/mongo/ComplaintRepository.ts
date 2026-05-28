@@ -1,4 +1,5 @@
 import { injectable } from "tsyringe";
+import { Types } from "mongoose";
 import { BaseRepository } from "./BaseRepository";
 import { IComplaintRepository, GetComplaintsQuery, PaginatedComplaints } from "../../interfaces/repositories/IComplaintRepository";
 import { IComplaint } from "../../interfaces/models/IComplaint";
@@ -12,21 +13,34 @@ export class ComplaintRepository extends BaseRepository<IComplaintDocument, ICom
   }
 
   protected toDomain(doc: IComplaintDocument): IComplaint {
+    const client = (doc as unknown as { clientRef?: any }).clientRef;
+    const clientName = client?.companyName ?? doc.clientName;
+    const contactPerson = client?.contactPerson ?? doc.contactPerson;
+    const phone = client?.phone ?? doc.phone;
+    const location = (() => {
+      if (client?.city) {
+        const addr = client?.address ? String(client.address).trim() : "";
+        const city = String(client.city).trim();
+        return addr ? `${addr}, ${city}` : city;
+      }
+      return doc.location;
+    })();
+
     return {
       id: doc._id.toString(),
       complaintNo: doc.complaintNo,
       date: doc.date,
       clientId: doc.clientId,
-      clientName: doc.clientName,
-      contactPerson: doc.contactPerson,
-      phone: doc.phone,
+      clientName,
+      contactPerson,
+      phone,
       issue: doc.issue,
       description: doc.description,
       priority: doc.priority,
       status: doc.status,
       assignedTo: Array.isArray(doc.assignedTo) ? doc.assignedTo : (doc.assignedTo ? [doc.assignedTo] : []),
       assignedStaffIds: Array.isArray(doc.assignedStaffIds) ? doc.assignedStaffIds : [],
-      location: doc.location,
+      location,
       expectedResolution: doc.expectedResolution,
       remarks: doc.remarks.map((r) => ({
         id: (r as { _id?: { toString(): string } })._id?.toString(),
@@ -47,11 +61,17 @@ export class ComplaintRepository extends BaseRepository<IComplaintDocument, ICom
 
     const createdDoc = new this.model({
       ...item,
-      complaintNo
+      complaintNo,
+      clientRef: item.clientId && Types.ObjectId.isValid(item.clientId) ? new Types.ObjectId(item.clientId) : null,
     });
 
     const savedDoc = await createdDoc.save();
     return this.toDomain(savedDoc);
+  }
+
+  public override async findById(id: string): Promise<IComplaint | null> {
+    const doc = await this.model.findById(id).populate("clientRef").exec();
+    return doc ? this.toDomain(doc) : null;
   }
 
   public async findPaginated(query: GetComplaintsQuery): Promise<PaginatedComplaints> {
@@ -84,7 +104,7 @@ export class ComplaintRepository extends BaseRepository<IComplaintDocument, ICom
     const skip = (page - 1) * limit;
 
     const [docs, total] = await Promise.all([
-      this.model.find(mongoFilter).sort({ createdAt: -1 }).skip(skip).limit(limit).exec(),
+      this.model.find(mongoFilter).populate("clientRef").sort({ createdAt: -1 }).skip(skip).limit(limit).exec(),
       this.model.countDocuments(mongoFilter).exec()
     ]);
 

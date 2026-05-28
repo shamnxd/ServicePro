@@ -10,6 +10,7 @@ export interface IComplaint {
   complaintNo: string;
   date: Date;
   clientId: string;
+  clientRef?: string;
   clientName: string;
   contactPerson: string;
   phone: string;

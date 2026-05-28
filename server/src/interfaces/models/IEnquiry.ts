@@ -26,6 +26,7 @@ export interface IEnquiry {
   enquiryNo: string;
   date: Date | string;
   clientId: string;
+  clientRef?: string;
   clientName: string;
   contactPerson: string;
   phone: string;
