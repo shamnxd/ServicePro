@@ -40,8 +40,7 @@ import { RefreshCw } from "lucide-react";
 import { NextVisitCell } from "../../components/NextVisitCell";
 import { calculateNextPreferredVisitDate } from "../../utils/calculateAmcVisits";
 import { useDebounce } from "../../hooks/useDebounce";
-import { ReusableTable } from "../../components/ReusableTable";
-import { FilterStatChips } from "../../components/FilterStatChips";
+import { ManagementListPage } from "../../components/ManagementListPage";
 import { toast } from "sonner";
 
 type StatusFilter = "all" | "Active" | "Due for Renewal" | "Expired";
@@ -324,9 +323,6 @@ export function AMC() {
     fetchStats();
   };
 
-  const startItem = total === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
-  const endItem = Math.min(currentPage * PAGE_SIZE, total);
-
   const filterChips = [
     { value: "all" as StatusFilter, label: "All Contracts", count: stats.total, tone: "primary" as const },
     { value: "Active" as StatusFilter, label: "Active", count: stats.active, tone: "green" as const },
@@ -335,204 +331,40 @@ export function AMC() {
   ];
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <div className="min-w-0 flex-1">
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground">AMC Management</h2>
-          <p className="text-sm text-muted-foreground mt-0.5">Manage annual maintenance contracts</p>
-        </div>
-        <Button
-          onClick={() => setIsAddOpen(true)}
-          className="flex items-center gap-2 shrink-0 bg-pink-700 hover:bg-pink-800 text-white font-semibold"
-        >
-          <Plus className="h-4 w-4" />
-          Add AMC Contract
-        </Button>
-      </div>
-
-      <div className="bg-card rounded-lg shadow-sm border border-border p-4 space-y-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            placeholder="Search by AMC no, client, service type, location..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <FilterStatChips options={filterChips} value={statusFilter} onChange={setStatusFilter} />
-      </div>
-
-      <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
-        <div className="px-4 sm:px-6 py-3 border-b border-border flex items-center justify-between gap-2">
-          <p className="text-xs sm:text-sm text-muted-foreground min-w-0 truncate">
-            {isLoading ? (
-              "Loading..."
-            ) : total === 0 ? (
-              "No contracts found"
-            ) : (
-              <>
-                Showing <span className="font-medium text-foreground">{startItem}–{endItem}</span> of{" "}
-                <span className="font-medium text-foreground">{total}</span> contracts
-                {statusFilter !== "all" && (
-                  <span className="hidden sm:inline ml-1">
-                    — filtered by{" "}
-                    <span className="text-primary font-medium">{statusFilterLabels[statusFilter]}</span>
-                  </span>
-                )}
-              </>
-            )}
-          </p>
-          {statusFilter !== "all" && (
-            <button
-              type="button"
-              onClick={() => setStatusFilter("all")}
-              className="text-xs text-muted-foreground hover:text-primary transition-colors underline shrink-0"
-            >
-              Clear filter
-            </button>
-          )}
-        </div>
-
-        <div className="hidden md:block">
-          <ReusableTable
-            data={contracts}
-            columns={columns}
-            isLoading={isLoading}
-            emptyMessage={
-              <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
-                <p className="text-sm">No AMC contracts found</p>
-                {statusFilter !== "all" && (
-                  <button
-                    type="button"
-                    onClick={() => setStatusFilter("all")}
-                    className="mt-2 text-xs text-primary hover:underline"
-                  >
-                    Clear filter
-                  </button>
-                )}
-              </div>
-            }
-            rowKey={(c) => c.id ?? c.amcNo}
-            rowNumberStart={startItem || 1}
-            onRowClick={(c) => c.id && navigate(`/amc/${c.id}`)}
-          />
-        </div>
-
-        <div className="md:hidden">
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-12 gap-3 text-muted-foreground">
-              <Loader2 className="h-7 w-7 animate-spin text-primary" />
-              <span className="text-sm">Loading contracts...</span>
-            </div>
-          ) : contracts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-              <p className="text-sm">No AMC contracts found</p>
-              {statusFilter !== "all" && (
-                <button
-                  type="button"
-                  onClick={() => setStatusFilter("all")}
-                  className="mt-2 text-xs text-primary hover:underline"
-                >
-                  Clear filter
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="divide-y divide-border">
-              {contracts.map((c, index) => (
-                <div
-                  key={c.id ?? c.amcNo}
-                  className="px-4 py-3 hover:bg-muted/30 transition-colors cursor-pointer"
-                  onClick={() => c.id && navigate(`/amc/${c.id}`)}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-foreground text-sm leading-tight truncate">{c.amcNo}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5 truncate">{c.clientName}</p>
-                      {c.email?.trim() && (
-                        <p className="text-xs text-muted-foreground truncate">{c.email}</p>
-                      )}
-                      <p className="text-xs text-muted-foreground mt-0.5 truncate">{c.serviceType}</p>
-                      <p className="text-xs text-muted-foreground mt-1">Expires {fmtDate(c.endDate)}</p>
-                    </div>
-                    <div className="flex items-start gap-2 shrink-0">
-                      <div className="flex flex-col items-end gap-1.5">
-                        <span className="text-[10px] font-bold text-muted-foreground tabular-nums">
-                          #{(startItem || 1) + index}
-                        </span>
-                        <span className={`px-2 py-0.5 text-[10px] font-semibold rounded-full ${statusColor(c.status)}`}>
-                          {c.status}
-                        </span>
-                        <div className="flex flex-col items-end gap-1.5 text-right">
-                          <div>
-                            <p className="text-[9px] font-bold uppercase text-muted-foreground mb-0.5">
-                              Preferred
-                            </p>
-                            <NextVisitCell
-                              nextVisit={calculateNextPreferredVisitDate(
-                                c.startDate,
-                                c.endDate,
-                                c.visitsCompleted,
-                                c.totalVisits
-                              )}
-                              emptyLabel="All visits done"
-                            />
-                          </div>
-                          <div>
-                            <p className="text-[9px] font-bold uppercase text-muted-foreground mb-0.5">
-                              Scheduled
-                            </p>
-                            <NextVisitCell nextVisit={c.nextVisit} emptyLabel="Not scheduled" />
-                          </div>
-                        </div>
-                      </div>
-                      {renderActions(c)}
-                    </div>
-                  </div>
-                  <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                    <span>
-                      {c.visitsCompleted}/{c.totalVisits} visits
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {!isLoading && totalPages > 1 && (
-          <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
-              Page <span className="font-medium text-foreground">{currentPage}</span> of{" "}
-              <span className="font-medium text-foreground">{totalPages}</span>
-            </p>
-            <div className="flex items-center gap-1 order-1 sm:order-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={currentPage <= 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
-                className="h-8 w-8 p-0"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span className="text-sm text-muted-foreground px-2">
-                {currentPage} / {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={currentPage >= totalPages}
-                onClick={() => setCurrentPage((p) => p + 1)}
-                className="h-8 w-8 p-0"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        )}
-      </div>
+    <>
+      <ManagementListPage
+        title="AMC Management"
+        subtitle="Manage annual maintenance contracts"
+        headerAction={
+          <Button
+            onClick={() => setIsAddOpen(true)}
+            className="flex items-center gap-2 shrink-0 bg-pink-700 hover:bg-pink-800 text-white font-semibold"
+          >
+            <Plus className="h-4 w-4" />
+            Add AMC Contract
+          </Button>
+        }
+        searchPlaceholder="Search by AMC no., client, service type, location…"
+        searchValue={searchQuery}
+        onSearchChange={setSearchQuery}
+        filterOptions={filterChips}
+        filterValue={statusFilter}
+        onFilterChange={setStatusFilter}
+        columns={columns}
+        data={contracts}
+        isLoading={isLoading}
+        rowKey={(c) => c.id ?? c.amcNo}
+        onRowClick={(c) => c.id && navigate(`/amc/${c.id}`)}
+        emptyMessage="No AMC contracts found"
+        currentPage={currentPage}
+        totalPages={totalPages}
+        total={total}
+        pageSize={PAGE_SIZE}
+        onPageChange={setCurrentPage}
+        entityLabel="contracts"
+        activeFilterLabel={statusFilter !== "all" ? statusFilterLabels[statusFilter] : undefined}
+        onClearFilter={() => setStatusFilter("all")}
+      />
 
       <AmcFormModal isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} onSuccess={refreshList} contract={null} />
       <AmcFormModal
@@ -573,6 +405,6 @@ export function AMC() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </>
   );
 }

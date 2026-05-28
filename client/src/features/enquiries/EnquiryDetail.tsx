@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useParams, useNavigate } from "react-router";
+import { AppRoute } from "../../constants/routes.enum";
 import {
   ArrowLeft,
   Phone,
@@ -445,7 +446,23 @@ export function EnquiryDetail() {
                           <XCircle className="h-4 w-4" />
                           Close Enquiry
                         </Button>
-                        <Button size="sm" className="bg-pink-700 hover:bg-pink-800 h-9 px-4 font-semibold">
+                        <Button
+                          size="sm"
+                          className="bg-pink-700 hover:bg-pink-800 h-9 px-4 font-semibold"
+                          onClick={() =>
+                            enquiry?.id &&
+                            navigate(AppRoute.QUOTATION_CREATE, {
+                              state: {
+                                prefillFromEnquiry: {
+                                  enquiryId: enquiry.id,
+                                  enquiryNo: enquiry.enquiryNo,
+                                  clientId: enquiry.clientId,
+                                  clientName: enquiry.clientName,
+                                },
+                              },
+                            })
+                          }
+                        >
                           Create Quotation
                         </Button>
                       </>

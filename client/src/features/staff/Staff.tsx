@@ -1,11 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
-import {
-  Plus, Search, Edit, Trash2, Eye, MapPin, Phone, Mail,
-  Loader2, ChevronLeft, ChevronRight, MoreVertical, UserX, UserCheck,
-} from "lucide-react";
+import { Plus, Edit, Trash2, Eye, MapPin, Phone, Mail, MoreVertical, UserX, UserCheck } from "lucide-react";
 import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -27,8 +23,7 @@ import { getStaffDisplayRole, getStaffStatusLabel } from "../../interfaces/staff
 import { getStaffApi, deleteStaffApi, updateStaffApi } from "../../api/staff.api";
 import { StaffFormModal } from "../../components/StaffFormModal";
 import { useDebounce } from "../../hooks/useDebounce";
-import { ReusableTable } from "../../components/ReusableTable";
-import { FilterStatChips } from "../../components/FilterStatChips";
+import { ManagementListPage } from "../../components/ManagementListPage";
 import { toast } from "sonner";
 
 type EmploymentFilter = "all" | "Permanent" | "Temporary";
@@ -312,9 +307,6 @@ export function Staff() {
     }
   };
 
-  const startItem = total === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
-  const endItem = Math.min(currentPage * PAGE_SIZE, total);
-
   const filterChips = [
     { value: "all" as EmploymentFilter, label: "All Types", count: stats.total, tone: "primary" as const },
     { value: "Permanent" as EmploymentFilter, label: "Permanent", count: stats.permanent, tone: "pink" as const },
@@ -327,248 +319,40 @@ export function Staff() {
       : "bg-amber-500/10 text-amber-700";
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <div className="min-w-0 flex-1">
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground">Staff Management</h2>
-          <p className="text-sm text-muted-foreground mt-0.5">Manage permanent and temporary team members</p>
-        </div>
-        <Button
-          onClick={() => setIsAddOpen(true)}
-          className="flex items-center gap-2 shrink-0 bg-pink-700 hover:bg-pink-800 text-white font-semibold"
-        >
-          <Plus className="h-4 w-4" />
-          Add Staff
-        </Button>
-      </div>
-
-      <div className="bg-card rounded-lg shadow-sm border border-border p-4 space-y-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            placeholder="Search by name, role, phone, email, city..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <FilterStatChips
-          options={filterChips}
-          value={employmentFilter}
-          onChange={setEmploymentFilter}
-        />
-      </div>
-
-      <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
-        <div className="px-4 sm:px-6 py-3 border-b border-border flex items-center justify-between gap-2">
-          <p className="text-xs sm:text-sm text-muted-foreground min-w-0 truncate">
-            {isLoading ? (
-              "Loading..."
-            ) : total === 0 ? (
-              "No staff found"
-            ) : (
-              <>
-                Showing <span className="font-medium text-foreground">{startItem}–{endItem}</span> of{" "}
-                <span className="font-medium text-foreground">{total}</span> staff
-                {employmentFilter !== "all" && (
-                  <span className="hidden sm:inline ml-1">
-                    — filtered by{" "}
-                    <span className="text-primary font-medium">{employmentFilterLabels[employmentFilter]}</span>
-                  </span>
-                )}
-              </>
-            )}
-          </p>
-          {employmentFilter !== "all" && (
-            <button
-              type="button"
-              onClick={() => setEmploymentFilter("all")}
-              className="text-xs text-muted-foreground hover:text-primary transition-colors underline shrink-0"
-            >
-              Clear filter
-            </button>
-          )}
-        </div>
-
-        <div className="hidden md:block">
-          <ReusableTable
-            data={staffList}
-            columns={columns}
-            isLoading={isLoading}
-            emptyMessage={
-              <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
-                <p className="text-sm">No staff found</p>
-                {employmentFilter !== "all" && (
-                  <button
-                    type="button"
-                    onClick={() => setEmploymentFilter("all")}
-                    className="mt-2 text-xs text-primary hover:underline"
-                  >
-                    Clear filter
-                  </button>
-                )}
-              </div>
-            }
-            rowKey={(s) => s.id ?? s.staffNo}
-            rowNumberStart={startItem || 1}
-            onRowClick={(s) => s.id && navigate(`/staff/${s.id}`)}
-          />
-        </div>
-
-        <div className="md:hidden">
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-12 gap-3 text-muted-foreground">
-              <Loader2 className="h-7 w-7 animate-spin text-primary" />
-              <span className="text-sm">Loading staff...</span>
-            </div>
-          ) : staffList.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-              <p className="text-sm">No staff found</p>
-              {employmentFilter !== "all" && (
-                <button
-                  type="button"
-                  onClick={() => setEmploymentFilter("all")}
-                  className="mt-2 text-xs text-primary hover:underline"
-                >
-                  Clear filter
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="divide-y divide-border">
-              {staffList.map((s, index) => {
-                const statusLabel = getStaffStatusLabel(s);
-                return (
-                  <div
-                    key={s.id ?? s.staffNo}
-                    className={`px-4 py-3 hover:bg-muted/30 transition-colors cursor-pointer ${
-                      !s.isActive ? "opacity-75" : ""
-                    }`}
-                    onClick={() => s.id && navigate(`/staff/${s.id}`)}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-start gap-3 min-w-0 flex-1">
-                        <div className="h-10 w-10 rounded-full bg-pink-700 text-white font-bold flex items-center justify-center text-sm shrink-0">
-                          {s.fullName.charAt(0)}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-foreground text-sm leading-tight truncate">
-                            {s.fullName}
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                            {s.staffNo} · {getStaffDisplayRole(s)}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-2 shrink-0">
-                        <div className="flex flex-col items-end gap-1.5">
-                          <span className="text-[10px] font-bold text-muted-foreground tabular-nums">
-                            #{(startItem || 1) + index}
-                          </span>
-                          <span
-                            className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${employmentTypeBadge(s.employmentType)}`}
-                          >
-                            {s.employmentType}
-                          </span>
-                          <span
-                            className={`px-2 py-0.5 text-[10px] font-semibold rounded-full ${statusColor(statusLabel)}`}
-                          >
-                            {statusLabel}
-                          </span>
-                        </div>
-                        {renderStaffActions(s)}
-                      </div>
-                    </div>
-                    <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1 pl-[52px]">
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Phone className="h-3 w-3 shrink-0" />
-                        {s.phone}
-                      </span>
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground truncate max-w-[200px]">
-                        <Mail className="h-3 w-3 shrink-0" />
-                        {s.email}
-                      </span>
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <MapPin className="h-3 w-3 shrink-0" />
-                        {s.city}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {!isLoading && totalPages > 1 && (
-          <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
-              Page <span className="font-medium text-foreground">{currentPage}</span> of{" "}
-              <span className="font-medium text-foreground">{totalPages}</span>
-            </p>
-            <div className="flex items-center gap-1 order-1 sm:order-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={currentPage <= 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
-                className="h-8 w-8 p-0"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <div className="hidden xs:flex items-center gap-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter((page) => {
-                    if (totalPages <= 5) return true;
-                    if (page === 1 || page === totalPages) return true;
-                    if (Math.abs(page - currentPage) <= 1) return true;
-                    return false;
-                  })
-                  .reduce<(number | "...")[]>((acc, page, idx, arr) => {
-                    if (
-                      idx > 0 &&
-                      typeof arr[idx - 1] === "number" &&
-                      (page as number) - (arr[idx - 1] as number) > 1
-                    ) {
-                      acc.push("...");
-                    }
-                    acc.push(page);
-                    return acc;
-                  }, [])
-                  .map((item, idx) =>
-                    item === "..." ? (
-                      <span key={`ellipsis-${idx}`} className="px-1 text-muted-foreground text-sm">
-                        …
-                      </span>
-                    ) : (
-                      <Button
-                        key={item}
-                        variant={currentPage === item ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setCurrentPage(item as number)}
-                        className="h-8 w-8 p-0 text-xs"
-                      >
-                        {item}
-                      </Button>
-                    )
-                  )}
-              </div>
-              <span className="xs:hidden text-sm text-muted-foreground px-2">
-                {currentPage} / {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={currentPage >= totalPages}
-                onClick={() => setCurrentPage((p) => p + 1)}
-                className="h-8 w-8 p-0"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        )}
-      </div>
+    <>
+      <ManagementListPage
+        title="Staff Management"
+        subtitle="Manage permanent and temporary team members"
+        headerAction={
+          <Button
+            onClick={() => setIsAddOpen(true)}
+            className="flex items-center gap-2 shrink-0 bg-pink-700 hover:bg-pink-800 text-white font-semibold"
+          >
+            <Plus className="h-4 w-4" />
+            Add Staff
+          </Button>
+        }
+        searchPlaceholder="Search by name, role, phone, email, city…"
+        searchValue={searchQuery}
+        onSearchChange={setSearchQuery}
+        filterOptions={filterChips}
+        filterValue={employmentFilter}
+        onFilterChange={setEmploymentFilter}
+        activeFilterLabel={employmentFilter !== "all" ? employmentFilterLabels[employmentFilter] : undefined}
+        onClearFilter={() => setEmploymentFilter("all")}
+        columns={columns}
+        data={staffList}
+        isLoading={isLoading}
+        rowKey={(s) => s.id ?? s.staffNo}
+        onRowClick={(s) => s.id && navigate(`/staff/${s.id}`)}
+        emptyMessage="No staff found"
+        currentPage={currentPage}
+        totalPages={totalPages}
+        total={total}
+        pageSize={PAGE_SIZE}
+        onPageChange={setCurrentPage}
+        entityLabel="staff"
+      />
 
       <StaffFormModal
         isOpen={isAddOpen}
@@ -603,6 +387,6 @@ export function Staff() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </>
   );
 }

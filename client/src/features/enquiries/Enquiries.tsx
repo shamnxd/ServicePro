@@ -2,19 +2,14 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
 import {
   Plus,
-  Search,
   Eye,
   Edit,
   Trash2,
   XCircle,
   Calendar,
-  ChevronLeft,
-  ChevronRight,
   MoreVertical,
-  Loader2,
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -37,20 +32,10 @@ import { Enquiry, EnquiryStatus } from "../../interfaces/enquiry.interface";
 import { Client } from "../../interfaces/client.interface";
 import { toast } from "sonner";
 import { useDebounce } from "../../hooks/useDebounce";
-import { ReusableTable } from "../../components/ReusableTable";
-import { FilterStatChips } from "../../components/FilterStatChips";
+import { ManagementListPage } from "../../components/ManagementListPage";
 import { EnquiryFormModal } from "../../components/EnquiryFormModal";
 
 type StatusFilter = "all" | EnquiryStatus;
-
-const filterLabels: Record<StatusFilter, string> = {
-  all: "All",
-  "Site Visit Scheduled": "Site Visit",
-  "Quotation Prepared": "Quotation",
-  "Follow-up Required": "Follow-up",
-  "Converted to Project": "Converted",
-  Closed: "Closed",
-};
 
 const PAGE_SIZE = 10;
 
@@ -358,168 +343,54 @@ export function Enquiries() {
     },
   ];
 
-  const startItem = total === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
-  const endItem = Math.min(currentPage * PAGE_SIZE, total);
-
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <div className="min-w-0 flex-1">
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground">Enquiry Management</h2>
-          <p className="text-sm text-muted-foreground mt-0.5">Track and manage customer enquiries</p>
-        </div>
+    <>
+      <ManagementListPage
+        title="Enquiry Management"
+        subtitle="Track and manage customer enquiries"
+        headerAction={
+          <Button
+            onClick={() => {
+              setEditEnquiry(null);
+              setIsFormOpen(true);
+            }}
+            className="flex items-center gap-2 shrink-0 bg-pink-700 hover:bg-pink-800 text-white font-semibold"
+          >
+            <Plus className="h-4 w-4" />
+            Add Enquiry
+          </Button>
+        }
+        searchPlaceholder="Search by enquiry no., client, requirement…"
+        searchValue={searchQuery}
+        onSearchChange={setSearchQuery}
+        filterOptions={filterChips}
+        filterValue={activeFilter}
+        onFilterChange={setActiveFilter}
+        columns={columns}
+        data={enquiries}
+        isLoading={isLoading}
+        rowKey={(row) => row.id || row.enquiryNo}
+        onRowClick={(row) => row.id && navigate(`/enquiries/${row.id}`)}
+        emptyMessage="No enquiries found"
+        currentPage={currentPage}
+        totalPages={totalPages}
+        total={total}
+        pageSize={PAGE_SIZE}
+        onPageChange={setCurrentPage}
+        entityLabel="enquiries"
+      />
 
-        <Button
-          onClick={() => {
-            setEditEnquiry(null);
-            setIsFormOpen(true);
-          }}
-          className="flex items-center gap-2 shrink-0 bg-pink-700 hover:bg-pink-800 text-white font-semibold"
-        >
-          <Plus className="h-4 w-4" />
-          Add Enquiry
-        </Button>
-
-        <EnquiryFormModal
-          isOpen={isFormOpen}
-          onClose={() => {
-            setIsFormOpen(false);
-            setEditEnquiry(null);
-          }}
-          onSuccess={refreshList}
-          enquiry={editEnquiry}
-          clients={clients}
-          onClientsRefresh={fetchClients}
-        />
-      </div>
-
-      <div className="bg-card rounded-lg shadow-sm border border-border p-4 space-y-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            placeholder="Search by enquiry no., client, requirement..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <FilterStatChips options={filterChips} value={activeFilter} onChange={setActiveFilter} />
-      </div>
-
-      <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
-        <div className="px-4 sm:px-6 py-3 border-b border-border flex items-center justify-between gap-2">
-          <p className="text-xs sm:text-sm text-muted-foreground min-w-0 truncate">
-            {isLoading ? (
-              "Loading..."
-            ) : total === 0 ? (
-              "No enquiries found"
-            ) : (
-              <>
-                Showing <span className="font-medium text-foreground">{startItem}–{endItem}</span> of{" "}
-                <span className="font-medium text-foreground">{total}</span> enquiries
-                {activeFilter !== "all" && (
-                  <span className="hidden sm:inline ml-1">
-                    — filtered by <span className="text-primary font-medium">{filterLabels[activeFilter]}</span>
-                  </span>
-                )}
-              </>
-            )}
-          </p>
-          {activeFilter !== "all" && (
-            <button
-              type="button"
-              onClick={() => setActiveFilter("all")}
-              className="text-xs text-muted-foreground hover:text-primary transition-colors underline shrink-0"
-            >
-              Clear filter
-            </button>
-          )}
-        </div>
-
-        <div className="hidden md:block">
-          <ReusableTable
-            data={enquiries}
-            columns={columns}
-            isLoading={isLoading}
-            rowKey={(row) => row.id || row.enquiryNo}
-            rowNumberStart={startItem || 1}
-            onRowClick={(row) => row.id && navigate(`/enquiries/${row.id}`)}
-            emptyMessage={
-              <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
-                <p className="text-sm">No enquiries found</p>
-                {activeFilter !== "all" && (
-                  <button type="button" onClick={() => setActiveFilter("all")} className="mt-2 text-xs text-primary hover:underline">
-                    Clear filter
-                  </button>
-                )}
-              </div>
-            }
-          />
-        </div>
-
-        <div className="md:hidden">
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-12 gap-3 text-muted-foreground">
-              <Loader2 className="h-7 w-7 animate-spin text-primary" />
-              <span className="text-sm">Loading enquiries...</span>
-            </div>
-          ) : enquiries.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-              <p className="text-sm">No enquiries found</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-border">
-              {enquiries.map((row, index) => (
-                <div
-                  key={row.id || row.enquiryNo}
-                  className="px-4 py-3 hover:bg-muted/30 transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div
-                      className="min-w-0 flex-1 cursor-pointer"
-                      onClick={() => row.id && navigate(`/enquiries/${row.id}`)}
-                    >
-                      <p className="font-semibold text-foreground text-sm">{row.enquiryNo}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{row.clientName}</p>
-                      <p className="text-xs text-foreground mt-1 line-clamp-2">{row.requirement}</p>
-                    </div>
-                    <div className="flex items-start gap-2 shrink-0">
-                      <span className="text-[10px] font-bold text-muted-foreground tabular-nums pt-1">
-                        #{(startItem || 1) + index}
-                      </span>
-                      {renderEnquiryActions(row)}
-                    </div>
-                  </div>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {getPriorityBadge(row.priority)}
-                    {getStatusBadge(row.status)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {!isLoading && totalPages > 1 && (
-          <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
-              Page <span className="font-medium text-foreground">{currentPage}</span> of{" "}
-              <span className="font-medium text-foreground">{totalPages}</span>
-            </p>
-            <div className="flex items-center gap-1 order-1 sm:order-2">
-              <Button variant="outline" size="sm" disabled={currentPage <= 1} onClick={() => setCurrentPage((p) => p - 1)} className="h-8 w-8 p-0">
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span className="text-sm text-muted-foreground px-2">
-                {currentPage} / {totalPages}
-              </span>
-              <Button variant="outline" size="sm" disabled={currentPage >= totalPages} onClick={() => setCurrentPage((p) => p + 1)} className="h-8 w-8 p-0">
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        )}
-      </div>
+      <EnquiryFormModal
+        isOpen={isFormOpen}
+        onClose={() => {
+          setIsFormOpen(false);
+          setEditEnquiry(null);
+        }}
+        onSuccess={refreshList}
+        enquiry={editEnquiry}
+        clients={clients}
+        onClientsRefresh={fetchClients}
+      />
 
       <AlertDialog open={!!closeId} onOpenChange={() => setCloseId(null)}>
         <AlertDialogContent>
@@ -554,6 +425,6 @@ export function Enquiries() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </>
   );
 }
